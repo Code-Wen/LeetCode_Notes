@@ -386,6 +386,19 @@ $(document).ready(function () {
      
         return sum(s_list)</code></pre>
 </div>
+<div id="majority-element" class="section level2">
+<h2>169. Majority Element</h2>
+<p><a href="https://leetcode.com/problems/majority-element/">Link to the problem</a></p>
+<pre><code>class Solution:
+    def majorityElement(self, nums: List[int]) -&gt; int:
+        L = len(nums)//2
+        nums.sort()
+        for i in set(nums):
+            ind = nums.index(i)
+            if ind + L &lt;= len(nums)-1: 
+                if nums[ind + L] == i:
+                    return i</code></pre>
+</div>
 
 
 

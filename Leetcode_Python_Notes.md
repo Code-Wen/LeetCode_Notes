@@ -247,3 +247,17 @@ class Solution:
      
         return sum(s_list)
 ```
+## 169. Majority Element
+
+[Link to the problem](https://leetcode.com/problems/majority-element/)
+```
+class Solution:
+    def majorityElement(self, nums: List[int]) -> int:
+        L = len(nums)//2
+        nums.sort()
+        for i in set(nums):
+            ind = nums.index(i)
+            if ind + L <= len(nums)-1: 
+                if nums[ind + L] == i:
+                    return i
+```
