@@ -250,6 +250,12 @@ class Solution:
 ## 169. Majority Element
 
 [Link to the problem](https://leetcode.com/problems/majority-element/)
+
+**Analysis:** 
+
+1. Compute `L = len(nums)//2`, which is the least number of repetitions for the majority element.
+2. Sort the list `nums`.
+3. For each element `i` in the set formed from elements in `nums`, get its index in the sorted list `ind`, then check if the `ind + L`th element is equal to `i`. If so, we captured the majority element!
 ```
 class Solution:
     def majorityElement(self, nums: List[int]) -> int:
