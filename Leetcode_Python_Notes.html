@@ -402,9 +402,11 @@ def majorityElement(self, nums: List[int]) -&gt; int:
         ind = nums.index(i)
         if ind + L &lt;= len(nums)-1: 
             if nums[ind + L] == i:
-                return i</code></pre>
-<h2 id="best-time-to-buy-and-sell-stock">121. Best Time to Buy and Sell Stock</h2></li>
+                return i</code></pre></li>
 </ol>
+</div>
+<div id="best-time-to-buy-and-sell-stock" class="section level2">
+<h2>121. Best Time to Buy and Sell Stock</h2>
 <p><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock/">Link to the problem</a></p>
 <p><strong>Analysis:</strong></p>
 <ol style="list-style-type: decimal">
@@ -419,10 +421,39 @@ def majorityElement(self, nums: List[int]) -&gt; int:
         L=len(prices)
         if L&gt;=2:
             for k in range(1, L):
-                MAX_step = max(prices[k]-prices[k-1], MAX_step+prices[k]-prices[k-1]) # max profit if one chooses to sell at k-th day
+                MAX_step = max(prices[k]-prices[k-1], MAX_step+prices[k]-prices[k-1]) 
                 MAX=max(MAX, MAX_step)
         
         return MAX</code></pre>
+</div>
+<div id="best-time-to-buy-and-sell-stock-ii" class="section level2">
+<h2>122. Best Time to Buy and Sell Stock II</h2>
+<p><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/">Link to the problem</a></p>
+<p><strong>Analysis:</strong> Now we allow multiply transactions, this will lead to different analysis.</p>
+<ol style="list-style-type: decimal">
+<li>We use <code>P</code> to denote the total profit, <code>buy</code> the last buy date, and <code>sell</code> the last sell date.</li>
+<li>If the next day price is lower or equal to the price of the previous day, the <code>buy</code> date will move forward, to generate more profit. <code>buy</code> will stop move forward once positive profit is possible, that is, <code>prices[buy+1] &gt; prices[buy]</code>.</li>
+<li>Once <code>buy</code> is fixed, we consider <code>sell</code>. First set <code>sell = buy + 1</code> (recall that we will always have prices[sell] &gt; prices[buy], due to how we work with <code>buy</code> in the previous step). <code>sell</code> will move forward if the price keeps increasing strictly. Once the price stops to increase strictly, <code>sell</code> stops moving forward.</li>
+<li>Once we obtain <code>sell</code> and <code>buy</code> for the next transaction, we update the profit by <code>P=P+prices[sell]-prices[buy]</code>.</li>
+</ol>
+<pre><code>class Solution:
+    def maxProfit(self, prices: List[int]) -&gt; int:
+            P = 0  #profit
+            buy = 0  #buy date
+            sell = 0  #sell date
+            L = len(prices)
+            while buy &lt; L-1:
+                
+                if prices[buy+1] &lt;= prices[buy]:
+                    buy += 1
+                else:
+                    sell = buy + 1
+                    while sell &lt; L-1 and prices[sell+1] &gt; prices[sell]:
+                        sell += 1
+                    P = P + prices[sell]-prices[buy]
+                    buy = sell + 1
+            
+            return P</code></pre>
 </div>
 
 

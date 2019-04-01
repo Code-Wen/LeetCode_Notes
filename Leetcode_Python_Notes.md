@@ -79,6 +79,7 @@ class Solution:
             s[-k-1] = head
 
 ```
+
 ## 58. Length of Last Word
 
 [Link to the problem](https://leetcode.com/problems/length-of-last-word/)
@@ -128,6 +129,7 @@ class Solution:
         
         return len(set(nums)) != len(nums)
 ``` 
+
 ## 204. Count Primes
 
 [Link to the problem](https://leetcode.com/problems/count-primes/)
@@ -204,6 +206,7 @@ class Solution:
         
         return tail == 1
 ```    
+
 ## 268. Missing Number
 
 [Link to the problem](https://leetcode.com/problems/missing-number/)
@@ -230,6 +233,7 @@ class Solution:
         N = len(nums)
         return N(N+1)/2 - sum(nums)
 ```
+
 ## 171. Excel Sheet Column Number
 
 [Link to the problem](https://leetcode.com/problems/excel-sheet-column-number/)
@@ -247,6 +251,7 @@ class Solution:
      
         return sum(s_list)
 ```
+
 ## 169. Majority Element
 
 [Link to the problem](https://leetcode.com/problems/majority-element/)
@@ -267,6 +272,7 @@ class Solution:
                 if nums[ind + L] == i:
                     return i
 ```
+
 ## 121. Best Time to Buy and Sell Stock
 
 [Link to the problem](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/)
@@ -290,4 +296,35 @@ class Solution:
                 MAX=max(MAX, MAX_step)
         
         return MAX
+```
+## 122. Best Time to Buy and Sell Stock II
+
+[Link to the problem](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/)
+
+**Analysis:** Now we allow multiply transactions, this will lead to different analysis.
+
+1. We use `P` to denote the total profit, `buy` the last buy date, and `sell` the last sell date.
+2. If the next day price is lower or equal to the price of the previous day, the `buy` date will move forward, to generate more profit. `buy` will stop move forward once positive profit is possible, that is, `prices[buy+1] > prices[buy]`.
+3. Once `buy` is fixed, we consider `sell`. First set `sell = buy + 1` (recall that we will always have prices[sell] > prices[buy], due to how we work with `buy` in the previous step). `sell` will move forward if the price keeps increasing strictly. Once the price stops to increase strictly, `sell` stops moving forward.
+4. Once we obtain `sell` and `buy` for the next transaction, we update the profit by `P=P+prices[sell]-prices[buy]`.
+
+```
+class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+            P = 0  #profit
+            buy = 0  #buy date
+            sell = 0  #sell date
+            L = len(prices)
+            while buy < L-1:
+                
+                if prices[buy+1] <= prices[buy]:
+                    buy += 1
+                else:
+                    sell = buy + 1
+                    while sell < L-1 and prices[sell+1] > prices[sell]:
+                        sell += 1
+                    P = P + prices[sell]-prices[buy]
+                    buy = sell + 1
+            
+            return P
 ```
