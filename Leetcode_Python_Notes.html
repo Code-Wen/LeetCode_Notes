@@ -402,8 +402,27 @@ def majorityElement(self, nums: List[int]) -&gt; int:
         ind = nums.index(i)
         if ind + L &lt;= len(nums)-1: 
             if nums[ind + L] == i:
-                return i</code></pre></li>
+                return i</code></pre>
+<h2 id="best-time-to-buy-and-sell-stock">121. Best Time to Buy and Sell Stock</h2></li>
 </ol>
+<p><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock/">Link to the problem</a></p>
+<p><strong>Analysis:</strong></p>
+<ol style="list-style-type: decimal">
+<li>We use <code>MAX_step</code> to denote the maximal profit if one chooses to sell on the <code>k</code>th day. Note that this quantity can be negative.</li>
+<li><code>MAX_step</code> at <code>k</code> can be obtained from the <code>MAX_step</code> at <code>k-1</code>: it equals the maximal value between <code>prices[k]-prices[k-1]</code> and <code>MAX_step+prices[k]-prices[k-1])</code>.</li>
+<li>In the <code>for</code> loop, we inductively update the current max profit if one chooses to sell the stock on the <code>1&lt;=i&lt;=k</code> day.</li>
+</ol>
+<pre><code>class Solution:
+    def maxProfit(self, prices: List[int]) -&gt; int:
+        MAX=0
+        MAX_step=0
+        L=len(prices)
+        if L&gt;=2:
+            for k in range(1, L):
+                MAX_step = max(prices[k]-prices[k-1], MAX_step+prices[k]-prices[k-1]) # max profit if one chooses to sell at k-th day
+                MAX=max(MAX, MAX_step)
+        
+        return MAX</code></pre>
 </div>
 
 

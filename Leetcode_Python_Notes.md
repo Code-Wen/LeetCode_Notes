@@ -267,3 +267,27 @@ class Solution:
                 if nums[ind + L] == i:
                     return i
 ```
+## 121. Best Time to Buy and Sell Stock
+
+[Link to the problem](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/)
+
+**Analysis:** 
+
+1. We use `MAX_step` to denote the maximal profit if one chooses to sell on the `k`th day. Note that this quantity can be negative.
+2. `MAX_step` at `k` can be obtained from the `MAX_step` at `k-1`: it equals the maximal value between `prices[k]-prices[k-1]`  and `MAX_step+prices[k]-prices[k-1])`.
+3. In the `for` loop, we inductively update the current max profit if one chooses to sell the stock on the `1<=i<=k` day.
+
+
+```
+class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+        MAX=0
+        MAX_step=0
+        L=len(prices)
+        if L>=2:
+            for k in range(1, L):
+                MAX_step = max(prices[k]-prices[k-1], MAX_step+prices[k]-prices[k-1]) 
+                MAX=max(MAX, MAX_step)
+        
+        return MAX
+```
