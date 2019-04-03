@@ -340,3 +340,33 @@ class Solution:
                 
         return now
 ```
+## 219. Contains Duplicate II
+
+[Link to the problem](https://leetcode.com/problems/contains-duplicate-ii/)
+
+**Analysis:** 
+
+1. The idea is very similar to Problem 217. We just need to check that whether any chunk of length `k+1` contains duplicates.
+2. Instead of use `set()` to convert a chunk of the list into a set, we use a little trick here: first we find the set from the first chunk. Then as we move to the right, we remove the first element `nums[step-1]` from the set, and then add the next element `nums[step+k]`  to the set.
+
+```
+class Solution:
+    def containsNearbyDuplicate(self, nums: List[int], k: int) -> bool:
+        L = len(nums)
+        if L <= 1 or k == 0:
+            return False
+        elif L <= k+1:
+            return len(set(nums)) != L
+        else:
+            s = set(nums[0:k+1])
+            if len(s) != k+1:
+                return True
+            for step in range(1, L-k):
+                s.remove(nums[step-1])
+                s.add(nums[step+k])
+                if len(s) != k+1:
+                    return True
+           
+                    
+            return False
+```
