@@ -370,3 +370,20 @@ class Solution:
                     
             return False
 ```
+
+## 172. Factorial Trailing Zeroes
+
+**Analysis:** It is the same as count the exponent of 5 in the prime factorization of n-factorial. We first see how many numbers from 1 to n are divisible by 5 : `n//5`. For the numbers which can be divided by 25, we have to count them twice, the first time is already included in the previous step, so we need to add how many numbers can be divided by 25, which can be obtained by `(n//5)//5`. We continue until the remainder is 0.
+ 
+```
+class Solution:
+    def trailingZeroes(self, n: int) -> int:
+        if n == 0:
+            return 0
+        else:
+            k=0
+            while n > 0:
+                k += n//5
+                n = n//5
+            return k
+```
