@@ -387,3 +387,33 @@ class Solution:
                 n = n//5
             return k
 ```
+## 168. Excel Sheet Column Title
+
+[Link to the problem](https://leetcode.com/problems/excel-sheet-column-title/)
+
+```
+class Solution:
+    def convertToTitle(self, n: int) -> str:
+        a = [chr(i) for i in range(65,91)]
+        b = [i for i in range(0, 26)]
+        order = dict(zip(b,a))
+        s = ''
+        while n > 0:
+            s = order[(n-1)%26] + s
+            n = (n-1)//26
+        return s
+```
+## 167. Two Sum II - Input array is sorted
+
+[Link to the problem](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/)
+
+```
+class Solution:
+    def twoSum(self, numbers: List[int], target: int) -> List[int]:
+        s = set([])
+        for i in range(len(numbers)):
+            if target-numbers[i] in s:
+                return [numbers.index(target-numbers[i])+1,i+1]
+            else:
+                s.add(numbers[i])
+```
