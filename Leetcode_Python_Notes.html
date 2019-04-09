@@ -494,6 +494,115 @@ def majorityElement(self, nums: List[int]) -&gt; int:
                     
             return False</code></pre>
 </div>
+<div id="factorial-trailing-zeroes" class="section level2">
+<h2>172. Factorial Trailing Zeroes</h2>
+<p><strong>Analysis:</strong> It is the same as count the exponent of 5 in the prime factorization of n-factorial. We first see how many numbers from 1 to n are divisible by 5 : <code>n//5</code>. For the numbers which can be divided by 25, we have to count them twice, the first time is already included in the previous step, so we need to add how many numbers can be divided by 25, which can be obtained by <code>(n//5)//5</code>. We continue until the remainder is 0.</p>
+<pre><code>class Solution:
+    def trailingZeroes(self, n: int) -&gt; int:
+        if n == 0:
+            return 0
+        else:
+            k=0
+            while n &gt; 0:
+                k += n//5
+                n = n//5
+            return k</code></pre>
+</div>
+<div id="excel-sheet-column-title" class="section level2">
+<h2>168. Excel Sheet Column Title</h2>
+<p><a href="https://leetcode.com/problems/excel-sheet-column-title/">Link to the problem</a></p>
+<pre><code>class Solution:
+    def convertToTitle(self, n: int) -&gt; str:
+        a = [chr(i) for i in range(65,91)]
+        b = [i for i in range(0, 26)]
+        order = dict(zip(b,a))
+        s = ''
+        while n &gt; 0:
+            s = order[(n-1)%26] + s
+            n = (n-1)//26
+        return s</code></pre>
+</div>
+<div id="two-sum-ii---input-array-is-sorted" class="section level2">
+<h2>167. Two Sum II - Input array is sorted</h2>
+<p><a href="https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/">Link to the problem</a></p>
+<pre><code>class Solution:
+    def twoSum(self, numbers: List[int], target: int) -&gt; List[int]:
+        s = set([])
+        for i in range(len(numbers)):
+            if target-numbers[i] in s:
+                return [numbers.index(target-numbers[i])+1,i+1]
+            else:
+                s.add(numbers[i])</code></pre>
+</div>
+<div id="longest-substring-without-repeating-characters-m" class="section level2">
+<h2>3. Longest Substring Without Repeating Characters (M)</h2>
+<p><strong>Analysis:</strong> <code>s_n</code> is the longest substring without repeating characters which ends at the <code>n</code>th position. <code>L_n = len(s_n)</code> and <code>L</code> is the current maximal length.</p>
+<pre><code>class Solution:
+    def lengthOfLongestSubstring(self, s: str) -&gt; int:
+        L = 0
+        s_n = ''
+        L_n = 0
+        dic = set([])
+        if len(s) == 0:
+            return L
+        else:
+            for n in range(len(s)):
+                if s[n] in dic:
+                    s_n = s_n[s_n.index(s[n])+1: ]+s[n]
+                    dic = set(s_n)
+                    L_n = len(dic)
+                else:
+                    s_n = s_n + s[n]
+                    dic.add(s[n])
+                    L_n += 1
+                    if L_n &gt; L:
+                        L = L_n
+            return L</code></pre>
+</div>
+<div id="median-of-two-sorted-arrays-h" class="section level2">
+<h2>4. Median of Two Sorted Arrays (H)</h2>
+<p>For a detailed explanation of the solution, see <a href="https://leetcode.com/problems/median-of-two-sorted-arrays/discuss/2481/Share-my-O(log(min(mn))-solution-with-explanation" class="uri">https://leetcode.com/problems/median-of-two-sorted-arrays/discuss/2481/Share-my-O(log(min(mn))-solution-with-explanation</a>.</p>
+<pre><code>class Solution:
+    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -&gt; float:
+        m, n = len(nums1), len(nums2)
+        if m &gt; n:
+            nums1, nums2, m, n = nums2, nums1, n, m
+        if n == 0:
+            raise ValueError
+
+        imin, imax, half_len = 0, m, (m + n + 1) // 2
+        while imin &lt;= imax:
+            i = (imin + imax) // 2
+            j = half_len - i
+            if i &lt; m and nums2[j-1] &gt; nums1[i]:
+                # i is too small, must increase it
+                imin = i + 1
+            elif i &gt; 0 and nums1[i-1] &gt; nums2[j]:
+                # i is too big, must decrease it
+                imax = i - 1
+            else:
+                # i is perfect
+
+                if i == 0: 
+                    max_of_left = nums2[j-1]
+                elif j == 0: 
+                    max_of_left = nums1[i-1]
+                else: 
+                    max_of_left = max(nums1[i-1], nums2[j-1])
+
+                if (m + n) % 2 == 1:
+                    return max_of_left
+
+                if i == m: 
+                    min_of_right = nums2[j]
+                elif j == n:
+                    min_of_right = nums1[i]
+                else:
+                    min_of_right = min(nums1[i], nums2[j])
+
+                return float((max_of_left + min_of_right) / 2)
+</code></pre>
+</div>
 
 
 
