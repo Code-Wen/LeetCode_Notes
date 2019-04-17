@@ -586,5 +586,78 @@ class Solution:
         return current
 ```
 
+## String Permutation
 
+**Problem Statement:** Given a string, write a function that uses recursion to output a list of all the possible permutations of that string.  If a character is repeated, treat each occurence as distinct, for example an input of `'xxx'` would return a list with 6 "versions" of `'xxx'`
 
+For example, given `s='abc'` the function should return `['abc', 'acb', 'bac', 'bca', 'cab', 'cba']`
+
+```
+def perm(s):
+    l = []
+    if len(s) <= 1:
+        l.append(s)
+    else:
+        for i in range(len(s)):
+            for w in perm(s[1:]):
+                l.append(s[0]+w)
+            s = s[1:]+s[0]
+    return l
+```
+
+## 141. Linked List Cycle
+
+[Link](https://leetcode.com/problems/linked-list-cycle/)
+
+The first solution is simply recording all the appeared nodes in a set, and traverse the linked list. Each step we check whether the next node is in the appeared list, if yes, then there is cycle, otherwise no cycle.
+
+```
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution(object):
+    def hasCycle(self, head):
+        """
+        :type head: ListNode
+        :rtype: bool
+        """
+        appeared =set([])
+        while head:
+            if head not in appeared:
+                appeared.add(head)
+                head = head.next
+            else:
+                return True
+        return False
+```
+The second approach is to traverse the linked list in two difference paces, one is `slow` and one is `fast`. If there is a cycle, then before the fast one hit `None`, he will catch up with the slow one. 
+
+```
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution(object):
+    def hasCycle(self, head):
+        """
+        :type head: ListNode
+        :rtype: bool
+        """
+        if head is None or head.next is None:
+            return False
+        else:
+            slow = head
+            fast = head.next
+            while fast.next and fast.next.next:
+                if slow == fast:
+                    return True
+                else:
+                    slow = slow.next
+                    fast = fast.next.next
+            return False
+```
