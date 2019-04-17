@@ -490,3 +490,101 @@ class Solution:
                 return float((max_of_left + min_of_right) / 2)
 
 ```
+## 21. Merge Two Sorted Lists
+
+[Link](https://leetcode.com/problems/merge-two-sorted-lists/)
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def mergeTwoLists(self, l1: ListNode, l2: ListNode) -> ListNode:
+        s = ListNode(0)
+        current = s
+        
+        if not l1:
+            return l2
+        if not l2:
+            return l1
+        else:
+            
+            while l1 and l2:
+                if l1.val < l2.val:
+                    current.next = l1
+                    current = l1
+                    l1 = l1.next
+                else:
+                    current.next = l2
+                    current = l2
+                    l2 = l2.next
+        
+        
+            if l1:
+                current.next = l1
+            elif l2: 
+                current.next = l2
+        
+        return s.next
+            
+```
+## 83. Remove Duplicates from Sorted List
+
+[Link](https://leetcode.com/problems/remove-duplicates-from-sorted-list/)
+
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def deleteDuplicates(self, head: ListNode) -> ListNode:
+        current = head
+        
+        if head:
+            next_node = head.next
+            while next_node:
+                if current.val != next_node.val:
+                    current.next = next_node
+                    current = next_node
+                    next_node = current.next
+                else:
+                    next_node = next_node.next
+            current.next = None
+            return head 
+        else:
+            return head
+```
+## 876. Middle of the Linked List
+
+[Link](https://leetcode.com/problems/middle-of-the-linked-list/)
+
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def middleNode(self, head: ListNode) -> ListNode:
+        nxt = head.next
+        current = head
+        L=1
+        while nxt:
+            nxt = nxt.next
+            L +=1
+        for i in range(L//2):
+            current = current.next
+        return current
+```
+
+
+
