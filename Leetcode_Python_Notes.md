@@ -661,3 +661,69 @@ class Solution(object):
                     fast = fast.next.next
             return False
 ```
+## 2. Add Two Numbers
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
+        
+        current_value = l1.val +l2.val
+        
+        l3 = ListNode(current_value % 10)
+        head = l3
+        
+        while l1.next and l2.next:
+            
+            l1 = l1.next
+            l2 = l2.next
+            
+            
+            if current_value > 9:
+                
+                next_value = l1.val + l2.val + 1
+            else:
+                next_value = l1.val + l2.val
+            
+            current_value = next_value
+            l3.next = ListNode(current_value % 10)
+            l3 = l3.next
+        
+        while l1.next:
+            l1 = l1.next
+            
+            if current_value > 9:
+                
+                next_value = l1.val + 1
+            else:
+                next_value = l1.val 
+            
+            current_value = next_value
+            l3.next = ListNode(current_value % 10)
+            l3 = l3.next
+        
+        
+        while l2.next:
+            l2 = l2.next
+            
+            if current_value > 9:
+                
+                next_value = l2.val + 1
+            else:
+                next_value = l2.val 
+            
+            current_value = next_value
+            l3.next = ListNode(current_value % 10)
+            l3 = l3.next
+        
+        if current_value > 9:
+            l3.next =ListNode(1)
+            
+        return head
+        
+```
