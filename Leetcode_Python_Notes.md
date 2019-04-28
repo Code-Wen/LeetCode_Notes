@@ -727,3 +727,94 @@ class Solution:
         return head
         
 ```
+## 125. Valid Palindrome
+
+```
+class Solution:
+    def isPalindrome(self, s: str) -> bool:
+        import re
+
+        regex = re.compile('[^a-zA-Z0-9]')
+        #First parameter is the replacement, second parameter is your input string
+        s = regex.sub('', s)
+        
+        
+        
+        L= len(s)
+        i=0
+
+        if len(s) <= 1:
+            return True
+        else:
+            while i <= len(s)//2 - 1:
+                
+                if s[i].lower() == s[-(i+1)].lower():
+                    i += 1
+                else:
+                    return False
+            return True
+```
+## 680. Valid Palindrome II
+
+```
+class Solution:
+    def check(self, s:str) -> bool:
+        if len(s) <=1:
+            return True
+        else:
+            i=0
+            while i <= len(s)//2-1:
+                if s[i] != s[-i-1]:
+                    return False
+                else:
+                    i +=1
+            return True
+           
+            
+        
+    def validPalindrome(self, s: str) -> bool:
+        if len(s)<=2:
+            return True
+        
+        else:
+            i=0
+            while s[i] == s[-i-1]:
+                if i == len(s)//2 -1:
+                    return True
+                else:
+                    i+=1
+                
+            
+            if self.check(s[i+1:len(s)-i]) != True:
+                return self.check(s[i:len(s)-i-1])
+            return True
+```
+
+The same idea implemented slightly differently:
+```
+class Solution:
+   def check(self, ss):
+       # two pointers
+       # move toward center if same
+       
+       l = 0
+       r = len(ss) - 1
+           
+       while l < r:
+           if ss[l] == ss[r]:
+               l += 1
+               r -= 1
+           else:
+               return (False, l, r)
+       return (True, 0,0)
+   
+   def validPalindrome(self, s: str) -> bool:
+       
+       out, l, r = self.check(s)
+       if out:
+           return True
+       # if not the same, check if s[l+1] == s[r] or s[l] == s[r+1], del flag
+       
+       else:
+           return self.check(s[l+1:r+1])[0] or self.check(s[l: r])[0]
+```
