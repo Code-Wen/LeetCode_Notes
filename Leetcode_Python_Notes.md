@@ -818,3 +818,98 @@ class Solution:
        else:
            return self.check(s[l+1:r+1])[0] or self.check(s[l: r])[0]
 ```
+## 605. Can Place Flowers
+
+Using recursion:
+
+```
+class Solution:
+    def canPlaceFlowers(self, flowerbed: List[int], n: int) -> bool:
+        if n == 0:
+            return True
+        elif n > 0 and len(flowerbed)==0:
+            return False
+        else:
+            if flowerbed[0]==1:
+                if len(flowerbed) >2:
+                    return self.canPlaceFlowers(flowerbed[2:], n)
+                else:
+                    return False
+            if flowerbed[0] == 0:
+                if len(flowerbed) ==1:
+                    n -= 1
+                    flowerbed[0] =1
+                    return self.canPlaceFlowers(flowerbed, n)
+                if len(flowerbed) >1:
+                    if flowerbed[1] ==0:
+                        flowerbed[0] = 1
+                        n -= 1
+                        return self.canPlaceFlowers(flowerbed, n)
+                    else:
+                        if len(flowerbed) > 3:
+                            return self.canPlaceFlowers(flowerbed[3:],n)
+                        else:
+                            return False
+            
+```
+
+Using iteration:
+
+```
+class Solution:
+    def canPlaceFlowers(self, flowerbed: List[int], n: int) -> bool:
+        i = 0
+        L= len(flowerbed)
+        while i < L:
+            if n == 0:
+                return True
+            
+            if flowerbed[i] == 1:
+                i+=2
+            elif flowerbed[i] == 0 and i+1<L:
+                if flowerbed[i+1] == 1:
+                    i+=3
+                else:
+                    n-=1
+                    i+=2
+            else:
+                i+=2
+                n-=1
+        return n<=0
+```
+
+## 292. Nim Game
+
+We can actually get the general formula for the outcome: if n is divisible by 4, then the first player loses; otherwise he will win. 
+```
+class Solution:
+    def canWinNim(self, n: int) -> bool:
+        if n%4 ==0:
+            return False
+        else:
+            return True
+```
+## 283. Move Zeroes
+```
+class Solution:
+    def moveZeroes(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        i=0
+        num_zeros=0
+        j=0
+        while i<len(nums):
+            if nums[i]==0:
+                i+=1
+                num_zeros+=1
+            else:
+                if num_zeros == 0:  ## if no zeros appeared before, simply move forward
+                    i+=1
+                    j+=1
+                else:            ## otherwise,interchange 0 and the non-0 number then forward
+                    nums[j]=nums[i]
+                    nums[i]=0
+                    j+=1
+                    i+=1
+```
