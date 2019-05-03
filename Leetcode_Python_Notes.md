@@ -913,3 +913,70 @@ class Solution:
                     j+=1
                     i+=1
 ```
+## 278. First Bad Version
+
+Typical binary search
+```
+# The isBadVersion API is already defined for you.
+# @param version, an integer
+# @return a bool
+# def isBadVersion(version):
+
+class Solution:
+    def firstBadVersion(self, n):
+        """
+        :type n: int
+        :rtype: int
+        """
+        if isBadVersion(n) == False:
+            return "No bad!"
+        else:
+            head =1
+            tail =n
+            mid=(head+tail)//2
+            while mid>head:
+                if isBadVersion(mid):
+                    tail= mid
+                    mid=(head+tail)//2
+                else:
+                    head = mid
+                    mid=(head+tail)//2
+                    
+            if isBadVersion(mid):
+                return head
+            else:
+                return tail
+```
+## 374. Guess Number Higher or Lower
+
+Simply binary search.
+
+```
+# The guess API is already defined for you.
+# @param num, your guess
+# @return -1 if my number is lower, 1 if my number is higher, otherwise return 0
+# def guess(num):
+
+class Solution(object):
+    def guessNumber(self, n):
+        """
+        :type n: int
+        :rtype: int
+        """
+        head = 1
+        tail = n
+        mid =(head+tail)//2
+        while mid>head:
+            if guess(mid)==-1:
+                tail=mid
+                mid=(head+tail)//2
+            elif  guess(mid)==1:
+                head=mid
+                mid=(head+tail)//2
+            else:
+                return mid
+        if guess(head)==0:
+            return head
+        else:
+            return tail
+```
