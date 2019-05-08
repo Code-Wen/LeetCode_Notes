@@ -980,3 +980,39 @@ class Solution(object):
         else:
             return tail
 ```
+## 371. Sum of Two Integers
+
+A nice exercise on bit manipulations. 
+```
+class Solution:
+    def getSum(self, a: int, b: int) -> int:
+        if a == -b:
+            return 0
+        if abs(a) > abs(b):
+            a, b = b, a
+        if a < 0:
+            return -self.getSum(-a, -b)
+        while b:
+            c = a & b
+            a ^= b
+            b = c << 1
+        return a
+                
+```
+
+## 342. Power of Four
+
+If `num` is non-positive, False.
+Check if it is a power of 2: if `num & (num-1)` is 0 then we are good.
+Check if it is a power of 4: if `num%3==1`, we are good.
+
+```
+class Solution:
+    def isPowerOfFour(self, num: int) -> bool:
+        if num <= 0:
+            return False
+      
+        else:
+            
+            return  not(num & (num-1)) and num%3==1
+```
