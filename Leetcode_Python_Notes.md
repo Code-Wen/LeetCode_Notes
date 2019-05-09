@@ -1016,3 +1016,141 @@ class Solution:
             
             return  not(num & (num-1)) and num%3==1
 ```
+
+## 155. Min Stack
+
+In order to retrieve the minimal value in constant time, we sacrifice space to store the minimal values at each step of the stack.
+
+```
+class MinStack:
+
+    def __init__(self):
+        """
+        initialize your data structure here.
+        """
+        self.val = []
+        self.min = float('inf')
+        self.min_record = []
+        
+
+    def push(self, x: int) -> None:
+        self.val.append(x)
+        if self.min > x:
+            self.min = x
+            self.min_record.append(x)
+        elif self.min == x:
+            self.min_record.append(x)
+        else:
+            self.min_record.append(self.min)
+
+    def pop(self) -> None:
+        if len(self.val)>0:
+            
+            self.val.pop()
+            self.min_record.pop()
+            if len(self.val)>0:
+                self.min = self.min_record[-1]
+            else:
+                self.min = float('inf')
+        else:
+            print ('There is nothing to pop!')
+
+    def top(self) -> int:
+        return self.val[-1]
+
+    def getMin(self) -> int:
+        return self.min
+
+
+# Your MinStack object will be instantiated and called as such:
+# obj = MinStack()
+# obj.push(x)
+# obj.pop()
+# param_3 = obj.top()
+# param_4 = obj.getMin()
+
+```
+## 345. Reverse Vowels of a String
+
+```
+class Solution:
+    def reverseVowels(self, s: str) -> str:
+        vowels = set(['a','e','i','o','u'])
+        L = len(s)
+        H = 0
+        T = L-1
+        temp = list(s)
+        while H < T:
+            while temp[H].lower() not in vowels and H < T:
+                H += 1
+            while temp[T].lower() not in vowels and T > H:
+                T -= 1
+            
+            if H < L and T >= 0:
+                temp[H], temp[T] = temp[T], temp[H]
+                
+                H += 1
+                T -= 1
+            
+            
+        
+        return ''.join(temp)
+```
+## 443. String Compression
+ 
+Leetcode is not working for my code. It works well on Spyder with Python 3.7 on my laptop.
+
+```
+class Solution:
+    def compress(self, chars: List[str]) -> int:
+        
+        L=len(chars) 
+        current=1           ## track the location of the modified list
+        step=1              ## step is to keep track of where we are at in the original list
+        count=1             ## track the count of continuous appearance of the letter
+        
+        ## if length is no larger than 1, no need to modify
+        
+        if L<=1:
+            return L
+            
+        else:
+            letter=chars[0]
+            while step < L:
+                ## if the next letter is the same as the current letter, count+1, step+1 and pop it out
+                
+                if letter == chars[current]:
+                    count += 1
+                    step += 1
+                    chars.pop(current)
+                
+                ## if the next letter is different with the current letter, we update the list
+                
+                else:
+                    ## if count is 1, we do not need to add a number, so just move on to the next letter
+                    
+                    if count == 1:
+                        
+                        letter = chars[current]
+                        current += 1
+                        step += 1
+                    ## if count>1, we need to add a number after the current letter, then move on the next letter
+                    
+                    else:
+                        letter = chars[current]
+                        temp = list(str(count))
+                        chars = chars[:current]+temp+chars[current:]
+                        current += len(temp)+1
+                        step += 1
+                        count = 1
+                        
+            ## edge case: after getting to the end of the list, we need to attach the count number if needed
+            
+            if count > 1:
+                temp = list(str(count))
+                chars = chars+temp
+                print(chars)
+            
+            return len(chars)
+                        
+```
