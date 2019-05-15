@@ -1288,3 +1288,24 @@ class Solution:
         return s
             
 ```
+## 557. Reverse Words in a String III
+```
+class Solution:
+    def reverseWords(self, s: str) -> str:
+        start=0
+        end=0
+        L=len(s)
+        if L==0:
+            return s
+        else:
+            while end < L:
+                if s[end]!=' ':
+                    end+=1
+                else:
+                    s=s[:start]+s[start:end][::-1]+s[end:]
+                    start = end+1
+                    end+=1
+                    
+            if start < L:
+                s = s[:start]+s[start:][::-1]
+```
