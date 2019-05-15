@@ -1263,3 +1263,28 @@ class Solution:
             else:
                 return True
 ```
+## 541. Reverse String II
+```
+class Solution:
+    def reverseStr(self, s: str, k: int) -> str:
+        i=0
+        L=len(s)//(2*k)
+        remainder=len(s)%(2*k)
+        while i < L:
+            
+            
+            s = s[:2*k*i]+s[2*k*i:2*k*i+k][::-1]+s[2*k*i+k:]
+            i+=1
+            
+        if remainder > k:
+            s = s[:2*k*i]+s[2*k*i:2*k*i+k][::-1]+s[2*k*i+k:]
+        elif remainder > 0:
+           
+            
+            s = s[:2*k*i]+s[2*k*i:2*k*i+k][::-1]
+        
+            
+        
+        return s
+            
+```
