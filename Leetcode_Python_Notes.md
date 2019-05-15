@@ -1202,3 +1202,64 @@ class Solution:
         else:
             return max1
 ```
+## 504. Base 7
+
+```
+
+class Solution:
+    def convertToBase7(self, num: int) -> str:
+        i=8
+        sign = 1
+        s=0
+        if num==0:
+            return '0'
+        if num<0:
+            sign = -1
+            num = -num
+            print(num)
+        while i >= 0:
+            power = 7**i
+            j=1
+            while j*power<=num:
+                j+=1
+            
+            j-=1
+            num = num-j*power
+            s+=j*(10**i)
+            i-=1
+        
+        return str(sign*s)
+        
+```
+## 383. Ransom Note
+```
+class Solution:
+    def canConstruct(self, ransomNote: str, magazine: str) -> bool:
+        
+        
+        
+        dict1=dict(zip([chr(i) for i in range(ord('a'),ord('z')+1)], [0]*26))
+        
+        L1=len(ransomNote)
+        L2=len(magazine)
+        if L1==0:
+            return True
+        else:
+            if L2==0:
+                return False
+            else:
+                i=1
+                while i<=L1:
+                    dict1[ransomNote[i-1]] += 1
+                    i+=1
+                
+                j=1
+                while j<=L2:
+                    dict1[magazine[j-1]] -=1
+                    j+=1
+                
+            if max(dict1.values()) > 0:
+                return False
+            else:
+                return True
+```
