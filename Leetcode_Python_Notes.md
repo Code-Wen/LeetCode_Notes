@@ -1309,3 +1309,96 @@ class Solution:
             if start < L:
                 s = s[:start]+s[start:][::-1]
 ```
+
+## 682. Baseball Game
+
+```
+class Solution:
+    def calPoints(self, ops: List[str]) -> int:
+        clean =[]
+        L=len(ops)
+        i=0
+        while i < L:
+            if ops[i]=='C':
+                clean.pop()
+                i+=1
+            elif ops[i]=="+":
+                clean.append(clean[-2]+clean[-1])
+                i+=1
+            elif ops[i]=='D':
+                clean.append(clean[-1]*2)
+                i+=1
+            else:
+                clean.append(int(ops[i]))
+                i+=1
+        return sum(clean)
+```
+## 633. Sum of Square Numbers
+```
+class Solution:
+    def judgeSquareSum(self, c: int) -> bool:
+        j=0
+        
+        while j**2 <= c/2:
+            if math.sqrt(c-j**2).is_integer():
+                return True
+            else:
+                j+=1
+        return False
+        
+```
+## 520. Detect Capital
+
+```
+class Solution:
+    def detectCapitalUse(self, word: str) -> bool:
+        s=set([chr(i) for i in range(ord('A'),ord('Z')+1)])
+        i=0
+        cap_num=0
+        if word[0] in s:
+            for i in range(0,len(word)):
+                if word[i] in s:
+                    cap_num+=1
+                    i+=1
+                    
+                else:
+                    i+=1
+            if cap_num==len(word) or cap_num==1:
+                return True
+            else:
+                return False
+            
+        else:
+            for i in range(0,len(word)):
+                if word[i]  in s:
+                    return False
+                else:
+                    i+=1
+            return True
+```
+## 686. Repeated String Match
+
+```
+class Solution:
+    def repeatedStringMatch(self, A: str, B: str) -> int:
+        
+        if len(set(B)-set(A))>=1:
+            return -1
+        else:
+            
+            LB=len(B)
+            A_temp =A
+            count=1
+            while len(A_temp)<LB:
+                A_temp = A_temp+A
+                count+=1
+            if B in A_temp:
+                return count
+            else:
+                A_temp += A
+                count+=1
+                if B in A_temp:
+                    return count
+                else:
+                    return -1
+```
