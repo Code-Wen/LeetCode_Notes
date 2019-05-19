@@ -1402,3 +1402,41 @@ class Solution:
                 else:
                     return -1
 ```
+## 412. Fizz Buzz
+
+```
+class Solution:
+    def fizzBuzz(self, n: int) -> List[str]:
+        l=[str(i+1) for i in range(n)]
+        i1=3
+        i2=5
+        i3=15
+        while i1 < n+1:
+            l[i1-1]="Fizz"
+            i1 += 3
+        while i2 < n+1:
+            l[i2-1]='Buzz'
+            i2 += 5
+        while i3 < n+1:
+            l[i3-1]='FizzBuzz'
+            i3 += 15
+        return l
+```
+## 977. Squares of a Sorted Array
+
+__Main idea:__ Use two pointers to get the next largest square.
+```
+class Solution:
+    def sortedSquares(self, A: List[int]) -> List[int]:
+        answer = [0] * len(A)
+        l, r = 0, len(A) - 1
+        while l <= r:
+            left, right = abs(A[l]), abs(A[r])
+            if left > right:
+                answer[r - l] = left * left
+                l += 1
+            else:
+                answer[r - l] = right * right
+                r -= 1
+        return answer
+```
