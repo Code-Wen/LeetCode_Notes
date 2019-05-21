@@ -1497,6 +1497,147 @@ class Solution:
                 r -= 1
         return answer</code></pre>
 </div>
+<div id="powerful-integers" class="section level2">
+<h2>970. Powerful Integers</h2>
+<p>First approach is brute-force. Be aware of the edge case that either x or y is 1 and the edge case that bound is less than 2.</p>
+<pre><code>class Solution:
+    def powerfulIntegers(self, x: int, y: int, bound: int) -&gt; List[int]:
+        s=set()
+        i,j=0,0
+        sum=2
+        x,y=max(x,y),min(x,y)
+        
+        if x==1:
+            if bound &gt;=2:
+                return [2]
+            else:
+                return []
+        elif y==1:
+            while sum&lt;=bound:
+                s.add(sum)
+                i+=1
+                sum=x**i + 1
+        else:
+            
+            while sum&lt;=bound:
+                s.add(sum)
+                j+=1
+                sum=1+y**j
+
+
+            while j&gt;=0:
+                i=1
+                sum=x**i+y**j
+                while sum&lt;=bound:
+                    s.add(sum)
+                    sum=x**i+y**j
+                    i+=1
+                j-=1
+
+        return list(s)</code></pre>
+<p>Second approach is to record the powers of x up to bound, and the powers of y up to bound. Then add the two lists while keeping the sums which is less than or equal to the bound.</p>
+<pre><code>class Solution:
+    def powerfulIntegers(self, x: int, y: int, bound: int) -&gt; List[int]:
+        if bound &lt; 2:
+            return []
+        
+        
+        xpower,ypower,i,j=[],[],0,0
+        if x==1:
+            xpower=[1]
+        else:
+            while x**i&lt;=bound:
+                xpower.append(x**i)
+                i+=1
+        
+        if y==1:
+            ypower=[1]
+        else:
+            while y**j&lt;=bound:
+                ypower.append(y**j)
+                j+=1
+                
+        return list(set([x+y for x in xpower for y in ypower if x+y&lt;=bound]))
+        </code></pre>
+</div>
+<div id="word-pattern" class="section level2">
+<h2>290. Word Pattern</h2>
+<p>Idea: use a dictionary to keep track of the pattern. Be aware of that the unique letters in <code>pattern</code> and the unique words in the string should be the same.</p>
+<pre><code>class Solution:
+    def wordPattern(self, pattern: str, str: str) -&gt; bool:
+        s=str.split()
+        if len(pattern)!=len(s) or len(set(pattern))!=len(set(s)):
+            return False
+        else:
+            tracking = {}
+            i=0
+            while i&lt;len(pattern):
+                if pattern[i] not in tracking.keys():
+                    tracking[pattern[i]]=s[i]
+                    i+=1
+                else:
+                    if tracking[pattern[i]] != s[i]:
+                        return False
+                    else:
+                        i+=1
+            return True</code></pre>
+</div>
+<div id="set-mismatch" class="section level2">
+<h2>645. Set Mismatch</h2>
+<pre><code>class Solution:
+    def findErrorNums(self, nums: List[int]) -&gt; List[int]:
+        n=len(nums)
+        missing = list(set([i+1 for i in range(n)])-set(nums))[0]
+        duplicate =  int(-n*(n+1)/2 +sum(nums)+missing)
+        return [ duplicate,missing]</code></pre>
+</div>
+<div id="find-the-duplicate-number" class="section level2">
+<h2>287. Find the Duplicate Number</h2>
+<p>This problem can be solved using the <a href="https://en.wikipedia.org/wiki/Cycle_detection">Floyd’s Tortoise and Hare</a> or Floyd’s cycle detection algorithm. Essentially we are treating the list with duplicates as a linked list with cycles.</p>
+<pre><code>class Solution:
+    def findDuplicate(self, nums: List[int]) -&gt; int:
+        slow=nums[0]
+        fast=nums[nums[0]]
+        
+        ## identifying whether there is cycle or not
+        
+        while slow != fast:
+            slow = nums[slow]
+            fast = nums[nums[fast]]
+        
+        ## now find the entry of the cycle, where our duplicate resides. 
+        
+        fast=0
+        while slow != fast:
+            fast = nums[fast]
+            slow = nums[slow]
+        return slow</code></pre>
+</div>
+<div id="first-unique-character-in-a-string" class="section level2">
+<h2>387. First Unique Character in a String</h2>
+<p>Approach 1: using a dictionary to track the number of appearance.</p>
+<pre><code>class Solution:
+    def firstUniqChar(self, s: str) -&gt; int:
+        dic = {}
+        for i in range(len(s)):
+            if s[i] not in dic.keys():
+                dic[s[i]] = [i,1]
+                i+=1
+            else:
+                dic[s[i]][1] += 1
+                i+=1
+        for key in dic.keys():
+            if dic[key][1]==1:
+                return dic[key][0]
+        return -1</code></pre>
+<p>Approach 2: This is due to <a href="https://leetcode.com/problems/first-unique-character-in-a-string/discuss/86351/Python-3-lines-beats-100-(~-60ms)-!">gregs.</a> As one of the comments explained: ‘Its only faster because s.index is a C function that python is calling. So you are changing the python loop to be the 26 characters, and the C loop is doing the heavy lifting searching the string. From an algo perspective this is slower than the others.’</p>
+<pre><code>
+class Solution:
+    def firstUniqChar(self, s: str) -&gt; int:
+        letters='abcdefghijklmnopqrstuvwxyz'
+        index=[s.index(l) for l in letters if s.count(l) == 1]
+        return min(index) if len(index) &gt; 0 else -1</code></pre>
+</div>
 
 
 

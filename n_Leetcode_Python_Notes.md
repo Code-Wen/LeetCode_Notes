@@ -1567,3 +1567,60 @@ class Solution:
             slow = nums[slow]
         return slow
 ```
+
+## 387. First Unique Character in a String
+
+Approach 1: using a dictionary to track the number of appearance.
+
+```
+class Solution:
+    def firstUniqChar(self, s: str) -> int:
+        dic = {}
+        for i in range(len(s)):
+            if s[i] not in dic.keys():
+                dic[s[i]] = [i,1]
+                i+=1
+            else:
+                dic[s[i]][1] += 1
+                i+=1
+        for key in dic.keys():
+            if dic[key][1]==1:
+                return dic[key][0]
+        return -1
+```
+
+Approach 2: This is due to [gregs.](https://leetcode.com/problems/first-unique-character-in-a-string/discuss/86351/Python-3-lines-beats-100-(~-60ms)-!)
+As one of the comments explained: 'Its only faster because s.index is a C function that python is calling. So you are changing the python loop to be the 26 characters, and the C loop is doing the heavy lifting searching the string. From an algo perspective this is slower than the others.'
+```
+
+class Solution:
+    def firstUniqChar(self, s: str) -> int:
+        letters='abcdefghijklmnopqrstuvwxyz'
+        index=[s.index(l) for l in letters if s.count(l) == 1]
+        return min(index) if len(index) > 0 else -1
+```
+
+## 507. Perfect Number
+
+```
+class Solution:
+    def checkPerfectNumber(self, num: int) -> bool:
+        if num <= 1:
+            return False
+        else:
+            i=2
+            sum=1
+            SQRT=num**(0.5)
+
+
+            while i < SQRT:
+                if num%i==0:
+                    sum = sum+i+num//i
+                i+=1
+            if int(SQRT)==SQRT:
+                sum += SQRT
+            
+            print(sum)
+
+            return sum == num
+```
