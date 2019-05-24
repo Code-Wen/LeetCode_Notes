@@ -1624,3 +1624,22 @@ class Solution:
 
             return sum == num
 ```
+## 447. Number of Boomerangs
+
+__Idea__: for each point in the list, we use a dictionary `cmap` to record the distances between it and other points in the list and how many points shares this distance.
+
+```
+class Solution:
+    def numberOfBoomerangs(self, points: List[List[int]]) -> int:
+        res = 0
+        for p in points:
+            cmap = {}
+            for q in points:
+                f = p[0]-q[0]
+                s = p[1]-q[1]
+                cmap[f*f + s*s] = 1 + cmap.get(f*f + s*s, 0)
+            for k in cmap:
+                res += cmap[k] * (cmap[k] -1)
+        return res
+        
+```
