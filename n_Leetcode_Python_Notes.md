@@ -1643,3 +1643,32 @@ class Solution:
         return res
         
 ```
+## 485. Max Consecutive Ones
+```
+class Solution:
+    def findMaxConsecutiveOnes(self, nums: List[int]) -> int:
+        temp = "".join([str(i) for i in nums]).split('0')
+        return max([len(j) for j in temp])
+```
+## 349. Intersection of Two Arrays
+
+```
+class Solution:
+    def intersection(self, nums1: List[int], nums2: List[int]) -> List[int]:
+        return list(set(nums1).intersection(set(nums2)))
+```
+
+## 350. Intersection of Two Arrays II
+
+```
+class Solution:
+    def intersect(self, nums1: List[int], nums2: List[int]) -> List[int]:
+        from collections import Counter
+        c1=Counter(nums1)
+        c2=Counter(nums2)
+        temp=[]
+        for i in c1:
+            if i in c2:
+                temp+= [i]*min(c1[i],c2[i])
+        return temp
+```
