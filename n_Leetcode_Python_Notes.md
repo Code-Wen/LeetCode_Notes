@@ -1672,3 +1672,82 @@ class Solution:
                 temp+= [i]*min(c1[i],c2[i])
         return temp
 ```
+## 496. Next Greater Element I
+```
+class Solution:
+    def nextGreaterElement(self, nums1: List[int], nums2: List[int]) -> List[int]:
+        L2=len(nums2)
+        if L2==0:
+            return []
+        
+        output=[]
+        M=max(nums2)
+        
+        for i in range(len(nums1)):
+            
+            if nums1[i] >= M:
+                output.append(-1)
+                i += 1
+            else:
+                
+                t=nums1[i]
+                j=nums2.index(t)
+                while j<L2 and nums2[j] <= t:
+                    j += 1
+                if j<L2:
+                    output.append(nums2[j])
+                else:
+                    output.append(-1)
+                i += 1
+        return output
+```
+
+## 509. Fibonacci Number
+
+
+__Mesmorization approach:__
+
+```
+class Solution:
+    def fib(self, N: int) -> int:
+        cache={0:0,1:1}
+        for i in range(2,31):
+            cache[i]=cache[i-1]+cache[i-2]
+            i += 1
+        return cache[N]
+        
+```
+__Iterative approach:__
+
+```
+class Solution:
+    def fib(self, N: int) -> int:
+       
+        a,b = 0,1
+        for _ in range(N):
+            a, b = b, a+b
+        return a 
+```
+## 409. Longest Palindrome
+
+__Idea:__ First list the number of appearances for each letter in the string by using the `Counter` function. Then notice that if the count is even, then we can make use all of the repetitions of that letter to form a Palindrome; if the count is odd, then we can make use of all except one repetition of that letter. Finally, if odd counts ever happened, note that we can choose of the letters with odd counts in the center of the palindrome, so we need to add 1 to the total maximal length.
+
+```
+class Solution:
+    def longestPalindrome(self, s: str) -> int:
+        from collections import Counter
+        counter = Counter(s)
+        length=0
+        max_odd=0
+        for i in counter:
+            if counter[i]%2==0:
+                length += counter[i]
+            else:
+                length += counter[i]-1
+                max_odd = 1
+        if max_odd == 1:
+            return length + 1
+        else:
+            return length
+        
+```
