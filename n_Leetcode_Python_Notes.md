@@ -1751,3 +1751,39 @@ class Solution:
             return length
         
 ```
+
+## 463. Island Perimeter
+
+```
+class Solution:
+    def islandPerimeter(self, grid: List[List[int]]) -> int:
+        if len(grid)==0:
+            return 0
+        elif len(grid)==1:
+            return 2*(sum(grid[0]))+2
+        
+        
+        hight = len(grid)
+        width = len(grid[0])
+        
+        # horizontal sum:
+        
+        h_first, h_last = sum(grid[0]), sum(grid[-1])
+        h_sum = h_first + h_last
+        for i in range(0,hight-1):
+            for j in range(width):
+                if (grid[i][j]==1 and grid[i+1][j]==0) or (grid[i][j]==0 and grid[i+1][j]==1):
+                    h_sum += 1
+                    j += 1
+            i += 1
+        
+        # vertical sum:
+        
+        v_sum=0
+        for i in range(hight):
+            s='0' + "".join([str(e) for e in grid[i]]) + '0'
+            v_sum = v_sum + s.count('01')+s.count('10')
+            i += 1
+        
+        return v_sum+h_sum
+```
