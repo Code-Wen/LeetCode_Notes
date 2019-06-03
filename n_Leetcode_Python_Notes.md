@@ -1787,3 +1787,17 @@ class Solution:
         
         return v_sum+h_sum
 ```
+## 434. Number of Segments in a String
+```
+class Solution:
+    def countSegments(self, s: str) -> int:
+        return len(s.split())
+```
+## 693. Bitwise Alternating Numbers
+
+```
+class Solution:
+    def hasAlternatingBits(self, n: int) -> bool:
+        k= ((n<<1) ^ n) >>1
+        return (k+1)&k==0
+```
