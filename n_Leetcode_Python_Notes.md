@@ -1801,3 +1801,85 @@ class Solution:
         k= ((n<<1) ^ n) >>1
         return (k+1)&k==0
 ```
+## 438. Find All Anagrams in a String
+```
+class Solution:
+    def findAnagrams(self, s: str, p: str) -> List[int]:
+        if len(p)>len(s):
+            return []
+        
+        
+        output=[]
+        from collections import Counter
+        p_count = Counter(p)
+        for i in range(ord('a'),ord('z')+1):
+            if chr(i) not in p_count:
+                p_count[chr(i)]=0
+                i += 1
+        L=len(p)
+        s_count=Counter(s[:L])
+        for i in range(ord('a'),ord('z')+1):
+            if chr(i) not in s_count:
+                s_count[chr(i)]=0
+                i += 1
+                
+        for i in range(len(s)-L):
+            
+            if s_count==p_count:
+                output.append(i)
+            
+            s_count[s[i]] -= 1
+            s_count[s[i+L]] +=1
+            i+=1
+        if s_count==p_count:
+            output.append(i)
+        return output
+```
+## 242. Valid Anagram
+
+```
+class Solution:
+    def isAnagram(self, s: str, t: str) -> bool:
+        if len(s)!=len(t):
+            return False
+        
+        from collections import Counter
+        return Counter(s)==Counter(t)
+            
+```
+## 1071. Greatest Common Divisor of Strings
+
+```
+class Solution:
+    def gcdOfStrings(self, str1: str, str2: str) -> str:
+        if set(str1)!=set(str2):
+            return ''
+        
+        elif len(str1)==0 or len(str2)==0:
+            return ''
+        
+        if len(str1)>len(str2):
+            str1, str2 = str2, str1
+        
+        from math import gcd
+        gcd=gcd(len(str1),len(str2))
+        
+        divisor=str1[:gcd]
+        
+        if divisor*(len(str1)//gcd)==str1 and divisor*(len(str2)//gcd)==str2:
+            return divisor
+        else:
+            return ''
+```
+## 1047. Remove All Adjacent Duplicates In String
+```
+class Solution:
+    def removeDuplicates(self, S: str) -> str:
+        res = []
+        for c in S:
+            if res and res[-1] == c:
+                res.pop()
+            else:
+                res.append(c)
+        return "".join(res)
+```
