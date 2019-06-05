@@ -1883,3 +1883,26 @@ class Solution:
                 res.append(c)
         return "".join(res)
 ```
+
+## 566. Reshape the Matrix
+
+```
+class Solution:
+    def matrixReshape(self, nums: List[List[int]], r: int, c: int) -> List[List[int]]:
+        if len(nums)==0 or nums[0]==0:
+            return nums
+        
+        if len(nums)*len(nums[0])!=r*c:
+            return nums
+        
+        l=len(nums[0])
+        
+        output = [[0]*c for i in range(r)]
+        for i in range(r):
+            for j in range(c):
+                output[i][j]=nums[(i*c+j)//l][(i*c+j)%l]
+                j+=1
+            i+=1
+        return output
+            
+```
