@@ -1906,3 +1906,26 @@ class Solution:
         return output
             
 ```
+## 728. Self Dividing Numbers
+
+```
+class Solution:
+    def selfDividingNumbers(self, left: int, right: int) -> List[int]:
+        
+        output=[]
+        num=left
+        while num<=right:
+            if self.check_self_dividing(num):
+                output.append(num)
+            num += 1
+        return output
+    
+    def check_self_dividing(self, n):
+        last, temp = n%10, n//10
+        while temp>0:
+            if last==0 or n%last!=0:
+                return False
+            else:
+                last, temp = temp%10, temp//10
+        return n%last==0
+```
