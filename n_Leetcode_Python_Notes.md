@@ -2005,3 +2005,46 @@ class Solution:
         else:
             return False
 ```
+## 104. Maximum Depth of Binary Tree
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def maxDepth(self, root: TreeNode) -> int:
+        if not root:
+            return 0
+        elif root and not root.left and not root.right:
+            return 1
+        else:
+            return 1 + max(self.maxDepth(root.left), self.maxDepth(root.right))
+```
+
+## 111. Minimum Depth of Binary Tree
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def minDepth(self, root: TreeNode) -> int:
+        if not root:
+            return 0
+        elif not root.left and  not root.right:
+            return 1
+        elif not root.left and root.right:
+            return 1+self.minDepth(root.right)
+        elif not root.right and root.left:
+            return 1+self.minDepth(root.left)
+        else:
+            return 1 + min(self.minDepth(root.left), self.minDepth(root.right))
+```
