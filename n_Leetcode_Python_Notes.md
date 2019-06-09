@@ -1929,3 +1929,79 @@ class Solution:
                 last, temp = temp%10, temp//10
         return n%last==0
 ```
+## 575. Distribute Candies
+
+```
+class Solution:
+    def distributeCandies(self, candies: List[int]) -> int:
+        return min(len(set(candies)), len(candies)//2)
+```
+## 191. Number of 1 Bits
+
+```
+class Solution(object):
+    def hammingWeight(self, n):
+        """
+        :type n: int
+        :rtype: int
+        """
+        temp=n
+        total=0
+        while temp>0:
+            temp, total = temp//2, total+temp%2
+        return total
+```
+
+
+## 100. Same Tree
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def isSameTree(self, p: TreeNode, q: TreeNode) -> bool:
+        if not p and not q:
+            return True
+        elif (p and not q) or ((not p) and q):
+            return False
+        elif p.val!=q.val:
+            return False
+        else:
+            return self.isSameTree(p.left, q.left) and self.isSameTree(p.right, q.right)
+        
+```
+## 101. Symmetric Tree
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def isSymmetric(self, root: TreeNode) -> bool:
+        if not root:
+            return True
+        else:
+            return self.isMirror(root.left, root.right)
+
+    def isMirror(self, left, right):
+        if left is None and right is None:
+            return True
+        if left is None or right is None:
+            return False
+
+        if left.val == right.val:
+            outPair = self.isMirror(left.left, right.right)
+            inPair = self.isMirror(left.right, right.left)
+            return outPair and inPair
+        else:
+            return False
+```

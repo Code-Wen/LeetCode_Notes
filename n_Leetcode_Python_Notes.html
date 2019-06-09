@@ -1638,6 +1638,312 @@ class Solution:
         index=[s.index(l) for l in letters if s.count(l) == 1]
         return min(index) if len(index) &gt; 0 else -1</code></pre>
 </div>
+<div id="perfect-number" class="section level2">
+<h2>507. Perfect Number</h2>
+<pre><code>class Solution:
+    def checkPerfectNumber(self, num: int) -&gt; bool:
+        if num &lt;= 1:
+            return False
+        else:
+            i=2
+            sum=1
+            SQRT=num**(0.5)
+
+
+            while i &lt; SQRT:
+                if num%i==0:
+                    sum = sum+i+num//i
+                i+=1
+            if int(SQRT)==SQRT:
+                sum += SQRT
+            
+            print(sum)
+
+            return sum == num</code></pre>
+</div>
+<div id="number-of-boomerangs" class="section level2">
+<h2>447. Number of Boomerangs</h2>
+<p><strong>Idea</strong>: for each point in the list, we use a dictionary <code>cmap</code> to record the distances between it and other points in the list and how many points shares this distance.</p>
+<pre><code>class Solution:
+    def numberOfBoomerangs(self, points: List[List[int]]) -&gt; int:
+        res = 0
+        for p in points:
+            cmap = {}
+            for q in points:
+                f = p[0]-q[0]
+                s = p[1]-q[1]
+                cmap[f*f + s*s] = 1 + cmap.get(f*f + s*s, 0)
+            for k in cmap:
+                res += cmap[k] * (cmap[k] -1)
+        return res
+        </code></pre>
+</div>
+<div id="max-consecutive-ones" class="section level2">
+<h2>485. Max Consecutive Ones</h2>
+<pre><code>class Solution:
+    def findMaxConsecutiveOnes(self, nums: List[int]) -&gt; int:
+        temp = &quot;&quot;.join([str(i) for i in nums]).split('0')
+        return max([len(j) for j in temp])</code></pre>
+</div>
+<div id="intersection-of-two-arrays" class="section level2">
+<h2>349. Intersection of Two Arrays</h2>
+<pre><code>class Solution:
+    def intersection(self, nums1: List[int], nums2: List[int]) -&gt; List[int]:
+        return list(set(nums1).intersection(set(nums2)))</code></pre>
+</div>
+<div id="intersection-of-two-arrays-ii" class="section level2">
+<h2>350. Intersection of Two Arrays II</h2>
+<pre><code>class Solution:
+    def intersect(self, nums1: List[int], nums2: List[int]) -&gt; List[int]:
+        from collections import Counter
+        c1=Counter(nums1)
+        c2=Counter(nums2)
+        temp=[]
+        for i in c1:
+            if i in c2:
+                temp+= [i]*min(c1[i],c2[i])
+        return temp</code></pre>
+</div>
+<div id="next-greater-element-i" class="section level2">
+<h2>496. Next Greater Element I</h2>
+<pre><code>class Solution:
+    def nextGreaterElement(self, nums1: List[int], nums2: List[int]) -&gt; List[int]:
+        L2=len(nums2)
+        if L2==0:
+            return []
+        
+        output=[]
+        M=max(nums2)
+        
+        for i in range(len(nums1)):
+            
+            if nums1[i] &gt;= M:
+                output.append(-1)
+                i += 1
+            else:
+                
+                t=nums1[i]
+                j=nums2.index(t)
+                while j&lt;L2 and nums2[j] &lt;= t:
+                    j += 1
+                if j&lt;L2:
+                    output.append(nums2[j])
+                else:
+                    output.append(-1)
+                i += 1
+        return output</code></pre>
+</div>
+<div id="fibonacci-number" class="section level2">
+<h2>509. Fibonacci Number</h2>
+<p><strong>Mesmorization approach:</strong></p>
+<pre><code>class Solution:
+    def fib(self, N: int) -&gt; int:
+        cache={0:0,1:1}
+        for i in range(2,31):
+            cache[i]=cache[i-1]+cache[i-2]
+            i += 1
+        return cache[N]
+        </code></pre>
+<p><strong>Iterative approach:</strong></p>
+<pre><code>class Solution:
+    def fib(self, N: int) -&gt; int:
+       
+        a,b = 0,1
+        for _ in range(N):
+            a, b = b, a+b
+        return a </code></pre>
+</div>
+<div id="longest-palindrome" class="section level2">
+<h2>409. Longest Palindrome</h2>
+<p><strong>Idea:</strong> First list the number of appearances for each letter in the string by using the <code>Counter</code> function. Then notice that if the count is even, then we can make use all of the repetitions of that letter to form a Palindrome; if the count is odd, then we can make use of all except one repetition of that letter. Finally, if odd counts ever happened, note that we can choose of the letters with odd counts in the center of the palindrome, so we need to add 1 to the total maximal length.</p>
+<pre><code>class Solution:
+    def longestPalindrome(self, s: str) -&gt; int:
+        from collections import Counter
+        counter = Counter(s)
+        length=0
+        max_odd=0
+        for i in counter:
+            if counter[i]%2==0:
+                length += counter[i]
+            else:
+                length += counter[i]-1
+                max_odd = 1
+        if max_odd == 1:
+            return length + 1
+        else:
+            return length
+        </code></pre>
+</div>
+<div id="island-perimeter" class="section level2">
+<h2>463. Island Perimeter</h2>
+<pre><code>class Solution:
+    def islandPerimeter(self, grid: List[List[int]]) -&gt; int:
+        if len(grid)==0:
+            return 0
+        elif len(grid)==1:
+            return 2*(sum(grid[0]))+2
+        
+        
+        hight = len(grid)
+        width = len(grid[0])
+        
+        # horizontal sum:
+        
+        h_first, h_last = sum(grid[0]), sum(grid[-1])
+        h_sum = h_first + h_last
+        for i in range(0,hight-1):
+            for j in range(width):
+                if (grid[i][j]==1 and grid[i+1][j]==0) or (grid[i][j]==0 and grid[i+1][j]==1):
+                    h_sum += 1
+                    j += 1
+            i += 1
+        
+        # vertical sum:
+        
+        v_sum=0
+        for i in range(hight):
+            s='0' + &quot;&quot;.join([str(e) for e in grid[i]]) + '0'
+            v_sum = v_sum + s.count('01')+s.count('10')
+            i += 1
+        
+        return v_sum+h_sum</code></pre>
+</div>
+<div id="number-of-segments-in-a-string" class="section level2">
+<h2>434. Number of Segments in a String</h2>
+<pre><code>class Solution:
+    def countSegments(self, s: str) -&gt; int:
+        return len(s.split())</code></pre>
+</div>
+<div id="bitwise-alternating-numbers" class="section level2">
+<h2>693. Bitwise Alternating Numbers</h2>
+<pre><code>class Solution:
+    def hasAlternatingBits(self, n: int) -&gt; bool:
+        k= ((n&lt;&lt;1) ^ n) &gt;&gt;1
+        return (k+1)&amp;k==0</code></pre>
+</div>
+<div id="find-all-anagrams-in-a-string" class="section level2">
+<h2>438. Find All Anagrams in a String</h2>
+<pre><code>class Solution:
+    def findAnagrams(self, s: str, p: str) -&gt; List[int]:
+        if len(p)&gt;len(s):
+            return []
+        
+        
+        output=[]
+        from collections import Counter
+        p_count = Counter(p)
+        for i in range(ord('a'),ord('z')+1):
+            if chr(i) not in p_count:
+                p_count[chr(i)]=0
+                i += 1
+        L=len(p)
+        s_count=Counter(s[:L])
+        for i in range(ord('a'),ord('z')+1):
+            if chr(i) not in s_count:
+                s_count[chr(i)]=0
+                i += 1
+                
+        for i in range(len(s)-L):
+            
+            if s_count==p_count:
+                output.append(i)
+            
+            s_count[s[i]] -= 1
+            s_count[s[i+L]] +=1
+            i+=1
+        if s_count==p_count:
+            output.append(i)
+        return output</code></pre>
+</div>
+<div id="valid-anagram" class="section level2">
+<h2>242. Valid Anagram</h2>
+<pre><code>class Solution:
+    def isAnagram(self, s: str, t: str) -&gt; bool:
+        if len(s)!=len(t):
+            return False
+        
+        from collections import Counter
+        return Counter(s)==Counter(t)
+            </code></pre>
+</div>
+<div id="greatest-common-divisor-of-strings" class="section level2">
+<h2>1071. Greatest Common Divisor of Strings</h2>
+<pre><code>class Solution:
+    def gcdOfStrings(self, str1: str, str2: str) -&gt; str:
+        if set(str1)!=set(str2):
+            return ''
+        
+        elif len(str1)==0 or len(str2)==0:
+            return ''
+        
+        if len(str1)&gt;len(str2):
+            str1, str2 = str2, str1
+        
+        from math import gcd
+        gcd=gcd(len(str1),len(str2))
+        
+        divisor=str1[:gcd]
+        
+        if divisor*(len(str1)//gcd)==str1 and divisor*(len(str2)//gcd)==str2:
+            return divisor
+        else:
+            return ''</code></pre>
+</div>
+<div id="remove-all-adjacent-duplicates-in-string" class="section level2">
+<h2>1047. Remove All Adjacent Duplicates In String</h2>
+<pre><code>class Solution:
+    def removeDuplicates(self, S: str) -&gt; str:
+        res = []
+        for c in S:
+            if res and res[-1] == c:
+                res.pop()
+            else:
+                res.append(c)
+        return &quot;&quot;.join(res)</code></pre>
+</div>
+<div id="reshape-the-matrix" class="section level2">
+<h2>566. Reshape the Matrix</h2>
+<pre><code>class Solution:
+    def matrixReshape(self, nums: List[List[int]], r: int, c: int) -&gt; List[List[int]]:
+        if len(nums)==0 or nums[0]==0:
+            return nums
+        
+        if len(nums)*len(nums[0])!=r*c:
+            return nums
+        
+        l=len(nums[0])
+        
+        output = [[0]*c for i in range(r)]
+        for i in range(r):
+            for j in range(c):
+                output[i][j]=nums[(i*c+j)//l][(i*c+j)%l]
+                j+=1
+            i+=1
+        return output
+            </code></pre>
+</div>
+<div id="self-dividing-numbers" class="section level2">
+<h2>728. Self Dividing Numbers</h2>
+<pre><code>class Solution:
+    def selfDividingNumbers(self, left: int, right: int) -&gt; List[int]:
+        
+        output=[]
+        num=left
+        while num&lt;=right:
+            if self.check_self_dividing(num):
+                output.append(num)
+            num += 1
+        return output
+    
+    def check_self_dividing(self, n):
+        last, temp = n%10, n//10
+        while temp&gt;0:
+            if last==0 or n%last!=0:
+                return False
+            else:
+                last, temp = temp%10, temp//10
+        return n%last==0</code></pre>
+</div>
 
 
 
