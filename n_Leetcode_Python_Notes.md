@@ -2048,3 +2048,78 @@ class Solution:
         else:
             return 1 + min(self.minDepth(root.left), self.minDepth(root.right))
 ```
+
+## 112. Path Sum
+
+__Main idea:__ we traverse the tree using a stack. In order to keep the path sum information, we keep the current sum from the root to the current position next to each node in the tree. Each time we pop an item from the stack, we check if the corresponding node has branches or not. If no branch, then it is a leaf, we record the path sum to the `sum_list`.
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def hasPathSum(self, root: TreeNode, sum: int) -> bool:
+        return sum in self.listPathSum(root)
+    
+    def listPathSum(self, root):
+        if not root:
+            return []
+        else:
+            
+            sum_list=[]
+            stack=[[root, root.val]]
+            
+            while stack!=[]:
+                temp=stack.pop()
+                cur_node=temp[0]
+                cur_sum=temp[1]
+                if not cur_node.left and not cur_node.right:
+                    sum_list.append(cur_sum)
+                    
+                    
+                else:
+                    if cur_node.left:
+                        stack.append([cur_node.left, cur_node.left.val+cur_sum])
+                    if cur_node.right:
+                        stack.append([cur_node.right, cur_node.right.val+cur_sum])
+            return sum_list
+                
+                
+```
+## 107. Binary Tree Level Order Traversal II
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def levelOrderBottom(self, root: TreeNode) -> List[List[int]]:
+        if not root:
+            return []
+        
+        stack = [root]
+        res, data = [],[]
+        nCount = 1 # keep track of number of nodes on the current level
+        while stack != []:
+            temp = stack.pop(0) # the popping order is 'first come, first pop'
+            nCount -= 1
+            data += [temp.val]
+            if temp.left:
+                stack.append(temp.left)
+            if temp.right:
+                stack.append(temp.right)
+            if nCount == 0: # once we clear an entire level, append data to the head of res, reset data and nCount
+                res = [data] + res
+                data = []
+                nCount =  len(stack)
+        
+        return res
+```
