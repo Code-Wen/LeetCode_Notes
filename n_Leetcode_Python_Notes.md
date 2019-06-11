@@ -2123,3 +2123,332 @@ class Solution:
         
         return res
 ```
+
+## 237. Delete Node in a Linked List
+
+__Idea:__ Swapping the values of the nodes. In the end, update the tail.
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def deleteNode(self, node):
+        """
+        :type node: ListNode
+        :rtype: void Do not return anything, modify node in-place instead.
+        """
+        cur = node
+        while node.next:
+            node.val=node.next.val
+            cur=node
+            node=node.next
+        cur.next=None
+```
+## 203. Remove Linked List Elements
+
+__Idea:__ The main edge cases are that the head node has the value same as `val` and the last node has the value same as `val`.
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def removeElements(self, head: ListNode, val: int) -> ListNode:
+        if not head:
+            return head
+        
+        new_head = head
+        while new_head.val == val and new_head.next:
+            new_head = new_head.next
+        if new_head.val == val:
+            new_head = None
+            return new_head
+        
+        
+        
+        cur = new_head        
+        while cur.next:
+            if cur.val == val:
+                cur.val = cur.next.val
+                cur.next = cur.next.next
+            else:
+                prev = cur
+                cur = cur.next
+        if cur.val == val:
+            prev.next = None
+        
+        return new_head
+```
+## 206. Reverse Linked List
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def reverseList(self, head: ListNode) -> ListNode:
+        if not head or not head.next:
+            return head
+        
+        
+        
+        if head.next:
+            cur = head.next
+            prev = head
+            prev.next = None
+        
+        while cur.next:
+            temp = cur.next
+            cur.next = prev
+            prev, cur = cur, temp
+        
+        cur.next = prev
+        
+        return cur
+        
+```
+## 234. Palindrome Linked List
+
+__Method 1:__ (Time O(n), space O(n)) Brutal force-record the linked list elements in order with a list, then check whether the list is polidrome or not.
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def isPalindrome(self, head: ListNode) -> bool:
+        l=[]
+        cur=head
+        while cur:
+            l.append(cur.val)
+            cur = cur.next
+        return l==l[::-1]
+```
+
+__Method 2:__  (Time O(n), space O(1)) Use a fast pointer and a slow pointer.   `fast` moves 2 steps at a time while `slow` moves 1 step at a time. Meanwhile, `rev` is used to reverse the first half. Then check whether the reversed first half is equal to the second half.
+
+```
+def isPalindrome(self, head):
+    rev = None
+    slow = fast = head
+    while fast and fast.next:
+        fast = fast.next.next
+        rev, rev.next, slow = slow, rev, slow.next
+    if fast:
+        slow = slow.next
+    while rev and rev.val == slow.val:
+        slow = slow.next
+        rev = rev.next
+    return not rev
+```
+## 160. Intersection of Two Linked Lists
+
+__Method 1:__ (Time O(n), Space O(1)) First determine which linked list is longer, then start with the positions at which to both ends are equal, and move at same pace.
+
+```
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution(object):
+    def getIntersectionNode(self, headA, headB):
+        """
+        :type head1, head1: ListNode
+        :rtype: ListNode
+        """
+        curA,curB = headA,headB
+        lenA,lenB = 0,0
+        while curA is not None:
+            lenA += 1
+            curA = curA.next
+        while curB is not None:
+            lenB += 1
+            curB = curB.next
+        
+        if lenA > lenB:
+            headA, headB, lenA, lenB = headB, headA, lenB, lenA
+            
+        curA,curB = headA,headB
+        for i in range(lenB-lenA):
+            curB=curB.next
+            
+        while curB and curB != curA:
+            curB = curB.next
+            curA = curA.next
+        return curA
+```
+
+__Method 2:__ First concatenate the two lists. If there is an intersection, there must be a loop in the concatenated list. Then Floyd's cycle detection algorithm will tell us where the start of the loop is located.
+
+```
+class Solution(object):
+    def getIntersectionNode(self, A, B):
+        if not A or not B: return None
+
+        # Concatenate A and B
+        last = A
+        while last.next: last = last.next
+        last.next = B
+
+        # Find the start of the loop
+        fast = slow = A
+        while fast and fast.next:
+            slow, fast = slow.next, fast.next.next
+            if slow == fast:
+                fast = A
+                while fast != slow:
+                    slow, fast = slow.next, fast.next
+                last.next = None
+                return slow
+
+        # No loop found
+        last.next = None
+        return None
+```
+## 303. Range Sum Query - Immutable
+
+```
+class NumArray(object):
+
+    def __init__(self, nums):
+        """
+        :type nums: List[int]
+        """
+        self.accu =[0]
+        for n in nums:
+            self.accu += [self.accu[-1] + n]
+
+    def sumRange(self, i, j):
+        """
+        :type i: int
+        :type j: int
+        :rtype: int
+        """
+        return self.accu[j+1]-self.accu[i]
+```
+
+## 500. Keyboard Row
+
+```
+class Solution:
+    def findWords(self, words: List[str]) -> List[str]:
+        if words == []:
+            return []
+        
+        res = []
+        for word in words:
+            if self.canTypeOneRow(word):
+                res.append(word)
+        return res
+        
+    def canTypeOneRow(self, s):
+        r1='QWERTYUIOPqwertyuiop'
+        r2='ASDFGHJKLasdfghjkl'
+        r3='ZXCVBNMzxcvbnm'
+        
+        if s == '':
+            return True
+        
+        if s[0] in r1:
+            test = r1
+        elif s[0] in r2:
+            test = r2
+        else:
+            test = r3
+        for j in range(len(s)):
+            if s[j] not in test:
+                return False
+            else:
+                j += 1
+        return True
+```
+## 521. Longest Uncommon Subsequence I
+
+
+```
+class Solution:
+    def findLUSlength(self, a: str, b: str) -> int:
+        if len(a)>len(b):
+            return len(a)
+        elif len(b)>len(a):
+            return len(b)
+        
+        if a!=b:
+            return len(a)
+        else:
+            return -1
+```
+## 120. Triangle
+
+__Idea:__ Starting from the top of the triangle, proceed level by level. For each level, `path_sums` will record the minimal path sums ending at each position on that level. Once we arrive at the bottom, return the minimal path sum.
+
+```
+class Solution:
+    def minimumTotal(self, triangle: List[List[int]]) -> int:
+        
+        path_sums = triangle[0]
+        for i in range(1, len(triangle)):
+            
+            cur_row = triangle[i]
+            path_sums = [0] + path_sums
+            
+            temp = [0]*(i+1)
+            temp[0]=path_sums[1]+cur_row[0]
+            
+            for j in range(1, i):
+                temp[j] = min(path_sums[j] + cur_row[j], path_sums[j+1]+cur_row[j])
+            
+            
+            temp[i]=path_sums[i]+cur_row[i]
+            path_sums = temp
+            
+        return min(path_sums)
+```
+## 665. Non-decreasing Array
+
+__Idea:__ (Time O(n), Space O(1)) This problem turns out to be quite tricky (maybe I was doing it in the wrong perspective). First we check whether there is any inversion in the list, and record the position that it happens: `high, low`. (If no inversion at all, then 'high==len(nums)-1', which we would return True). Next we check that whether the sublist starting at the `low`th position, contains any inversions. If there is one more inversion, then return False. Otherwise, there is just one inversion, then we check whether one can fix the inversion by modifying just one list element : either the `nums[high]` or `nums[low]`. If we can modify `nums[low]` to make it work, then one must have either 'low==len(nums)-1' or 'nums[low+1]>=nums[high]'; or we can modify `nums[high]' to work, then one must have that either  'high==0' or 'nums[high-1]<=nums[low]'.
+```
+class Solution:
+    def checkPossibility(self, nums: List[int]) -> bool:
+        if len(nums) <= 2:
+            return True
+        i=0
+        while i <= len(nums)-2:
+            if nums[i] <=  nums[i+1]:
+                i += 1
+            else:
+                
+                break
+        high, low = i, i+1
+        
+        
+                
+        for _ in range(low, len(nums)-1):
+            if nums[_] > nums[_ + 1]:
+                return False
+            else:
+                _ += 1
+        
+        if high == 0 or high==len(nums)-1:
+            return True
+        elif low == len(nums)-1:
+            return True
+        else:
+            return nums[low+1] >= nums[high] or nums[high-1] <= nums[low]
+        
+        
+```
