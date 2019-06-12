@@ -2449,6 +2449,94 @@ class Solution:
             return True
         else:
             return nums[low+1] >= nums[high] or nums[high-1] <= nums[low]
+```
+
+## 108. Convert Sorted Array to Binary Search Tree
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def sortedArrayToBST(self, nums: List[int]) -> TreeNode:
+        L = len(nums)
+        if L==0:
+            head = None
+        else:
+            head = TreeNode(nums[L//2])
+            head.left = self.sortedArrayToBST(nums[:L//2])
+            head.right = self.sortedArrayToBST(nums[L//2+1:])
+            
+        return head
+```
+## 110. Balanced Binary Tree
+
+__Method 1:__ (Time O(nlogn)) Brutal force: compute the depth of the left subtree and right subtree, respectively, then recursively go over all the tree and check whether every node is balanced.
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def isBalanced(self, root: TreeNode) -> bool:
+        if not root:
+            return True
+        elif self.TreeDepth(root.left) >= self.TreeDepth(root.right) + 2:
+            return False
+        elif self.TreeDepth(root.right) >= self.TreeDepth(root.left) + 2:
+            return False
+        else:
+            return self.isBalanced(root.left) and self.isBalanced(root.right)
+    
+    def TreeDepth(self, root):
+        if not root:
+            return 0
         
+        depth = 0
+        stack = [root]
+        count = 1
+        while stack != []:
+            temp = stack.pop(0)
+            count -= 1
+            if temp.left:
+                stack.append(temp.left)
+            if temp.right:
+                stack.append(temp.right)
+            
+            if count == 0:
+                depth += 1
+                count = len(stack)
+        return depth
+```
+__Method 2__ (Time O(n)): Instead of computing the depth for each subtree and then compare, which leads to a whole lot of repetitions, we simply run the depth function once for the head node, which actually can compute the depth for each subtree. We check the condition in the depth function. (Here we use the recursive definition of the depth function.)
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def isBalanced(self, root: TreeNode) -> bool:
+        self.flag = False
+        self.getHeight(root)
+        return not self.flag
         
+    
+    def getHeight(self, root):
+        if not root: return 0
+        left = self.getHeight(root.left)
+        right = self.getHeight(root.right)
+        if abs(left - right) > 1: 
+            self.flag = True
+        return max(left, right) + 1
 ```
