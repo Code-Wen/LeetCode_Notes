@@ -2540,3 +2540,223 @@ class Solution:
             self.flag = True
         return max(left, right) + 1
 ```
+## 15. 3Sum
+
+__Idea:__ These '3Sum' problems are a bit challenging. The idea is that one first sort the array, then use three pointers to traverse the entire array. Depending on what exactly the goal is, we may need to implement the code slightly differently.
+
+```
+class Solution:
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+            res = []
+            nums.sort()
+            for i in range(len(nums)-2):
+                if i > 0 and nums[i] == nums[i-1]:
+                    continue
+                l, r = i+1, len(nums)-1
+                while l < r:
+                    s = nums[i] + nums[l] + nums[r]
+                    if s < 0:
+                        l +=1 
+                    elif s > 0:
+                        r -= 1
+                    else:
+                        res.append((nums[i], nums[l], nums[r]))
+                        while l < r and nums[l] == nums[l+1]:
+                            l += 1
+                        while l < r and nums[r] == nums[r-1]:
+                            r -= 1
+                        l += 1; r -= 1
+            return res
+```
+## 16. 3Sum Closest
+
+```
+class Solution:
+    def threeSumClosest(self, nums: List[int], target: int) -> int:
+        nums.sort()
+        s, dif = float('inf'), float('inf')
+        for i in range(len(nums)-2):
+            h, t = i+1, len(nums)-1
+            while h < t:
+                temp_sum = nums[i] + nums[h] + nums[t]
+                temp_dif = abs(target-temp_sum)
+                if temp_dif < dif:
+                    s, dif = temp_sum, temp_dif
+                
+                if temp_sum == target:
+                    return target
+                elif temp_sum > target:
+                    t -= 1
+                else:
+                    h += 1
+            
+        return s
+```
+## 923. 3Sum With Multiplicity
+
+
+__Method 1:__ Same idea as the previous _sort and traverse_ strategy. Not very efficient, O(N^2) time complexity. Sutle point at whether the 2nd and 3rd pointer have the same value or not.
+```
+class Solution:
+    def threeSumMulti(self, A: List[int], target: int) -> int:
+        res = 0
+        A.sort()
+        for i in range(len(A)-2):
+            
+            head, tail = i+1, len(A)-1
+            
+            while head < tail:
+                s = A[i]+A[head]+A[tail]
+                if s < target:
+                    head += 1
+                elif s > target:
+                    tail -= 1
+                else:
+                    if A[head] == A[tail]:
+                        temp = (tail-head+1)*(tail-head)//2
+                        res += temp
+                        break
+                    else:
+                        
+                        left, right = 1, 1
+                        while head < tail-1 and A[tail-1]==A[tail]:
+                            right += 1
+                            tail -= 1
+                        while head < tail-1 and A[head+1]==A[head]:
+                            left += 1
+                            head += 1
+                        temp = left*right
+                        res, head, tail = res + temp, head + 1, tail - 1
+            i += 1
+        return res%(10**9+7)
+```
+__Method 2:__ Make use the `Counter` function from `collections`. Greatly reduce the time required to repetedly traverse the array for counting as in the previous method.
+
+```
+class Solution:
+    def threeSumMulti(self, A: List[int], target: int) -> int:
+        
+        c = collections.Counter(A)
+        res = 0
+        for i, j in itertools.combinations_with_replacement(c, 2):
+            k = target - i - j
+            if i == j == k: res += c[i] * (c[i] - 1) * (c[i] - 2) // 6
+            elif i == j != k: res += c[i] * (c[i] - 1) // 2 * c[k]
+            elif k > i and k > j: res += c[i] * c[j] * c[k]
+        return res % (10**9 + 7)
+```
+
+## 189. Rotate Array
+
+__Method 1:__ (Time O(n^2), Space O(1)) This is the brutal force method. We first define the function `rotate1`, which rotates the given array to the right by 1 position. Then in the main function `rotate`, we apply this `k%len(nums)` times.
+```
+class Solution:
+    def rotate(self, nums: List[int], k: int) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        i=1
+        k=k%len(nums)
+        while i <= k:
+            self.rotate1(nums)
+            i += 1
+    
+    def rotate1(self, s):
+        temp = s[-1]
+        i = len(s)-1
+        while i >= 1:
+            s[i] = s[i-1]
+            i -= 1
+        s[0] = temp
+```
+
+
+__Method 2:__  (Time O(n), Space O(k)) First store the last k elements in order, then rotate the first `len(nums)-k` elements to their correct positions, finally update the first k positions.
+
+```
+class Solution:
+    def rotate(self, nums: List[int], k: int) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        
+        L= len(nums)
+        k = k % L
+        temp = nums[L-k:]
+        for j  in range(L-k):
+            nums[L-j-1]=nums[L-j-k-1]
+            j += 1
+        
+        for i in range(k):
+            nums[i]=temp[i]
+            i += 1
+```
+
+__Method 3:__ (Time O(n), Space O(1)) Very nice solution. Swapping the last k elements to the correct position, then do the same swapping process for the rest (n-k) elements. Keeping doing this until done. Note that we need to update the length of array.
+```
+class Solution:
+    def rotate(self, nums: List[int], k: int) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        
+        n, k, j = len(nums), k % len(nums), 0
+        while n > 0 and k % n != 0:
+            for i in range(k):
+                nums[j + i], nums[len(nums) - k + i] = nums[len(nums) - k + i], nums[j + i]
+            n, j = n - k, j + k
+            k = k % n
+```
+
+## 235. Lowest Common Ancestor of a Binary Search Tree
+
+__Idea:__ First check whether the one of the given nodes is an ancestor of the other, if yes, return that node. If the two nodes do not have an ancestial relation, then we search from the root. There are two possibilities:
+the two nodes are on the same branch of the root, or the two nodes are on different branches (this is because we have a BST). For the first case, we move down to that branch; for the second case, the root must be the lowest common ancestor. In addition, to avoid repetedly checking whether `p,q` share ancestial relation or not, we introduce a new function `lowestAncestorSimple`, which finds the lowest common ancestor recursively, given that the two nodes do have have ancestial relation with each other.  
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        if self.isAncestor(p, q):
+            return p
+        if self.isAncestor(q, p):
+            return q
+        else:
+            return self.lowestAncestorSimple(root, p, q)
+            
+    def lowestAncestorSimple(self, root, p, q):
+    
+        ## Find the lowest common ancestor given that p, q do not have ancestial relations.
+        
+        if (p.val > root.val and q.val < root.val) or (p.val<root.val and q.val>root.val):
+            return root
+        elif p.val > root.val and q.val > root.val:
+            return self.lowestAncestorSimple(root.right, p, q)
+        else:
+            return self.lowestAncestorSimple(root.left, p, q)
+                    
+    
+    def isAncestor(self, node1, node2):
+        ## checking whether node1 is an ancestor of node2
+        
+        stack = [node1]
+        while stack != []:
+            temp = stack.pop(0)
+            if temp.left == node2 or temp.right == node2:
+                return True
+            else:
+                if temp.left:
+                    stack.append(temp.left)
+                if temp.right:
+                    stack.append(temp.right)
+        return False
+        
+```
+
+
