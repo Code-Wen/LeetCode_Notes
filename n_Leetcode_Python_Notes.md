@@ -2758,5 +2758,234 @@ class Solution:
         return False
         
 ```
+## 236. Lowest Common Ancestor of a Binary Tree
 
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
 
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        if root == p or root == q:
+            return root
+        
+        left = right = None
+        # else look in left and right child
+        if root.left:
+            left = self.lowestCommonAncestor(root.left, p, q)
+        if root.right:
+            right = self.lowestCommonAncestor(root.right, p, q)
+
+        # if both children returned a node, means
+        # both p and q found so parent is LCA
+        if left and right:
+            return root
+        else:
+        # either one of the chidren returned a node, meaning either p or q found on left or right branch.
+        # Example: assuming 'p' found in left child, right child returned 'None'. This means 'q' is
+        # somewhere below node where 'p' was found we dont need to search all the way, 
+        # because in such scenarios, node where 'p' found is LCA
+            return left or right
+````
+## 598. Range Addition II
+
+```
+class Solution:
+    def maxCount(self, m: int, n: int, ops: List[List[int]]) -> int:
+        L=len(ops)
+        if L==0:
+            return m*n
+        
+        m1, m2 = float('inf'), float('inf')
+        for i in range(L):
+            m1, m2 = min(m1, ops[i][0]), min(m2, ops[i][1])
+            i += 1
+        return m1*m2
+```
+## 908. Smallest Range I
+
+```
+class Solution:
+    def smallestRangeI(self, A: List[int], K: int) -> int:
+        m, M = min(A), max(A)
+        return max(M-m-2*K, 0)
+```
+## 1041. Robot Bounded In Circle
+```
+class Solution:
+    def isRobotBounded(self, instructions: str) -> bool:
+        
+        init, pos = [[0,0],0], [[0,0],0]
+        for s in instructions*4:
+            self.action(pos, s)
+        return init == pos
+        
+    def action(self, pos, s):
+        ## We use a list of two elements to denote the positioning of the robot:
+        # 1st element is a list of two integers, which are the coordinates of the position
+        # 2nd element is the direction the robot is facing, we use 0-3 (integers mod 4), where 0 
+        # stands for North and adding 1 means turning right by 90 degrees
+        
+        if s == 'L':
+            pos[1] = (pos[1]-1) % 4
+        elif s == 'R':
+            pos[1] = (pos[1]+1) % 4
+        else:
+            if pos[1]  == 0:
+                pos[0][1] += 1
+            elif pos[1] == 2:
+                pos[0][1] -= 1
+            elif pos[1] == 1:
+                pos[0][0] += 1
+      
+            else:
+                pos[0][0] -= 1
+```
+## 709. To Lower Case
+
+```
+class Solution:
+    def toLowerCase(self, str: str) -> str:
+        temp = []
+        for i in range(len(str)):
+            if 65 <= ord(str[i]) and ord(str[i]) <= 90:
+                temp.append(chr(ord(str[i])+32))
+            else:
+                temp.append(str[i])
+        
+        return ''.join(temp)
+```
+## 704. Binary Search
+
+__Method 1:__ recursive approach, time O(log n)
+```
+class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        if len(nums) == 0 or nums[-1] < target or nums[0] > target:
+            return -1
+        
+        
+        
+        if nums[len(nums)//2] == target:
+            return len(nums)//2
+        else:
+            if nums[len(nums)//2] > target:
+                return self.search(nums[:len(nums)//2], target)
+            else:
+                
+                if self.search(nums[len(nums)//2:],target) != -1:
+                    return len(nums)//2 + self.search(nums[len(nums)//2:],target)
+                else:
+                    return -1
+```
+Method 2: using two pointers `left` and   `right`, to indicate the left and right bounds of `nums` to check.
+```
+class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        if len(nums) == 0: 
+            return -1
+        
+        left, right = 0, len(nums)-1
+        
+        while left <= right:
+            
+            mid = (left+right)//2
+            if nums[mid] == target:
+                return mid
+            elif nums[mid] > target:
+                right = mid - 1
+            else:
+                left = mid + 1
+        return -1
+         
+```
+
+## 455. Assign Cookies
+
+```
+class Solution:
+    def findContentChildren(self, g: List[int], s: List[int]) -> int:
+        g.sort()
+        s.sort()
+        res = 0
+         
+        
+        
+        left = 0
+        
+        if len(s) == 0:
+            return 0
+        
+        while left <= len(s)-1 and g!=[] and s[-1]>=g[0]:
+            cur = g.pop(0)
+            res += 1
+            
+            while s[left] < cur:
+                left += 1
+            left +=1
+        return res 
+```
+## 404. Sum of Left Leaves
+
+We use a stack to traverse the binary tree. Each element in the stack records the node and whether the node is left or right. Then we only summing up the values of the left leaves.
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def sumOfLeftLeaves(self, root: TreeNode) -> int:
+        sum = 0
+        if not root:
+            return 0
+        
+        stack = [[root, 0]]
+        while stack != []:
+            temp = stack.pop(0)
+            node, left = temp[0], temp[1]
+            if not node.left and not node.right and left:
+                sum += node.val
+            
+            if node.left:
+                stack.append([node.left, 1])
+            if node.right:
+                stack.append([node.right, 0])
+        return sum
+```
+## 938. Range Sum of BST
+
+Remember to use the structure of a binary search tree!
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def rangeSumBST(self, root: TreeNode, L: int, R: int) -> int:
+        if not root:
+            return 0
+        SUM = 0
+        stack = [root]
+        while stack != []:
+            node = stack.pop(0)
+            val = node.val
+            if L <= val and R >= val:
+                SUM += val
+            if node.left and val >= L:
+                stack.append(node.left)
+            if node.right and val <= R:
+                stack.append(node.right)
+        return SUM
+```
