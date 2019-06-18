@@ -3026,5 +3026,129 @@ class Solution:
         return s['U']-s['D'] ==0 and s['L']-s['R']==0
         
 ```
+##  994. Rotting Oranges
+
+This problem turns out to be more difficult than I thought. A lesson learned is that __one cannot make a set of lists in Python.__
 
 
+```
+class Solution:
+    def orangesRotting(self, grid: List[List[int]]) -> int:
+        rotten, fresh = self.check(grid)
+        h, w = len(grid), len(grid[0])
+        rotting = self.newRotting(rotten, fresh, h, w)
+        time = 0
+        while rotting:
+            time += 1
+            rotten = []
+            for _ in rotting:
+                fresh.remove(list(_))
+                rotten.append(list(_))
+            rotting = self.newRotting(rotten, fresh, h, w)
+        
+        if fresh != []:
+            return -1
+        
+        return time
+        
+        
+    def check(self, grid):
+            
+        rotten, fresh = [], []
+        h, w = len(grid), len(grid[0])
+        for i in range(h):
+            for j in range(w):
+                if grid[i][j] == 2:
+                    rotten.append([i,j])
+                elif grid[i][j] == 1:
+                    fresh.append([i,j])
+        return rotten, fresh
+        
+    def newRotting(self, rotten, fresh, h, w):
+        temp=set([])
+        for e in rotten:
+            i, j = e[0], e[1]
+            if [i+1,j] in fresh:
+                temp.add((i+1,j))
+            if [i-1,j] in fresh:
+                temp.add((i-1,j))
+            if [i, j+1] in fresh:
+                temp.add((i,j+1))
+            if [i,j-1] in fresh:
+                temp.add((i,j-1))
+            
+        return temp
+```
+## 661. Image Smoother
+
+Two things to note: 1. how we constructed the `nerghbors` of a given position; 2. we have to use `copy.deepcopy()` to make a copy of `M`, the shallow copy     `copy.copy()` won't work in this case.
+
+```
+class Solution:
+    def imageSmoother(self, M: List[List[int]]) -> List[List[int]]:
+        
+        x_len = len(M)
+        y_len = len(M[0]) if x_len else 0
+        res = copy.deepcopy(M)
+        for x in range(x_len):
+            for y in range(y_len):
+                neighbors = [
+                    M[_x][_y]
+                    for _x in (x-1, x, x+1)
+                    for _y in (y-1, y, y+1)
+                    if 0 <= _x < x_len and 0 <= _y < y_len
+                ]
+                res[x][y] = sum(neighbors) // len(neighbors)
+        return res
+```
+## 594. Longest Harmonious Subsequence
+
+```
+class Solution:
+    def findLHS(self, nums: List[int]) -> int:
+        if len(nums)==0:
+            return 0
+        
+        counter = collections.Counter(nums)
+        res = 0
+        for i in counter:
+            if i+1 in counter:
+                res = max(counter[i]+counter[i+1], res)
+        return res
+                
+        
+```
+
+## 690. Employee Importance
+
+```
+"""
+# Employee info
+class Employee:
+    def __init__(self, id, importance, subordinates):
+        # It's the unique id of each node.
+        # unique id of this employee
+        self.id = id
+        # the importance value of this employee
+        self.importance = importance
+        # the id of direct subordinates
+        self.subordinates = subordinates
+"""
+class Solution:
+    def getImportance(self, employees, id):
+        """
+        :type employees: Employee
+        :type id: int
+        :rtype: int
+        """
+        SUM=0
+        stack =[id]
+        while stack:
+            x=stack.pop(0)
+            for i in employees:
+                if i.id == x:
+                    stack = stack + i.subordinates
+                    SUM += i.importance
+                    break
+        return SUM
+```
