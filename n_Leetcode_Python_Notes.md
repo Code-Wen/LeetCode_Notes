@@ -2989,3 +2989,42 @@ class Solution:
                 stack.append(node.right)
         return SUM
 ```
+##  674. Longest Continuous Increasing Subsequence
+
+__Idea:__ (Time O(n), Space O(1)) tranverse the list once while recording the current maximal length of of continuous increasing subsequence and the current streak. If the next element is not bigger than the previous one, we update the current max length to be the maximum among `max_length` and `cur_streak`. Then we reset the current streak to 1.
+
+```
+class Solution:
+    def findLengthOfLCIS(self, nums: List[int]) -> int:
+        if len(nums)<=1:
+            return len(nums)
+        
+        max_length = 1
+        cur_streak = 1
+        i = 1
+        while i <= len(nums)-1:
+            if nums[i-1] < nums[i]:
+                cur_streak += 1
+                
+            else:
+                max_length, cur_streak = max(max_length, cur_streak), 1
+            
+            i += 1
+        return max(max_length, cur_streak)
+                
+```
+
+
+## 657. Robot Return to Origin
+
+Use `Counter` from    `collections`. Added  a string `RLUD` in front in order to avoid the possibility that `moves` does not contain all of the possible moves.
+
+```
+class Solution:
+    def judgeCircle(self, moves: str) -> bool:
+        s = collections.Counter('RLUD'+moves)
+        return s['U']-s['D'] ==0 and s['L']-s['R']==0
+        
+```
+
+
