@@ -3152,3 +3152,119 @@ class Solution:
                     break
         return SUM
 ```
+## 24. Swap Nodes in Pairs
+
+Standard recursive method. First swap the first two nodes, then make the link correctly.
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def swapPairs(self, head: ListNode) -> ListNode:
+        if not head:
+            return head
+        elif not head.next:
+            return head
+        else:
+            node1, node2 = head, head.next
+            node3 = self.swapPairs(node2.next)
+            node1.next = node3
+            node2.next = node1
+            return node2
+```
+## 22. Generate Parentheses
+
+The construction is recursive: for `n >= 2`, we have that the possible combinations must be of the following forms:
+
+1. Either `e+f` where `e,f` are made of `i,n-i` pairs of parenthesis, where 1<= i <= n-1
+2. OR `'('+e+')'` where e are made of n-1 pairs of parenthesis.
+
+We use a cache to store the previous results.
+
+```
+class Solution:
+    def generateParenthesis(self, n: int) -> List[str]:
+        if n == 0:
+            return []
+        if n == 1:
+            return ['()']
+        
+        cache=[[],['()']]
+        
+        
+        
+        for i in range(2,n+1):
+            temp=[]
+            for j in range(1,i):
+                for e in cache[j]:
+                    temp += [e+f for f in cache[i-j]]
+            temp =  temp + ['('+e+')' for e in cache[i-1]]
+            cache.append(list(set(temp)))
+        
+        return cache[n]
+```
+## 852. Peak Index in a Mountain Array
+
+Typical binary search. 
+
+```
+class Solution:
+    def peakIndexInMountainArray(self, A: List[int]) -> int:
+        left, right, mid = 0, len(A)-1, len(A)//2
+        while A[mid] < A[mid-1] or A[mid] < A[mid+1]:
+            if A[mid] < A[mid-1]:
+                right, mid = mid, (left+mid)//2
+            else:
+                left, mid = mid, (mid+right)//2
+        
+        return mid
+```
+## 700. Search in a Binary Search Tree
+
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def searchBST(self, root: TreeNode, val: int) -> TreeNode:
+        if not root or root.val == val:
+            return root
+        
+        if root.val > val:
+            return self.searchBST(root.left, val)
+        if root.val < val:
+            return self.searchBST(root.right, val)
+```
+## 697. Degree of an Array
+
+```
+class Solution:
+    def findShortestSubArray(self, nums: List[int]) -> int:
+        stats = dict([])
+        for i in range(len(nums)):
+            if nums[i] in stats:
+                stats[nums[i]][1] = i
+                stats[nums[i]][2] += 1
+            else:
+                stats[nums[i]] = [i,i,1]
+        
+        degree, shortest = 0, float('inf')
+        for i in stats:
+            if degree == stats[i][2]:
+                degree = stats[i][2]
+                shortest = min(shortest, stats[i][1]-stats[i][0]+1)
+            if degree < stats[i][2]:
+                degree = stats[i][2]
+                shortest = stats[i][1]-stats[i][0]+1
+        return shortest
+```
+
