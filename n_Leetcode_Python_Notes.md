@@ -3267,4 +3267,320 @@ class Solution:
                 shortest = stats[i][1]-stats[i][0]+1
         return shortest
 ```
+##  530. Minimum Absolute Difference in BST
 
+(Space O(n), Time O(n)) In-order traverse the BST and record the values, which leads to a sorted list. Then find the minimal difference among the list elements.
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def getMinimumDifference(self, root: TreeNode) -> int:
+        L = self.inOrder(root)
+        return min([L[i+1]-L[i] for i in range(len(L)-1)])
+    
+    def inOrder(self,root):
+        
+        if not root:
+            return []
+        else:
+            return self.inOrder(root.left) + [root.val] + self.inOrder(root.right)
+```
+## 448. Find All Numbers Disappeared in an Array
+
+```
+class Solution:
+    def findDisappearedNumbers(self, nums: List[int]) -> List[int]:
+       
+        for num in nums:
+            index = abs(num) - 1
+            nums[index] = -abs(nums[index])
+
+        return [i + 1 for i, num in enumerate(nums) if num > 0]
+```
+## 405. Convert a Number to Hexadecimal
+
+```
+class Solution:
+    def toHex(self, num: int) -> str:
+        if num == 0:
+            return '0'
+        sign = (num >= 0) - 1
+        s = dict(zip([i for i in range(16)], [str(i) for i in range(10)]+['a','b','c','d','e','f']))
+        
+        quotient, remainder, digits = abs(num), 0, []
+        while quotient > 0:
+            quotient, remainder = quotient//16, quotient % 16
+            digits.append(remainder)
+        
+        
+        
+        if sign == 0:
+            digits = digits[::-1]
+            return ''.join([s[i] for i in digits])
+        else:
+            digits = digits+[0]*(8-len(digits))
+            i = 0
+            while digits[i]==0:
+                
+                i += 1
+            digits[i] = 16-digits[i]
+            for j in range(i+1,8):
+                digits[j] = 16 - digits[j] - 1
+            digits = digits[::-1]
+            return ''.join([s[i] for i in digits])
+```
+## 628. Maximum Product of Three Numbers
+
+```
+class Solution:
+    def maximumProduct(self, nums: List[int]) -> int:
+        if len(nums)==3:
+            return nums[0]*nums[1]*nums[2]
+        
+        nums.sort()
+        return max(nums[0]*nums[1]*nums[-1],nums[-1]*nums[-2]*nums[-3], nums[0]*nums[1]*nums[2])
+```
+
+
+## 706.Design HashMap
+
+```
+class MyHashMap:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.cap = 8
+        self.size = 0
+        self.data = [None] * 8
+        self.ratio = float(2)/3
+
+    def put(self, key: int, value: int) -> None:
+        """
+        value will always be non-negative.
+        """
+        if float(self.size)/self.cap >= self.ratio:
+            self.cap = self.cap * 2
+            new = [None] * self.cap
+            for i in range(self.cap//2):
+                if self.data[i] and self.data[i][1] != "tomb":
+                    myhash = self.data[i][0]%self.cap
+                    while new[myhash]:
+                        myhash = (5*myhash+1)%self.cap
+                    new[myhash] = self.data[i]
+                i += 1
+            self.data = new
+            
+        myhash = key % self.cap
+        while self.data[myhash]:
+            if self.data[myhash][0] == key:
+                self.data[myhash][1] = value
+                return
+            
+            myhash = (5*myhash+1)%self.cap
+        self.data[myhash]=[key, value]
+        self.size += 1
+        
+            
+                        
+                
+        
+
+    def get(self, key: int) -> int:
+        """
+        Returns the value to which the specified key is mapped, or -1 if this map contains no mapping for the key
+        """
+        myhash = key % self.cap
+        while self.data[myhash]:
+            if self.data[myhash][0] == key and self.data[myhash][1]=="tomb":
+                return -1
+            elif self.data[myhash][0] == key and self.data[myhash][1] != "tomb":
+                return self.data[myhash][1]
+            else:
+                myhash = (5*myhash+1) % self.cap
+        return -1
+
+    def remove(self, key: int) -> None:
+        """
+        Removes the mapping of the specified value key if this map contains a mapping for the key
+        """
+        myhash = key % self.cap
+        while self.data[myhash]:
+            if self.data[myhash][0] == key and self.data[myhash][1]=="tomb":
+                return 
+            elif self.data[myhash][0] == key and self.data[myhash][1] != "tomb":
+                self.data[myhash][1] = "tomb"
+                return
+            else:
+                myhash = (5*myhash+1) % self.cap
+
+
+```
+
+## 599. Minimum Index Sum of Two Lists
+```
+class Solution:
+    def findRestaurant(self, list1: List[str], list2: List[str]) -> List[str]:
+        dic1 = {e:i for i, e in enumerate(list1)}
+        min_sum =  len(list1)+len(list2)
+        res =[]
+        for i, e in enumerate(list2):
+            if e in dic1:
+                
+                
+                if i + dic1[e] ==  min_sum:
+                    res.append(e)
+                elif i + dic1[e] < min_sum:
+                    res, min_sum = [e], i + dic1[e]
+                else:
+                    continue
+        return res
+```
+## 50. Pow(x, n)
+
+[Link](https://leetcode.com/problems/powx-n/)
+
+```
+class Solution:
+    def myPow(self, x: float, n: int) -> float:
+        if n == 0:
+            return 1
+        
+        if n < 0:
+            x, n = 1/x, -n
+        
+        
+        res = 1
+        
+        if n % 2 == 1:
+            
+            return x* self.myPow(x*x, (n-1)//2)
+        
+        else:
+            return self.myPow(x*x, n//2)
+            
+```
+## 257. Binary Tree Paths
+
+[Link](https://leetcode.com/problems/binary-tree-paths/)
+
+Use DFS to traverse the tree. In the stack, we also keep the path from the root to the current node for output reasons.
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def binaryTreePaths(self, root: TreeNode) -> List[str]:
+        if not root:
+            return []
+        
+        res, stack = [], [(root, "")]
+        while stack:
+            node, path = stack.pop()
+            if not node.left and not node.right:
+                res.append(path+str(node.val))
+            else:
+                if node.left:
+                    stack.append((node.left, path+str(node.val)+'->'))
+                if node.right:
+                    stack.append((node.right, path+str(node.val)+'->'))
+        return res
+```
+## 401. Binary Watch
+[Link](https://leetcode.com/problems/binary-watch/)
+
+```
+class Solution:
+    def readBinaryWatch(self, num: int) -> List[str]:
+        res = []
+        
+        for hour in range(12):
+            n1=self.binarydigitSum(hour)
+            n2 = num - n1
+            for minute in range(60):
+                if self.binarydigitSum(minute) == n2:
+                    res.append(str(hour)+':'+('0'+str(minute))[-2:])
+        return res
+        
+    def binarydigitSum(self, n):
+        sum = 0
+        while n > 0:
+            sum, n = sum + n%2, n//2
+        return sum
+```
+## 771. Jewels and Stones
+
+[Link](https://leetcode.com/problems/jewels-and-stones/)
+
+```
+class Solution:
+    def numJewelsInStones(self, J: str, S: str) -> int:
+        sum = 0
+        for l in J:
+            
+            sum += S.count(l)
+        return sum
+```
+
+
+One-liner using `map`:
+
+```
+class Solution:
+    def numJewelsInStones(self, J: str, S: str) -> int:
+        return sum(map(S.count, J))   
+
+```
+## 961. N-Repeated Element in Size 2N Array
+[Link](https://leetcode.com/problems/n-repeated-element-in-size-2n-array/)
+
+```
+class Solution:
+    def repeatedNTimes(self, A: List[int]) -> int:
+        
+        for i in range(len(A)-2):
+            if A[i] == A[i+1] or A[i] == A[i+2]:
+                return A[i]
+        return A[-1]
+```
+## 1002. Find Common Characters
+
+[Link](https://leetcode.com/problems/find-common-characters/)
+```
+class Solution:
+    def commonChars(self, A: List[str]) -> List[str]:
+        a = set(A[0])
+        dic = {e:A[0].count(e) for e in a}
+        
+        for e in A:
+            for letter in a:
+                dic[letter] = min(dic[letter], e.count(letter))
+        
+        res=''
+        for e in dic:
+            res += e * dic[e]
+        return list(res)
+```
+
+
+Same idea, but using `collections.Counter`:
+
+```
+    def commonChars(self, A):
+        res = collections.Counter(A[0])
+        for a in A:
+            res &= collections.Counter(a)
+        return list(res.elements())
+```
