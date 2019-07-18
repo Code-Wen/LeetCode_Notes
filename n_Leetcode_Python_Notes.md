@@ -3584,3 +3584,216 @@ Same idea, but using `collections.Counter`:
             res &= collections.Counter(a)
         return list(res.elements())
 ```
+
+## 1025. Divisor Game
+[Link](https://leetcode.com/problems/divisor-game/)
+
+```
+class Solution:
+    def divisorGame(self, N: int) -> bool:
+        cache = [0, False, True, False] #initial cases. The 0th element is just a place-holder.
+        
+        i = 4
+        while i <= N:
+            j = 1
+            sqrt = math.floor(math.sqrt(i))
+            
+            #If Alice can choose a strategy to ensure that Bob will lose, then she is going to win.
+            
+            while j <= sqrt:
+                if i % j == 0 and cache[i-j]==False: 
+                    
+                    break
+                else:
+                    j += 1
+            if j < sqrt:
+                cache.append(True)
+            else: 
+                cache.append(False)
+            i += 1
+        return cache[N]
+```
+
+After saw other's discussion, I realize that this is a typical dynamic programming problem. Below is the more concise code, idea is exactly the same as the previous solution.
+
+```
+class Solution:
+    def divisorGame(self, N: int) -> bool:
+        dp = [False]*(N+1)
+        
+        i = 2
+        while i <= N:
+            j = 1
+            sqrt = math.floor(math.sqrt(i))
+            while j <= sqrt:
+                if i % j == 0 and dp[i-j]==False:
+                    dp[i] = True
+                    break
+                j += 1
+            i += 1
+                
+        return dp[N]
+```
+
+## 720. Longest Word in Dictionary
+[Link](https://leetcode.com/problems/longest-word-in-dictionary/)
+
+
+```
+class Solution:
+    def longestWord(self, words: List[str]) -> str:
+        words.sort()
+        w_set, res = set(['']), ''
+        for word in words:
+            if word[:-1] in w_set:
+                w_set.add(word)
+                if len(word) > len(res):
+                    res = word
+        return res
+```
+
+## 884. Uncommon Words from Two Sentences
+[Link](https://leetcode.com/problems/uncommon-words-from-two-sentences/)
+
+Note that want all the words which only appear once in the combination of the two sentences. This is my original code:
+```
+class Solution:
+    def uncommonFromSentences(self, A: str, B: str) -> List[str]:
+        from collections import Counter
+        A_words, B_words = A.split(' '), B.split(' ')
+        A_dic, B_dic = Counter(A_words), Counter(B_words)
+        A_uniq, B_uniq, A_dup, B_dup = set([]), set([]), set([]), set([])
+        for word in A_dic:
+            if A_dic[word] == 1:
+                A_uniq.add(word)
+            else:
+                A_dup.add(word)
+        for word  in B_dic:
+            if B_dic[word] == 1:
+                B_uniq.add(word)
+            else:
+                B_dup.add(word)
+        return list((A_uniq | B_uniq) - ((A_uniq | A_dup) & (B_uniq | B_dup)))
+```
+Below is the __smart__ code...
+
+
+```
+def uncommonFromSentences(self, A, B):
+        c = collections.Counter((A + " " + B).split())
+        return [w for w in c if c[w] == 1]
+```
+
+## 746. Min Cost Climbing Stairs
+[Link](https://leetcode.com/problems/min-cost-climbing-stairs/)
+
+
+```
+class Solution:
+    def minCostClimbingStairs(self, cost: List[int]) -> int:
+        dp = [0] *  len(cost)
+        level = 2
+        while level < len(cost):
+            dp[level] = min(dp[level-1]+cost[level-1], dp[level-2]+cost[level-2])
+            level += 1
+        return min(dp[-2]+cost[-2], dp[-1]+cost[-1])
+```
+
+Here is a DP method without using an array to store the previous costs:
+
+```
+class Solution:
+    def minCostClimbingStairs(self, cost: List[int]) -> int:
+        l = len(cost)
+        if l<=1:
+            return 0
+        
+        cost0, cost1 = cost[0], cost[1] 
+        
+        for i in range(2, l):
+            cost0, cost1 = cost1, min(cost0, cost1)+cost[i]
+        return min(cost0, cost1)
+```
+
+## 338. Counting Bits
+
+[Link](https://leetcode.com/problems/counting-bits/)
+
+
+```
+res = [0]
+        while len(res) <= num:
+            res += [i + 1 for i in res[:num + 1 - len(res)]]
+        return res
+```
+It turns out to be a DP problem! We start with `res=[0]` since the binary representation of 0 is 0, thus no 1 there. Each step, we multiply the size of `res` list by 2, and note that the numbers in the second half can be obtained by adding 1 to the corresponding numbers in the first half. Note we may compute more than we need.
+```
+class Solution:
+    def countBits(self, num: int) -> List[int]:
+        res = [0]
+        if num > 0:
+            
+            while len(res) < num + 1:
+                res += [x+1 for x in res]
+        
+        return res[0:num+1]
+```
+## 64. Minimum Path Sum
+[Link](https://leetcode.com/problems/minimum-path-sum/)
+
+```
+class Solution:
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        n_row = len(grid)
+        n_col = len(grid[0])
+        for i in range(1, n_col):
+            grid[0][i] += grid[0][i-1]
+        for j in range(1, n_row):
+            grid[j][0] += grid[j-1][0]
+        
+        for i in range(1, n_row):
+            for j in range(1, n_col):
+                grid[i][j] += min(grid[i-1][j], grid[i][j-1])
+        
+        return grid[-1][-1]
+```
+## 929. Unique Email Addresses
+
+[Link](https://leetcode.com/problems/unique-email-addresses/)
+
+```
+class Solution:
+    def numUniqueEmails(self, emails: List[str]) -> int:
+        
+        return len(set([self.simplify(e) for e in emails]))
+        
+    def simplify(self, S):
+        ## Return the address for string S without '.' and '+' in the local name
+        
+        n = S.find('@')
+        first_half = S[:n]
+        m = first_half.find('+') # locate the first '+' before @
+        if m > -1:
+            first_half = first_half[:m] # remove the part after '+' if there is one
+            
+        first_half = first_half.replace('.','') # remove the periods
+        return first_half + S[n:]
+        
+```
+## 836. Rectangle Overlap
+[Link](https://leetcode.com/problems/rectangle-overlap/)
+
+```
+class Solution:
+    def isRectangleOverlap(self, rec1: List[int], rec2: List[int]) -> bool:
+        ## first check whether there is nontrivial horizontal overlap:
+        
+        h1 = (rec1[0] <= rec2[0]) & (rec2[0] < rec1[2])
+        h2 = (rec2[0] <= rec1[0]) & (rec1[0] < rec2[2])
+        
+        ## check whether there is nontrivial vertical overlap:
+        
+        v1 = (rec1[1] <= rec2[1]) & (rec2[1] < rec1[3])
+        v2 = (rec2[1] <= rec1[1]) & (rec1[1] < rec2[3])
+        return (h1 or h2) and (v1 or v2)
+```
