@@ -3797,3 +3797,56 @@ class Solution:
         v2 = (rec2[1] <= rec1[1]) & (rec1[1] < rec2[3])
         return (h1 or h2) and (v1 or v2)
 ```
+
+## 748. Shortest Completing Word
+
+```
+class Solution:
+    def shortestCompletingWord(self, licensePlate: str, words: List[str]) -> str:
+        t = licensePlate.lower()
+        L = dict()
+        for i in range(ord('a'), ord('z')):
+            if chr(i) in t:
+                L[chr(i)] = t.count(chr(i))
+        res, length = '', 1001
+        for word in words:
+            complete = True
+            for letter in L:
+                if word.count(letter) < L[letter]:
+                    complete = False
+                    continue
+            if complete == True and len(word) < length:
+                res, length = word, len(word)
+        
+        return res
+```
+## 811. Subdomain Visit Count
+[Link](https://leetcode.com/problems/subdomain-visit-count/)
+
+
+```
+class Solution:
+    def subdomainVisits(self, cpdomains: List[str]) -> List[str]:
+        from collections import Counter
+        dic, res = Counter(), []
+        for entry in cpdomains:
+            n, domain = int(entry[:entry.find(' ')]), entry[entry.find(' ')+1:]
+            dic[domain] += n
+            loc = domain.find('.')
+            while loc != -1:
+                dic[domain[loc+1:]] += n
+                loc = domain.find('.', loc+1)
+                
+        
+        return return [str(dic[e]) + ' ' + e for e in dic]
+```
+## 453. Minimum Moves to Equal Array Elements
+[Link](https://leetcode.com/problems/minimum-moves-to-equal-array-elements/)
+
+__Incrementing n-1 elements by 1 is effectively the same as subtracting 1 from a single element. __
+
+```
+class Solution:
+    def minMoves(self, nums: List[int]) -> int:
+        return sum(nums)-min(nums)*len(nums)
+```
