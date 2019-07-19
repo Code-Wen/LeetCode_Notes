@@ -3850,3 +3850,75 @@ class Solution:
     def minMoves(self, nums: List[int]) -> int:
         return sum(nums)-min(nums)*len(nums)
 ```
+## 868. Binary Gap
+[Link](https://leetcode.com/problems/binary-gap/)
+
+Typical question about binary representations, we use __long division__ for that.
+
+```
+class Solution:
+    def binaryGap(self, N: int) -> int:
+        q, r = N // 2, N % 2
+        
+        # Find first 1 in the representation
+        
+        while r == 0:
+            q, r = q//2, q%2
+        
+        # Keep track of distance and current max distance: whenever we encounter a 1 again, we update Max reset cnt.
+        
+        cnt, Max = 0, 0
+        while q > 0:
+            q, r, cnt = q//2, q%2, cnt + 1
+            if r == 1:
+                Max = max(cnt, Max)
+                cnt = 0      
+        return Max
+```
+
+## 1108. Defanging an IP Address
+[Link](https://leetcode.com/problems/defanging-an-ip-address/)
+
+```
+class Solution:
+    def defangIPaddr(self, address: str) -> str:
+        return address.replace('.', '[.]')
+```
+
+## 1021. Remove Outermost Parentheses
+[Link](https://leetcode.com/problems/remove-outermost-parentheses/)
+
+```
+class Solution:
+    def removeOuterParentheses(self, S: str) -> str:
+        net, res, start = 0 , '', 0
+        for i in range(len(S)):
+            
+            if S[i] == '(':
+                net += 1
+            else:
+                net -= 1
+            
+            if net == 0:
+                res += S[start+1:i]
+                start = i + 1
+        return res
+```
+
+## 804. Unique Morse Code Words
+[Link](https://leetcode.com/problems/unique-morse-code-words/)
+
+```
+class Solution:
+    def uniqueMorseRepresentations(self, words: List[str]) -> int:
+        code_set, cnt = set(), 0
+        dic = dict(zip([chr(i) for i in range(ord('a'),ord('z')+1)],[".-","-...","-.-.","-..",".","..-.","--.","....","..",".---","-.-",".-..","--","-.","---",".--.","--.-",".-.","...","-","..-","...-",".--","-..-","-.--","--.."]))
+        for word in words:
+            temp = ''
+            for letter in word:
+                temp += dic[letter]
+            if temp not in code_set:
+                cnt += 1
+                code_set.add(temp)
+        return cnt
+```
