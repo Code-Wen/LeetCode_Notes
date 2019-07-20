@@ -3922,3 +3922,192 @@ class Solution:
                 code_set.add(temp)
         return cnt
 ```
+
+## 844. Backspace String Compare
+[Link](https://leetcode.com/problems/backspace-string-compare/)
+
+Time: O(N), Space O(N).
+
+```
+class Solution:
+    def backspaceCompare(self, S: str, T: str) -> bool:
+        outS, outT = self.process(S), self.process(T)
+        return outS == outT
+        
+    def process(self, A):
+        out = []
+        for i in range(len(A)):
+            
+            if A[i] != '#':
+                out.append(A[i])
+            else:
+                if len(out) > 0:
+                    out = out[:-1]
+        return out
+```
+There is a way to backward checking which is Time O(N) and Space O(1):
+
+```
+class Solution:
+    def backspaceCompare(self, S, T):
+        """
+        :type S: str
+        :type T: str
+        :rtype: bool
+        """
+        si, ti = len(S) - 1, len(T) - 1
+        count_s = count_t = 0
+        
+        while si >= 0 or ti >= 0:
+            # si stops at non-deleted character in S or -1
+            while si >= 0:
+                if S[si] == '#':
+                    count_s += 1
+                    si -= 1
+                elif S[si] != '#' and count_s > 0:
+                    count_s -= 1
+                    si -= 1
+                else:
+                    break
+            
+            # ti stops at non-deleted character in T or -1
+            while ti >= 0:
+                if T[ti] == '#':
+                    count_t += 1
+                    ti -= 1
+                elif T[ti] != '#' and count_t > 0:
+                    count_t -= 1
+                    ti -= 1
+                else:
+                    break
+            
+            
+            if (ti < 0 and si >= 0) or (si < 0 and ti >= 0):
+                # eg. S = "a#", T = "a" 
+                return False
+            if (ti >= 0 and si >= 0) and S[si] != T[ti]:
+                return False
+            
+            si -= 1
+            ti -= 1
+        return True
+
+
+```
+
+## 532. K-diff Pairs in an Array
+[Link](https://leetcode.com/problems/k-diff-pairs-in-an-array/)
+
+```
+class Solution:
+    def findPairs(self, nums: List[int], k: int) -> int:
+        from collections import Counter
+        
+        t, res = Counter(nums), 0
+        
+        
+        
+        for i in t:
+            if (k>0 and i+k in t) or (k==0 and t[i]>1):
+                res += 1
+            
+        return res
+```
+## 925. Long Pressed Name
+[Link](https://leetcode.com/problems/long-pressed-name/)
+
+```
+class Solution:
+    def isLongPressedName(self, name: str, typed: str) -> bool:
+        i, j, l1, l2, cnt1, cnt2 = 0, 0, len(name), len(typed), 0, 0
+        while i < l1 and j<l2:
+            while i+1 < l1 and name[i] == name[i+1]:
+                cnt1 += 1
+                i += 1
+            while j+1 < l2 and typed[j] == typed[j+1]:
+                cnt2 += 1
+                j += 1
+            if name[i] == typed[j] and cnt1 <= cnt2:
+                cnt1, cnt2, i, j = 0, 0, i+1, j+1
+            else:
+                return False
+        return i == l1 and j == l2
+```
+
+## 860. Lemonade Change
+[Link](https://leetcode.com/problems/lemonade-change/)
+
+```
+class Solution:
+    def lemonadeChange(self, bills: List[int]) -> bool:
+        five, ten = 0, 0
+        for i in range(len(bills)):
+            if bills[i] == 5:
+                five += 1
+                i += 1
+            elif bills[i] == 10:
+                five, ten = five - 1, ten + 1
+                if five < 0 or ten < 0:
+                    return False
+            
+            elif bills[i] == 20:
+                if ten > 0:
+                    five, ten = five - 1, ten - 1
+                else:
+                    five -= 3
+                if five < 0:
+                    return False
+        return True
+            
+```
+
+## 944. Delete Columns to Make Sorted
+[Link](https://leetcode.com/problems/delete-columns-to-make-sorted/)
+
+
+```
+class Solution:
+    def minDeletionSize(self, A: List[str]) -> int:
+        
+        cnt, m, n = 0, len(A), len(A[0])
+        if m == 1:
+            return True 
+        
+        for i in range(n):
+            for j in range(m-1):
+                if A[j][i] > A[j+1][i]:
+                    cnt += 1
+                    break
+                  
+        return cnt            
+```
+
+## 561. Array Partition I
+[Link](https://leetcode.com/problems/array-partition-i/)
+
+
+
+```
+class Solution:
+    def arrayPairSum(self, nums: List[int]) -> int:
+        nums.sort()
+        res = 0
+        for i in range(len(nums)):
+            if i%2 == 0:
+                res += nums[i]
+        return res
+```
+## 461. Hamming Distance
+[Link](https://leetcode.com/problems/hamming-distance/)
+
+
+
+An easy application of the __bitwise XOR__ `^` operator.
+```
+class Solution:
+    def hammingDistance(self, x: int, y: int) -> int:
+        c, res= x^y, 0
+        while c > 0:
+            res, c = res+c%2, c//2
+        return res
+```
