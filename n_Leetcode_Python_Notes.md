@@ -4111,3 +4111,305 @@ class Solution:
             res, c = res+c%2, c//2
         return res
 ```
+## 1046. Last Stone Weight
+[Link](https://leetcode.com/problems/last-stone-weight/)
+
+This is the first time using (minimal) __heap__ in Python. Take a look at the documentation about [heapq](https://docs.python.org/3/library/heapq.html).
+
+```
+class Solution:
+    def lastStoneWeight(self, stones: List[int]) -> int:
+        hp = [-i for i in stones]
+        heapq.heapify(hp)
+        for i in range(len(stones)-1):
+            max1, max2 = -heapq.heappop(hp), -heapq.heappop(hp)
+            heapq.heappush(hp,max2-max1)
+        
+        return -heapq.heappop(hp)
+            
+```
+
+
+## 1029. Two City Scheduling
+
+[Link](https://leetcode.com/problems/two-city-scheduling/)
+
+```
+class Solution:
+    def twoCitySchedCost(self, costs: List[List[int]]) -> int:
+        costs.sort(key = lambda x: x[0]-x[1])
+        return sum([x[0] for x in costs[:len(costs)//2]]) + sum([x[1] for x in costs[len(costs)//2:]])
+```
+
+
+## 1005. Maximize Sum Of Array After K Negations
+[Link](https://leetcode.com/problems/maximize-sum-of-array-after-k-negations/)
+
+An O(NlnN) solution:
+```
+class Solution:
+    def largestSumAfterKNegations(self, A: List[int], K: int) -> int:
+        neg, zero, res, l = 0,0,0,len(A)
+        A.sort()
+        for i in range(l):
+            temp = A[i]
+            if temp < 0:
+                neg += 1
+            elif temp == 0:
+                zero += 1
+            res += temp
+        
+        
+        for i in range(min(K,neg)):
+            res += -2*A[i]
+        
+        if neg < K and zero == 0 and (K-neg)%2 == 1:
+            if neg>0:
+                
+                res += max(-2*A[neg], 2*A[neg-1])
+            if neg == 0:
+                res += -2*A[neg]
+            
+        return res
+                
+```
+
+Here is a O(N) solution:
+
+```
+class Solution:
+    def largestSumAfterKNegations(self, A: List[int], K: int) -> int:
+        c = collections.Counter(A)
+        for i in range(-100, 0):
+            if i in c:
+                
+                if K == 0:
+                    break
+                flips = min(K, c[i])
+                c[i] -= flips
+                c[-i] += flips
+                K -= flips
+        return sum(c.elements()) - K % 2 * min([abs(i) for i in c.keys()]) * 2
+                
+```
+
+## 11. Container With Most Water
+[Link](https://leetcode.com/problems/container-with-most-water/)
+
+
+```
+class Solution:
+    def maxArea(self, height: List[int]) -> int:
+        #initiate with two pointers on the left and right and the current max volumn of water
+        i, j, vol = 0, len(height)-1, 0  
+        
+        
+        while i < j:
+            vol = max(vol, (j-i) * min(height[j],height[i]))
+            
+            # if we want to reduce the width and hope the volumn will increase, have to move the smaller height
+            
+            if height[i] < height[j]:    
+                i += 1
+            elif height[j] < height[i]:
+                j -= 1
+                
+            # if the two heights are equal, we need to make sure we choose the proper one to move
+            
+            else:
+                if height[i+1] >= height[j-1]:
+                    j -= 1
+                else:
+                    i += 1
+        return vol
+```
+## 12. Integer to Roman
+[Link](https://leetcode.com/problems/integer-to-roman/)
+
+```
+class Solution:
+    def intToRoman(self, num: int) -> str:
+        l = [[1000, 'M'],[900,'CM'],[500, 'D'],[400, 'CD'],[100,'C'],[90,'XC'], [50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']]
+        res = ''
+        for i in range(len(l)):
+            while num >= l[i][0]:
+                num -= l[i][0]
+                res += l[i][1]
+        return res
+            
+```
+## 5. Longest Palindromic Substring
+[Link](https://leetcode.com/problems/longest-palindromic-substring/)
+
+To take away: __how to identify palindromes given a center.__
+
+```
+class Solution:
+    def longestPalindrome(self, s: str) -> str:
+        res = ''
+        for i in range(len(s)):
+            # odd case:
+            temp = self.helper(s, i, i)
+            if len(temp) > len(res): res = temp
+            
+            # even case
+            temp= self.helper(s,i,i+1)
+            if len(temp) > len(res): res = temp
+        return res
+        
+    def helper(self, S, l, r):
+        # Return the longest palindrom in S which is centered at (l,r)-location.
+        # l==r correspondes to the odd case and r==l+1 correspond to the even case
+        
+        while l >= 0 and r < len(S) and S[l]==S[r]:
+            l, r = l-1, r+1
+        return S[l+1:r]
+```
+## 6. ZigZag Conversion
+[Link](https://leetcode.com/problems/zigzag-conversion/)
+
+```
+class Solution:
+    def convert(self, s: str, numRows: int) -> str:
+        # Edge case
+        if numRows == 1:
+            return s
+            
+        # Split the ZigZag into small pieces, and put each letter into the corresponding row
+        new, l, r, k = ['' for i in range(numRows)], 0, 2*numRows-2, numRows
+        temp = s[l:r]
+        while temp != '':
+            for i in range(k):
+                if i==0 or i==k-1:
+                    new[i] += temp[i:i+1]
+                else:
+                    new[i] += temp[i:i+1]
+                    new[i] += temp[2*k-i-2:2*k-i-1]
+            l, r = l+2*k-2, r+2*k-2
+            temp = s[l:r]
+        return ''.join(new)
+```
+## 8. String to Integer (atoi)
+[Link](https://leetcode.com/problems/string-to-integer-atoi/)
+
+```
+class Solution:
+    def myAtoi(self, str: str) -> int:
+        i, res = 0, ''
+        while i<len(str) and str[i] == ' ':
+            i += 1
+        
+        if i >= len(str) or str[i] not in '+-0123456789':
+            return 0
+        else:
+            res += str[i]
+            i += 1
+            while i < len(str) and str[i] in '0123456789':
+                res += str[i]
+                i += 1
+            
+            if res == '+' or res == '-':
+                return 0
+            
+            res = int(res)
+            if res < -2**31:
+                return -2**31
+            elif res > 2**31-1:
+                return 2**31-1
+            else:
+                return res
+```
+
+## 10. Regular Expression Matching
+[Link](https://leetcode.com/problems/regular-expression-matching/)
+
+This one is very hard. The DP approach is the hardest DP problem I've seen so far. __One key assumption__, which to me is necessary but not explicitly mentioned, is that in `p`, there will not be any `*`s appearing consectively.
+
+```
+class Solution(object):
+    def isMatch(self, s, p):
+        # The DP table and the string s and p use the same indexes i and j, but
+        # table[i][j] means the match status between p[:i] and s[:j], i.e.
+        # table[0][0] means the match status of two empty strings, and
+        # table[1][1] means the match status of p[0] and s[0]. Therefore, when
+        # refering to the i-th and the j-th characters of p and s for updating
+        # table[i][j], we use p[i - 1] and s[j - 1].
+
+        # Initialize the table with False. The first row is satisfied.
+        table = [[False] * (len(s) + 1) for _ in range(len(p) + 1)]
+
+        # Update the corner case of matching two empty strings.
+        table[0][0] = True
+
+        # Update the corner case of when s is an empty string but p is not.
+        # Since each '*' can eliminate the charter before it, the table is
+        # vertically updated by the one before previous. [test_symbol_0]
+        for i in range(2, len(p) + 1):
+            table[i][0] = table[i - 2][0] and p[i - 1] == '*'
+
+        for i in range(1, len(p) + 1):
+            for j in range(1, len(s) + 1):
+                if p[i - 1] != "*":
+                    # Update the table by referring the diagonal element.
+                    table[i][j] = table[i - 1][j - 1] and \
+                                  (p[i - 1] == s[j - 1] or p[i - 1] == '.')
+                else:
+                    # Eliminations (referring to the vertical element)
+                    # Either refer to the one before previous or the previous.
+                    # I.e. * eliminate the previous or count the previous.
+                    # [test_symbol_1]
+                    table[i][j] = table[i - 2][j] or table[i - 1][j]
+
+                    # Propagations (referring to the horizontal element)
+                    # If p's previous one is equal to the current s, with
+                    # helps of *, the status can be propagated from the left.
+                    # [test_symbol_2]
+                    if p[i - 2] == s[j - 1] or p[i - 2] == '.':
+                        table[i][j] |= table[i][j - 1]
+
+        return table[-1][-1]
+```
+
+## 29. Divide Two Integers
+[Link](https://leetcode.com/problems/divide-two-integers/)
+
+```
+class Solution:
+    def divide(self, dividend: int, divisor: int) -> int:
+        
+        
+        if dividend == 0:
+            return 0
+        
+        sign, res = 1, 0
+        if (dividend > 0 and divisor < 0) or (dividend < 0 and divisor >0):
+            sign = -1
+        
+        dividend, divisor = abs(dividend), abs(divisor)
+        
+        if divisor == 1:
+            res = dividend
+        else:
+        
+            temp = [[divisor,1]]
+            for _ in range(32):
+                a,b = temp[-1][0]+temp[-1][0], temp[-1][1]+temp[-1][1]
+                temp.append([a,b])
+
+            while dividend >= divisor:
+                i = 32
+                while i >= 0:
+                    while dividend >= temp[i][0]:
+                        dividend = dividend - temp[i][0]
+                        res += temp[i][1]
+                    i -= 1
+        
+        res = sign * res
+        
+        if res < -2**31 or res > 2**31 - 1:
+            return 2**31-1
+        else:
+            return res
+        
+        
+```
