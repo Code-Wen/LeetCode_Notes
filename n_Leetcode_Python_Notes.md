@@ -4413,3 +4413,82 @@ class Solution:
         
         
 ```
+
+## 17. Letter Combinations of a Phone Number
+[Link](https://leetcode.com/problems/letter-combinations-of-a-phone-number/)
+
+```
+class Solution:
+    def letterCombinations(self, digits: str) -> List[str]:
+        dic = {'2':'abc', '3':'def','4':'ghi','5':'jkl','6':'mno','7':'pqrs','8':'tuv','9':'wxyz'}
+        
+        if len(digits) == 0:
+            return []
+        
+        if len(digits) == 1:
+            return list(dic[digits])
+        
+        prev = self.letterCombinations(digits[:-1])
+        temp = list(dic[digits[-1]])
+        return [s+t for s in prev for t in temp]
+```
+
+
+## 232. Implement Queue using Stacks
+[Link](https://leetcode.com/problems/implement-queue-using-stacks/)
+
+
+Use two stacks to implement. `push` O(1), 'pop' amortized O(1).
+
+```
+class MyQueue:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.istack = []
+        self.outstack = []
+
+    def push(self, x: int) -> None:
+        """
+        Push element x to the back of queue.
+        """
+        self.instack.append(x)
+        
+
+    def pop(self) -> int:
+        """
+        Removes the element from in front of queue and returns that element.
+        """
+        if self.outstack == []:
+            while self.instack:
+                self.outstack.append(self.instack.pop())
+        
+        if self.outstack == []:
+            return 'Nothing there!'
+        else:
+            return self.outstack.pop()
+        
+        
+
+    def peek(self) -> int:
+        """
+        Get the front element.
+        """
+        if self.outstack == []:
+            while self.instack:
+                self.outstack.append(self.instack.pop())
+        
+        if self.outstack == []:
+            return 'Nothing there!'
+        else:
+            return self.outstack[-1]
+        
+
+    def empty(self) -> bool:
+        """
+        Returns whether the queue is empty.
+        """
+        return self.instack == [] and self.outstack == []
+```
