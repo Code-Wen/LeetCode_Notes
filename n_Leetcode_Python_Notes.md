@@ -4710,10 +4710,29 @@ Class Solution:
 				for i in range(len(l)+1):
 					new.append(l[:i]+[n]+l[i:])
 					# Deal with duplicate
-					if i<len(l) and n==l[i]:
+					if i<len(l) and n==l[i]:  
 						break
 			res = new
 		return res
+````
+
+## 62. Unique Paths
+[Link](https://leetcode.com/problems/unique-paths/)
+
+Just basic combinatorics.
+
+````
+class Solution:
+    def uniquePaths(self, m: int, n: int) -> int:
+        if m == 1 or n == 1:
+            return 1
+        
+        K, k = m+n-2, min(m,n)-1
+        numerator, denom = 1, 1
+        for i in range(1,k+1):
+            numerator *= (K-i+1)
+            denom *= i
+        return numerator//denom
 ````
 
 
