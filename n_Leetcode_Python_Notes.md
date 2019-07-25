@@ -4492,3 +4492,117 @@ class MyQueue:
         """
         return self.instack == [] and self.outstack == []
 ```
+## 18. 4Sum
+[Link](https://leetcode.com/problems/4sum/)
+
+In the solution, we actually defined the method to find general N-sum for any N >= 2. The core part is to defined 2Sum, which is O(N) time. Then we recursively reduce to the 2Sum case. Thus the time complexity is O(N^3).
+
+```
+class Solution:
+    def fourSum(self, nums: List[int], target: int) -> List[List[int]]:
+        nums.sort()
+        res = []
+        self.N_sum(nums, target, 4, [], res)
+        return res
+    
+    def N_sum(self, nums, target, N, temp, res):
+        if N < 2 or len(nums) < N:
+            return
+        
+        elif N == 2:
+            l, r = 0, len(nums)-1
+            while l < r:
+                if nums[l]+nums[r] == target:
+                    res.append(temp+[nums[l],nums[r]])
+                    l += 1
+                    r -= 1
+                    while l<r and nums[l] == nums[l-1]:
+                        l += 1
+                    while l<r and nums[r] == nums[r+1]:
+                        r -= 1
+                
+                elif  nums[l] + nums[r] < target:
+                    l += 1
+                
+                else:
+                    r -= 1
+            return
+        
+        else:
+            for i in range(len(nums)-N+1):
+                if nums[i]*N > target or nums[-1]*N < target:
+                    break
+                if i == 0 or (i > 0 and nums[i-1] != nums[i]):
+                    self.N_sum(nums[i+1:], target - nums[i], N-1, temp+[nums[i]], res)
+            return 
+```
+## 19. Remove Nth Node From End of List
+[Link](https://leetcode.com/problems/remove-nth-node-from-end-of-list/)
+
+This is a typical technique in dealing with linked lists: using a fast and a slow pointer.
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def removeNthFromEnd(self, head: ListNode, n: int) -> ListNode:
+        fast, slow = head, head
+        for _ in range(n):
+            fast = fast.next
+            
+        # if the n-th node from the end is the head (since we know n will always be valid)    
+        if not fast:
+            return head.next
+        
+        # when fast reach the end, slow is at the n-th position
+        while fast.next:
+            fast, slow = fast.next, slow.next
+        
+        # skip the n-th
+        slow.next = slow.next.next
+        return head
+```
+## 31. Next Permutation
+[Link](https://leetcode.com/problems/next-permutation/)
+
+This solution actually is not in place, but we can achieve that by sorting `nums[left+1:]' in place.
+
+```
+class Solution:
+    def nextPermutation(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        
+        # Initiate: left is the right most index i where nums[i]<nums[i+1]. If such an i exists, we mark `possible`
+        # to be True, which indicates that the next permutation is possible. `Right` is the largest index i where           # nums[j]>nums[left] and nums[j] >= nums[j+1] for all j such that left+1 <= j <= i+1.
+        # Once left and right are found, we swap nums[left] and nums[right], and then sort nums[left+1:] in place.
+        
+        i, left, right, possible = 0, 0, 0, False
+        while i < len(nums)-1:
+            if nums[i] >= nums[i+1]: 
+                i += 1
+            else:
+                left, right, possible = i, i+1, True
+                i += 1
+                while i < len(nums)-1 and nums[i] >= nums[i+1] and nums[i+1] > nums[left]:
+                    right = i+1
+                    i += 1
+        if possible:
+            nums[left], nums[right] = nums[right], nums[left]
+            t=nums[left+1:]
+            t.sort()
+            nums[left+1:]=t
+        else:
+            self.reverse(nums, 0, len(nums)-1)
+            
+    def reverse(self,nums,l,r):
+        while l < r:
+            nums[l],nums[r] = nums[r],nums[l]
+            l += 1
+            r -= 1
+```
