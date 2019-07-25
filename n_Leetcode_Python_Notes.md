@@ -4606,3 +4606,115 @@ class Solution:
             l += 1
             r -= 1
 ```
+## 36. Valid Sudoku
+[link](https://leetcode.com/problems/valid-sudoku/)
+
+```
+class Solution:
+    def isValidSudoku(self, board: List[List[str]]) -> bool:
+        
+        def check_rows(board):
+            
+            for i in range(9):
+                s=[]
+                for j in range(9):
+                    if board[i][j] != '.':
+                        s.append(board[i][j])
+                if len(s) != len(set(s)):
+                    return False
+            return True
+        
+        def check_cols(board):
+            return check_rows(list(zip(*board)))
+        
+        def check_box(board, m, n):
+            s=[]
+            for i in range(3):
+                
+                for j in range(3):
+                    if board[m+i][n+j] != '.':
+                        s.append(board[m+i][n+j])
+            if len(s) != len(set(s)):
+                return False
+            
+        def check_all_boxes(board):
+            for m in [0,3,6]:
+                for n in [0,3,6]:
+                    if check_box(board,m,n)==False:
+                        return False
+            return True
+        
+        return check_rows(board) and check_cols(board) and check_all_boxes(board)
+```
+## 46. Permutations
+[Link](https://leetcode.com/problems/permutations/)
+
+Recursive solution:
+
+````
+class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        if len(nums)==1:
+            return [nums]
+        else:
+            res =[]
+            for i in range(len(nums)):
+                res += [[nums[i]]+e for e in self.permute(nums[:i]+nums[i+1:])]
+            return res
+````
+
+Iterative solution:
+```
+class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        res = [[]]
+        for n in nums:
+            new = []
+            for l in res:
+                for j in range(len(l)+1):  # Here len(l)+1 to ensure we insert n after l
+                    new.append(l[:j]+[n]+l[j:])
+            res = new
+        return res
+           
+```
+
+## 47. Permutations II
+
+Recursive solution. Since lists are not hashable in `Python`, we have to check whether a permutation is already contained in the res or not before adding it. This greatly slows down the solution.
+
+````
+class Solution:
+    def permuteUnique(self, nums: List[int]) -> List[List[int]]:
+        if len(nums)==1:
+            return [nums]
+        else:
+            res =[]
+            for i in range(len(nums)):
+                for e in self.permuteUnique(nums[:i]+nums[i+1:]):
+                    if [nums[i]]+e not in res:
+                        res.append([nums[i]]+e)
+                
+            return res
+
+````
+
+Iterative solution. Just adding one line to deal with the duplicate situation.
+
+````
+Class Solution:
+	def permuteUnique(self, nums):
+		res = [[]]
+		for n in nums:
+			new =[]
+			for l in res:
+				for i in range(len(l)+1):
+					new.append(l[:i]+[n]+l[i:])
+					# Deal with duplicate
+					if i<len(l) and n==l[i]:
+						break
+			res = new
+		return res
+````
+
+
+
