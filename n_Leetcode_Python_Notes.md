@@ -890,6 +890,7 @@ class Solution:
             return True
 ```
 ## 283. Move Zeroes
+
 ```
 class Solution:
     def moveZeroes(self, nums: List[int]) -> None:
@@ -4651,7 +4652,7 @@ class Solution:
 
 Recursive solution:
 
-````
+```
 class Solution:
     def permute(self, nums: List[int]) -> List[List[int]]:
         if len(nums)==1:
@@ -4661,7 +4662,7 @@ class Solution:
             for i in range(len(nums)):
                 res += [[nums[i]]+e for e in self.permute(nums[:i]+nums[i+1:])]
             return res
-````
+```
 
 Iterative solution:
 ```
@@ -4682,7 +4683,7 @@ class Solution:
 
 Recursive solution. Since lists are not hashable in `Python`, we have to check whether a permutation is already contained in the res or not before adding it. This greatly slows down the solution.
 
-````
+```
 class Solution:
     def permuteUnique(self, nums: List[int]) -> List[List[int]]:
         if len(nums)==1:
@@ -4696,11 +4697,11 @@ class Solution:
                 
             return res
 
-````
+```
 
 Iterative solution. Just adding one line to deal with the duplicate situation.
 
-````
+```
 Class Solution:
 	def permuteUnique(self, nums):
 		res = [[]]
@@ -4714,14 +4715,14 @@ Class Solution:
 						break
 			res = new
 		return res
-````
+```
 
 ## 62. Unique Paths
 [Link](https://leetcode.com/problems/unique-paths/)
 
 Just basic combinatorics.
 
-````
+```
 class Solution:
     def uniquePaths(self, m: int, n: int) -> int:
         if m == 1 or n == 1:
@@ -4737,3 +4738,349 @@ class Solution:
 
 
 
+## 213. House Robber II
+[Link](https://leetcode.com/problems/house-robber-ii/)
+
+````
+class Solution:
+    def rob(self, nums: List[int]) -> int:
+        L = len(nums)
+        # Some easy edge cases
+        if L == 0:
+            return 0
+        elif L == 1:
+            return nums[0]
+        elif L <= 3:
+            return max(nums)
+        
+        else:
+            res1 = self.rob_no_circ(nums[2:L-1])+nums[0]
+            res2 = self.rob_no_circ(nums[1:])
+            return max(res1, res2)
+        
+    def rob_no_circ(self, houses):
+        # This function take a list of numbers and return the max amount a robber 
+        # can get by loosing on the circle restriction. 
+        if len(houses) <= 2:
+            return max(houses)
+        # Assuming len(houses)>2
+        # dp[i] represents the max amount if the robber just robs the first i-houses
+        dp = [0]*(len(houses)+1)
+        dp[1] = houses[0] 
+        for i in range(2, len(houses)+1):
+            dp[i] = max(dp[i-2]+houses[i-1], dp[i-1])
+        return dp[-1]
+````
+## 34. Find First and Last Position of Element in Sorted Array
+[Link](https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
+
+
+```
+class Solution:
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        # Idea: use binary search three times: the first time to check whether 
+        # target is in the list or not, if its there, return left, mid, right at the
+        # last step of the search; the 2nd and 3rd search is to locate the first and 
+        # the last appearance of target.
+        
+        
+        
+        def binarySearch(nums, target):
+            # Binary search: if target not there, return -1; 
+            # otherwise return left, mid, right of the last step for the search. 
+            # Note that nums[mid]==target.
+            
+            left, right = 0, len(nums)-1
+            if not nums:
+                return -1
+            while left+1 < right:
+                mid = (left + right)//2
+                if nums[mid] == target:
+                    return left, mid, right
+                elif nums[mid] < target:
+                    left = mid
+                else:
+                    right = mid
+            if nums[left] == target:
+                return left, left, right
+            elif nums[right] == target:
+                return left, right, right
+            else:
+                return -1
+        
+        def leftSearch(nums, target, left, right):
+            # Binary search to find the starting position 
+            # if nums[left-1] < target and nums[right] == target
+            if nums[left] == target:
+                return left
+            else:
+                mid = (left+right)//2
+                if nums[mid] < target:
+                    return leftSearch(nums, target, mid+1, right)
+                else:
+                    return leftSearch(nums, target, left, mid)
+                
+        def rightSearch(nums, target, left, right):
+            # Binary search to find the ending position 
+            # if nums[right+1] > target and nums[left] == target
+            if nums[right] == target:
+                return right
+            else:
+                mid = (left+right)//2 + 1
+                if nums[mid] > target:
+                    return rightSearch(nums, target, left, mid-1)
+                else:
+                    return rightSearch(nums, target, mid, right)
+        
+        if binarySearch(nums, target) == -1:
+            return [-1,-1]
+        else:
+            left, mid, right = binarySearch(nums, target)
+            return [leftSearch(nums, target, left, mid),rightSearch(nums,target,mid, right)]
+                
+            
+```
+
+## 207. Course Schedule
+[Link](https://leetcode.com/problems/course-schedule/)
+```
+class Solution:
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        if numCourses == 0:
+            return True
+        
+        taken = set()
+        
+        pre = [set() for _ in range(numCourses)]
+        for e in prerequisites:
+            pre[e[0]].add(e[1])
+            
+        nxt = set()
+        for i in range(numCourses):
+            if pre[i] == set():
+                nxt.add(i)
+        
+        while nxt:
+            taken = taken.union(nxt)
+            nxt = set()
+            for i in range(numCourses):
+                if i not in taken and len(pre[i]-taken)==0:
+                    nxt.add(i)
+        return len(taken)==numCourses            
+```
+## 210. Course Schedule II
+
+```
+class Solution:
+    def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+        
+        if numCourses == 0:
+            return True
+        
+        taken = []
+        
+        pre = [set() for _ in range(numCourses)]
+        for e in prerequisites:
+            pre[e[0]].add(e[1])
+            
+        nxt = []
+        for i in range(numCourses):
+            if len(pre[i]) == 0:
+                nxt.append(i)
+        
+        while nxt:
+            taken = taken + nxt
+            nxt = []
+            taken_set = set(taken)
+            for i in range(numCourses):
+                if i not in taken_set and len(pre[i]-taken_set)==0:
+                    nxt.append(i)
+        if len(taken) == numCourses:
+            return taken
+        else:
+            return []
+```
+## 39. Combination Sum
+[Link](https://leetcode.com/problems/combination-sum/)
+
+```
+class Solution:
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        res = []
+        candidates.sort()
+        self.dfs(candidates, target, 0, [], res)
+        return res
+    
+    def dfs(self, nums, target, ind, path, res):
+        if target == 0:
+            res.append(path)
+            return 
+        else:
+            for i in range(ind, len(nums)):
+                if nums[i] > target:
+                    break
+                self.dfs(nums, target-nums[i], i, path+[nums[i]], res)
+```
+
+## 40. Comnination Sum II
+
+- The main difference is that we can only use each number in the `candidates` list at most once in each combination. To achieve that, each time to recursive call the helper function, we need to increase the starting index by 1.
+- Another subtle point is that due to the possibility that the `candidates` list may contain repetitions, we need to address potential repetitions in our output. A slow but easier way whenever we want to append a combination to the output, we check whether it is already in it; a faster way is that in the `for` loop of the helper function, we make sure that we omit all the cases in which `i > ind and nums[i]==nums[i-1]`.
+
+Approach 1 (slower):
+
+```
+class Solution:
+    def combinationSum2(self, candidates: List[int], target: int) -> List[List[int]]:
+        res = []
+        candidates.sort()
+        self.dfs_noRepeat(candidates, target, 0, [], res)
+        return res
+    
+    def dfs_noRepeat(self, nums, target, ind, path, res):
+        if target == 0:
+            if path not in res:     # Avoiding repeatitions
+                res.append(path)
+            return 
+        else:
+            for i in range(ind, len(nums)):
+                if nums[i] > target:
+                    break
+                self.dfs_noRepeat(nums, target-nums[i], i+1, path+[nums[i]], res)  # note that we use i+1 for the recursive call to ensure that we are never using the same number twice
+```
+
+Approach 2 (faster):
+
+```
+class Solution:
+    def combinationSum2(self, candidates: List[int], target: int) -> List[List[int]]:
+        res = []
+        candidates.sort()
+        self.dfs_noRepeat(candidates, target, 0, [], res)
+        return res
+    
+    def dfs_noRepeat(self, nums, target, ind, path, res):
+        if target == 0:
+            res.append(path)
+            return 
+        else:
+            for i in range(ind, len(nums)):
+                if i > ind and nums[i] == nums[i-1]:  # avoiding repetitions
+                    continue
+                if nums[i] > target:
+                    break
+                self.dfs_noRepeat(nums, target-nums[i], i+1, path+[nums[i]], res)  # use i+1 for the recursive call to ensure that we are never using the same number twice
+```
+
+
+## 33. Search in Rotated Sorted Array
+
+One can use Binary Search all the same, just when deciding when side to continue requires a bit thinking.
+
+```
+class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        l, r = 0, len(nums)-1
+        
+        
+        
+        while l <= r:
+            if target == nums[l]:
+                return l
+            if target == nums[r]:
+                return r
+            mid = (l+r)//2
+            if l == mid:
+                return -1
+            
+            if nums[mid] == target:
+                return mid
+            
+            if nums[l] < nums[mid]:   # Case 1: the first half is strictly increasing
+                if target < nums[mid] and target > nums[l]:
+                    l, r = l+1, mid-1
+                else:
+                    l, r = mid+1, r-1
+            else:                     # Case 2: the first half has a 'cliff'
+                if target < nums[mid] or target > nums[l]:
+                    l, r = l+1, mid-1
+                else:
+                    l, r = mid+1, r-1
+        return -1
+```
+
+## 43. Multiply Strings
+
+Multiplying things out by defition. Updating each digits accordingly.
+```
+class Solution:
+    def multiply(self, num1: str, num2: str) -> str:
+        
+        if num1 == '0' or num2 == '0':
+            return '0'
+        
+        dic = {str(i):i for i in range(10)}
+        res = [0]*(len(num1)+len(num2))   # the product is AT MOST this long
+        
+        for i in range(len(num1)-1, -1, -1):  # computation goes from right to left
+            next_d = 0                # contribution to the next digit on the LEFT
+            n1 = dic[num1[i]]         # i-th digit of num1
+            for j in range(len(num2)-1,-1,-1):
+                n2 = dic[num2[j]]     # j-th digit of num2
+                pos = i+j+1   # the position of the product
+                temp = n1*n2  # the product of the i-th and j-th digits for num1, num2
+                
+                res[pos], next_d = (res[pos]+temp%10+next_d)%10, temp//10 + (temp%10 + res[pos]+next_d)//10
+            
+            while pos-1 >= 0 and next_d > 0:   # updating the left digits
+                pos -= 1
+                res[pos], next_d = (res[pos]+next_d)%10, (res[pos]+next_d)//10
+        
+        if res[0] == 0:
+            return ''.join([str(res[i]) for i in range(1,len(res))])  
+        else:
+            return ''.join([str(res[i]) for i in range(len(res))])
+```
+
+## 48. Rotate Image
+
+The difficult part is to change in-place. Suppose that we obtain matrix B by rotating matrix A clockwise by 90 degrees. Then a careful check can show that `B[i][j] = A[n-1-j][i]` where n is the dimension of A.
+
+Therefore we can update each time four entries which lie in the corners of a square. A subtle point is that we only need to rotate one forth of the entire matrix. 
+
+```
+class Solution:
+    def rotate(self, matrix: List[List[int]]) -> None:
+        """
+        Do not return anything, modify matrix in-place instead.
+    
+        """
+        # rotate the matrix, we use the bottom left one-fourth as our axis
+
+        n = len(matrix)
+        for j in range(n//2):
+            for i in range(j, n-j-1):
+                self.helper(matrix, i, j , n)
+        return
+        
+    def helper(self, matrix, i, j, n):
+        """
+        Rotate four entries of the matrix at the corners of a square where the left-most corner is at (i,j), where i>=j
+        """
+        
+        matrix[i][j],matrix[n-j-1][i], matrix[n-i-1][n-j-1], matrix[j][n-i-1] = matrix[n-j-1][i], matrix[n-i-1][n-j-1], matrix[j][n-i-1], matrix[i][j],
+        return
+```
+## 49. Group Anagrams
+
+Using sorted words from the input as keys in a dictionary. Then values are lists in the same anagram class.
+
+```
+class Solution:
+    def groupAnagrams(self, strs):
+        d = {}
+        for w in strs:
+            key = tuple(sorted(w))
+            d[key] = d.get(key, []) + [w]
+        return list(d.values())
+```
