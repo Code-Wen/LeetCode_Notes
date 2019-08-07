@@ -5080,7 +5080,104 @@ class Solution:
     def groupAnagrams(self, strs):
         d = {}
         for w in strs:
-            key = tuple(sorted(w))
+            key = tuple(sorted(w))  
             d[key] = d.get(key, []) + [w]
         return list(d.values())
+```
+
+## 78. Subsets
+It really feels like a DFS.
+```
+class Solution:
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        res = [[]]
+        
+        for i in range(len(nums)):
+            res += [e+[nums[i]] for e in res]
+        return res
+            
+```
+
+
+## 63. Unique Paths II
+
+Method 1: (O(2^(m+n))). Brute-force DFS. 
+```
+class Solution:
+    def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
+        if obstacleGrid[-1][-1] == 1 or obstacleGrid[0][0] == 1:
+            return 0
+        
+        stack, res = [(0,0)], 0 
+        m, n = len(obstacleGrid), len(obstacleGrid[0])
+        while stack:
+            i, j = stack.pop()
+            if i == m-1 and j == n-1:
+                res += 1
+            else:
+                if i+1 < m and obstacleGrid[i+1][j] == 0:
+                    stack.append((i+1,j))
+                if j+1 < n and obstacleGrid[i][j+1] == 0:
+                    stack.append((i,j+1))
+        return res
+```
+
+
+Method 2: (Time O(mn), space O(mn)). DP method. One can also clean the code a bit to make it only use space O(n).
+
+
+```
+class Solution:
+    def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
+        
+        
+        m, n = len(obstacleGrid), len(obstacleGrid[0])
+         
+        dp = [[0]*n for _ in range(m)]
+        
+        dp[0][0] = 1 - obstacleGrid[0][0]
+        for i in range(1, n):
+            dp[0][i] = dp[0][i-1] * (1-obstacleGrid[0][i])
+        for j in range(1,m):
+            dp[j][0] = dp[j-1][0] * (1-obstacleGrid[j][0])
+        
+        for i in range(1, m):
+            for j in range(1, n):
+                dp[i][j] = (dp[i-1][j]+dp[i][j-1]) * (1-obstacleGrid[i][j])
+                
+        return dp[-1][-1]
+
+```
+
+## 980. Unique Paths III
+
+```
+class Solution:
+    def uniquePathsIII(self, grid: List[List[int]]) -> int:
+        # first locate the start and end position
+        m, n, empty = len(grid), len(grid[0]), 1
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j]==1: sx, sy = i, j 
+                if grid[i][j]==2: end = (i,j)
+                if grid[i][j]==0: empty += 1
+        
+        self.res = 0
+        
+        def backstrack(x, y, empty):
+            if not (0 <= x < m and 0 <= y < n and grid[x][y] >= 0): return
+            
+            if (x,y) == end:
+                self.res +=  empty == 0
+                return 
+            
+            grid[x][y] = -2 # mark the current position to avoid repetition
+            backstrack(x-1, y, empty-1)
+            backstrack(x+1, y, empty-1)
+            backstrack(x, y-1, empty-1)
+            backstrack(x, y+1, empty-1)
+            grid[x][y] = 0 # reset
+        
+        backstrack(sx, sy, empty)
+        return self.res
 ```
