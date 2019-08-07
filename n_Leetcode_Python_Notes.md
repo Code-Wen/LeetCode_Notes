@@ -890,6 +890,7 @@ class Solution:
             return True
 ```
 ## 283. Move Zeroes
+
 ```
 class Solution:
     def moveZeroes(self, nums: List[int]) -> None:
@@ -4651,7 +4652,7 @@ class Solution:
 
 Recursive solution:
 
-````
+```
 class Solution:
     def permute(self, nums: List[int]) -> List[List[int]]:
         if len(nums)==1:
@@ -4661,7 +4662,7 @@ class Solution:
             for i in range(len(nums)):
                 res += [[nums[i]]+e for e in self.permute(nums[:i]+nums[i+1:])]
             return res
-````
+```
 
 __Iterative solution:__
 ```
@@ -4682,7 +4683,7 @@ class Solution:
 
 __Recursive solution.__ Since lists are not hashable in `Python`, we have to check whether a permutation is already contained in the res or not before adding it. This greatly slows down the solution.
 
-````
+```
 class Solution:
     def permuteUnique(self, nums: List[int]) -> List[List[int]]:
         if len(nums)==1:
@@ -4696,11 +4697,11 @@ class Solution:
                 
             return res
 
-````
+```
 
 __Iterative solution.__ Just adding one line to deal with the duplicate situation.
 
-````
+```
 Class Solution:
 	def permuteUnique(self, nums):
 		res = [[]]
@@ -4714,14 +4715,14 @@ Class Solution:
 						break
 			res = new
 		return res
-````
+```
 
 ## 62. Unique Paths
 [Link](https://leetcode.com/problems/unique-paths/)
 
 Just basic combinatorics.
 
-````
+```
 class Solution:
     def uniquePaths(self, m: int, n: int) -> int:
         if m == 1 or n == 1:
@@ -4737,3 +4738,849 @@ class Solution:
 
 
 
+## 213. House Robber II
+[Link](https://leetcode.com/problems/house-robber-ii/)
+
+````
+class Solution:
+    def rob(self, nums: List[int]) -> int:
+        L = len(nums)
+        # Some easy edge cases
+        if L == 0:
+            return 0
+        elif L == 1:
+            return nums[0]
+        elif L <= 3:
+            return max(nums)
+        
+        else:
+            res1 = self.rob_no_circ(nums[2:L-1])+nums[0]
+            res2 = self.rob_no_circ(nums[1:])
+            return max(res1, res2)
+        
+    def rob_no_circ(self, houses):
+        # This function take a list of numbers and return the max amount a robber 
+        # can get by loosing on the circle restriction. 
+        if len(houses) <= 2:
+            return max(houses)
+        # Assuming len(houses)>2
+        # dp[i] represents the max amount if the robber just robs the first i-houses
+        dp = [0]*(len(houses)+1)
+        dp[1] = houses[0] 
+        for i in range(2, len(houses)+1):
+            dp[i] = max(dp[i-2]+houses[i-1], dp[i-1])
+        return dp[-1]
+````
+## 34. Find First and Last Position of Element in Sorted Array
+[Link](https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
+
+
+```
+class Solution:
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        # Idea: use binary search three times: the first time to check whether 
+        # target is in the list or not, if its there, return left, mid, right at the
+        # last step of the search; the 2nd and 3rd search is to locate the first and 
+        # the last appearance of target.
+        
+        
+        
+        def binarySearch(nums, target):
+            # Binary search: if target not there, return -1; 
+            # otherwise return left, mid, right of the last step for the search. 
+            # Note that nums[mid]==target.
+            
+            left, right = 0, len(nums)-1
+            if not nums:
+                return -1
+            while left+1 < right:
+                mid = (left + right)//2
+                if nums[mid] == target:
+                    return left, mid, right
+                elif nums[mid] < target:
+                    left = mid
+                else:
+                    right = mid
+            if nums[left] == target:
+                return left, left, right
+            elif nums[right] == target:
+                return left, right, right
+            else:
+                return -1
+        
+        def leftSearch(nums, target, left, right):
+            # Binary search to find the starting position 
+            # if nums[left-1] < target and nums[right] == target
+            if nums[left] == target:
+                return left
+            else:
+                mid = (left+right)//2
+                if nums[mid] < target:
+                    return leftSearch(nums, target, mid+1, right)
+                else:
+                    return leftSearch(nums, target, left, mid)
+                
+        def rightSearch(nums, target, left, right):
+            # Binary search to find the ending position 
+            # if nums[right+1] > target and nums[left] == target
+            if nums[right] == target:
+                return right
+            else:
+                mid = (left+right)//2 + 1
+                if nums[mid] > target:
+                    return rightSearch(nums, target, left, mid-1)
+                else:
+                    return rightSearch(nums, target, mid, right)
+        
+        if binarySearch(nums, target) == -1:
+            return [-1,-1]
+        else:
+            left, mid, right = binarySearch(nums, target)
+            return [leftSearch(nums, target, left, mid),rightSearch(nums,target,mid, right)]
+                
+            
+```
+
+## 207. Course Schedule
+[Link](https://leetcode.com/problems/course-schedule/)
+```
+class Solution:
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        if numCourses == 0:
+            return True
+        
+        taken = set()
+        
+        pre = [set() for _ in range(numCourses)]
+        for e in prerequisites:
+            pre[e[0]].add(e[1])
+            
+        nxt = set()
+        for i in range(numCourses):
+            if pre[i] == set():
+                nxt.add(i)
+        
+        while nxt:
+            taken = taken.union(nxt)
+            nxt = set()
+            for i in range(numCourses):
+                if i not in taken and len(pre[i]-taken)==0:
+                    nxt.add(i)
+        return len(taken)==numCourses            
+```
+## 210. Course Schedule II
+
+```
+class Solution:
+    def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+        
+        if numCourses == 0:
+            return True
+        
+        taken = []
+        
+        pre = [set() for _ in range(numCourses)]
+        for e in prerequisites:
+            pre[e[0]].add(e[1])
+            
+        nxt = []
+        for i in range(numCourses):
+            if len(pre[i]) == 0:
+                nxt.append(i)
+        
+        while nxt:
+            taken = taken + nxt
+            nxt = []
+            taken_set = set(taken)
+            for i in range(numCourses):
+                if i not in taken_set and len(pre[i]-taken_set)==0:
+                    nxt.append(i)
+        if len(taken) == numCourses:
+            return taken
+        else:
+            return []
+```
+## 39. Combination Sum
+[Link](https://leetcode.com/problems/combination-sum/)
+
+```
+class Solution:
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        res = []
+        candidates.sort()
+        self.dfs(candidates, target, 0, [], res)
+        return res
+    
+    def dfs(self, nums, target, ind, path, res):
+        if target == 0:
+            res.append(path)
+            return 
+        else:
+            for i in range(ind, len(nums)):
+                if nums[i] > target:
+                    break
+                self.dfs(nums, target-nums[i], i, path+[nums[i]], res)
+```
+
+## 40. Comnination Sum II
+
+- The main difference is that we can only use each number in the `candidates` list at most once in each combination. To achieve that, each time to recursive call the helper function, we need to increase the starting index by 1.
+- Another subtle point is that due to the possibility that the `candidates` list may contain repetitions, we need to address potential repetitions in our output. A slow but easier way whenever we want to append a combination to the output, we check whether it is already in it; a faster way is that in the `for` loop of the helper function, we make sure that we omit all the cases in which `i > ind and nums[i]==nums[i-1]`.
+
+Approach 1 (slower):
+
+```
+class Solution:
+    def combinationSum2(self, candidates: List[int], target: int) -> List[List[int]]:
+        res = []
+        candidates.sort()
+        self.dfs_noRepeat(candidates, target, 0, [], res)
+        return res
+    
+    def dfs_noRepeat(self, nums, target, ind, path, res):
+        if target == 0:
+            if path not in res:     # Avoiding repeatitions
+                res.append(path)
+            return 
+        else:
+            for i in range(ind, len(nums)):
+                if nums[i] > target:
+                    break
+                self.dfs_noRepeat(nums, target-nums[i], i+1, path+[nums[i]], res)  # note that we use i+1 for the recursive call to ensure that we are never using the same number twice
+```
+
+Approach 2 (faster):
+
+```
+class Solution:
+    def combinationSum2(self, candidates: List[int], target: int) -> List[List[int]]:
+        res = []
+        candidates.sort()
+        self.dfs_noRepeat(candidates, target, 0, [], res)
+        return res
+    
+    def dfs_noRepeat(self, nums, target, ind, path, res):
+        if target == 0:
+            res.append(path)
+            return 
+        else:
+            for i in range(ind, len(nums)):
+                if i > ind and nums[i] == nums[i-1]:  # avoiding repetitions
+                    continue
+                if nums[i] > target:
+                    break
+                self.dfs_noRepeat(nums, target-nums[i], i+1, path+[nums[i]], res)  # use i+1 for the recursive call to ensure that we are never using the same number twice
+```
+
+
+## 33. Search in Rotated Sorted Array
+
+One can use Binary Search all the same, just when deciding when side to continue requires a bit thinking.
+
+```
+class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        l, r = 0, len(nums)-1
+        
+        
+        
+        while l <= r:
+            if target == nums[l]:
+                return l
+            if target == nums[r]:
+                return r
+            mid = (l+r)//2
+            if l == mid:
+                return -1
+            
+            if nums[mid] == target:
+                return mid
+            
+            if nums[l] < nums[mid]:   # Case 1: the first half is strictly increasing
+                if target < nums[mid] and target > nums[l]:
+                    l, r = l+1, mid-1
+                else:
+                    l, r = mid+1, r-1
+            else:                     # Case 2: the first half has a 'cliff'
+                if target < nums[mid] or target > nums[l]:
+                    l, r = l+1, mid-1
+                else:
+                    l, r = mid+1, r-1
+        return -1
+```
+
+## 43. Multiply Strings
+
+Multiplying things out by defition. Updating each digits accordingly.
+```
+class Solution:
+    def multiply(self, num1: str, num2: str) -> str:
+        
+        if num1 == '0' or num2 == '0':
+            return '0'
+        
+        dic = {str(i):i for i in range(10)}
+        res = [0]*(len(num1)+len(num2))   # the product is AT MOST this long
+        
+        for i in range(len(num1)-1, -1, -1):  # computation goes from right to left
+            next_d = 0                # contribution to the next digit on the LEFT
+            n1 = dic[num1[i]]         # i-th digit of num1
+            for j in range(len(num2)-1,-1,-1):
+                n2 = dic[num2[j]]     # j-th digit of num2
+                pos = i+j+1   # the position of the product
+                temp = n1*n2  # the product of the i-th and j-th digits for num1, num2
+                
+                res[pos], next_d = (res[pos]+temp%10+next_d)%10, temp//10 + (temp%10 + res[pos]+next_d)//10
+            
+            while pos-1 >= 0 and next_d > 0:   # updating the left digits
+                pos -= 1
+                res[pos], next_d = (res[pos]+next_d)%10, (res[pos]+next_d)//10
+        
+        if res[0] == 0:
+            return ''.join([str(res[i]) for i in range(1,len(res))])  
+        else:
+            return ''.join([str(res[i]) for i in range(len(res))])
+```
+
+## 48. Rotate Image
+
+The difficult part is to change in-place. Suppose that we obtain matrix B by rotating matrix A clockwise by 90 degrees. Then a careful check can show that `B[i][j] = A[n-1-j][i]` where n is the dimension of A.
+
+Therefore we can update each time four entries which lie in the corners of a square. A subtle point is that we only need to rotate one forth of the entire matrix. 
+
+```
+class Solution:
+    def rotate(self, matrix: List[List[int]]) -> None:
+        """
+        Do not return anything, modify matrix in-place instead.
+    
+        """
+        # rotate the matrix, we use the bottom left one-fourth as our axis
+
+        n = len(matrix)
+        for j in range(n//2):
+            for i in range(j, n-j-1):
+                self.helper(matrix, i, j , n)
+        return
+        
+    def helper(self, matrix, i, j, n):
+        """
+        Rotate four entries of the matrix at the corners of a square where the left-most corner is at (i,j), where i>=j
+        """
+        
+        matrix[i][j],matrix[n-j-1][i], matrix[n-i-1][n-j-1], matrix[j][n-i-1] = matrix[n-j-1][i], matrix[n-i-1][n-j-1], matrix[j][n-i-1], matrix[i][j],
+        return
+```
+## 49. Group Anagrams
+
+Using sorted words from the input as keys in a dictionary. Then values are lists in the same anagram class.
+
+```
+class Solution:
+    def groupAnagrams(self, strs):
+        d = {}
+        for w in strs:
+            key = tuple(sorted(w))  
+            d[key] = d.get(key, []) + [w]
+        return list(d.values())
+```
+
+## 78. Subsets
+It really feels like a DFS.
+```
+class Solution:
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        res = [[]]
+        
+        for i in range(len(nums)):
+            res += [e+[nums[i]] for e in res]
+        return res
+            
+```
+
+
+## 63. Unique Paths II
+
+Method 1: (O(2^(m+n))). Brute-force DFS. 
+```
+class Solution:
+    def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
+        if obstacleGrid[-1][-1] == 1 or obstacleGrid[0][0] == 1:
+            return 0
+        
+        stack, res = [(0,0)], 0 
+        m, n = len(obstacleGrid), len(obstacleGrid[0])
+        while stack:
+            i, j = stack.pop()
+            if i == m-1 and j == n-1:
+                res += 1
+            else:
+                if i+1 < m and obstacleGrid[i+1][j] == 0:
+                    stack.append((i+1,j))
+                if j+1 < n and obstacleGrid[i][j+1] == 0:
+                    stack.append((i,j+1))
+        return res
+```
+
+
+Method 2: (Time O(mn), space O(mn)). DP method. One can also clean the code a bit to make it only use space O(n).
+
+
+```
+class Solution:
+    def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
+        
+        
+        m, n = len(obstacleGrid), len(obstacleGrid[0])
+         
+        dp = [[0]*n for _ in range(m)]
+        
+        dp[0][0] = 1 - obstacleGrid[0][0]
+        for i in range(1, n):
+            dp[0][i] = dp[0][i-1] * (1-obstacleGrid[0][i])
+        for j in range(1,m):
+            dp[j][0] = dp[j-1][0] * (1-obstacleGrid[j][0])
+        
+        for i in range(1, m):
+            for j in range(1, n):
+                dp[i][j] = (dp[i-1][j]+dp[i][j-1]) * (1-obstacleGrid[i][j])
+                
+        return dp[-1][-1]
+
+```
+
+## 980. Unique Paths III
+
+```
+class Solution:
+    def uniquePathsIII(self, grid: List[List[int]]) -> int:
+        # first locate the start and end position
+        m, n, empty = len(grid), len(grid[0]), 1
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j]==1: sx, sy = i, j 
+                if grid[i][j]==2: end = (i,j)
+                if grid[i][j]==0: empty += 1
+        
+        self.res = 0
+        
+        def backstrack(x, y, empty):
+            if not (0 <= x < m and 0 <= y < n and grid[x][y] >= 0): return
+            
+            if (x,y) == end:
+                self.res +=  empty == 0
+                return 
+            
+            grid[x][y] = -2 # mark the current position to avoid repetition
+            backstrack(x-1, y, empty-1)
+            backstrack(x+1, y, empty-1)
+            backstrack(x, y-1, empty-1)
+            backstrack(x, y+1, empty-1)
+            grid[x][y] = 0 # reset
+        
+        backstrack(sx, sy, empty)
+        return self.res
+```
+
+## 73. Set Matrix Zeroes
+
+Method 1: Time O(mn), Space(m+n). Scan the entire matrix and record in  two lists `rows` and `cols` which rows and columns contains zeros. Then go through the matrix twice to modify.
+
+```
+class Solution:
+    def setZeroes(self, matrix: List[List[int]]) -> None:
+        """
+        Do not return anything, modify matrix in-place instead.
+        """
+        m, n = len(matrix), len(matrix[0])
+        rows, cols = [0]*m, [0]*n
+        
+        for i in range(m):
+            for j in range(n):
+                if matrix[i][j] == 0:
+                    rows[i], cols[j] = 1, 1
+        
+        for i in range(m):
+            if rows[i] == 1:
+                for j in range(n):
+                    matrix[i][j] = 0
+        
+        for j in range(n):
+            if cols[j] == 1:
+                for i in range(m):
+                    matrix[i][j] = 0
+```
+
+
+Method 2: Time O(mn), space O(1). Use the first row and first column to record zeros.
+
+```
+class Solution:
+    def setZeroes(self, matrix: List[List[int]]) -> None:
+        """
+        Do not return anything, modify matrix in-place instead.
+        """
+        # First rowc/col has zero?
+        m, n = len(matrix), len(matrix[0])
+        firstRowHasZero = not all(matrix[0])
+        firstColHasZero = not all([matrix[i][0] for i in range(m)])
+        # Use first row/column as marker, scan the matrix
+        for i in range(1, m):
+            for j in range(n):
+                if matrix[i][j] == 0:
+                    matrix[0][j] = matrix[i][0] = 0
+        # Set the zeros except for the first row and first column
+        for i in range(1, m):
+            for j in range(1,n):
+                if matrix[i][0] == 0 or matrix[0][j] == 0:
+                    matrix[i][j] = 0
+        # Set the zeros for the first row and first column
+        if firstRowHasZero:
+            matrix[0] = [0] * n
+        if firstColHasZero:
+            for i in range(m):
+                matrix[i][0] = 0
+```
+
+## 71. Simplify Path
+
+```
+class Solution:
+    def simplifyPath(self, path: str) -> str:
+        # we add a '/' to the end to ensure while loop will end
+        d, prev, path = [], 0,  path+'/'  
+        
+        while prev < len(path)-1:
+            next = path.find('/', prev+1)
+            word = path[prev+1: next]
+            prev =  next
+            if word == '.' or word == '':
+                continue
+            elif word == '..':
+                if d: d.pop()
+            else:
+                d.append('/'+word)
+        
+        if not d: return '/'
+        
+        return ''.join(d)
+```
+## 42. Trapping Rain Water
+
+```
+class Solution:
+    def trap(self, height: List[int]) -> int:
+        if len(height) <= 1: return 0
+        # The list peaks records the locations for all local max
+        peaks=[]
+        if height[0] > height[1]: peaks.append(0)
+            
+        for i in range(1, len(height)-1):
+            if (height[i] > height[i-1] and height[i] >= height[i+1]) or (height[i] >= height[i-1] and height[i] > height[i+1]):
+                peaks.append(i)
+        
+        if height[-1] > height[-2]:
+            peaks.append(len(height)-1)
+        # If just 1 local max, no water can be trapped
+        if len(peaks) <= 1:
+            return 0
+        
+        # Otherwise, check whether the local max can be overshadowed from both sides
+        
+        left_max, right_max = [-float('inf')]*len(peaks), [-float('inf')]*len(peaks)
+        for i in range(1, len(peaks)):
+            left_max[i], right_max[-i-1] = max(left_max[i-1], height[peaks[i-1]]), max(right_max[-i], height[peaks[-i]])
+        
+        # The list levels stores all the local max which stands out as boundaries
+        # for the water traps
+        levels = []
+        for i in range(len(peaks)):
+            if height[peaks[i]] > left_max[i] or height[peaks[i]] > right_max[i]:
+                levels.append(peaks[i])
+        
+        res = 0
+        for i in range(len(levels)-1):
+            left, right = levels[i], levels[i+1]
+            # Choose the lowest side as the height of the bucket
+            level = min(height[left],height[right])
+            
+            # Add the water in the bucket to the total amount
+            # Need to ignore those whose height exceeds the height of the bucket
+            for j in range(left+1, right):
+                if height[j] > level:
+                    j += 1
+                else:
+                    res += (level-height[j])
+        return res 
+```
+
+## 54. Spiral Matrix
+
+Time O(mn), Space O(1).
+
+```
+class Solution:
+    def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
+        
+        if not matrix:
+            return []
+        m, n, res = len(matrix), len(matrix[0]), []
+        self.helper(matrix, 0, m, n, res)
+        return res
+    
+    def helper(self, M, k, m, n, res):
+        '''
+        The helper will record the k-th (starting from 0 th) rectanglular outskirt layer of the  matrix M of size m*n where the top left corner is located at (k,k)
+        '''
+        m1, n1 = m - 2*k -2, n - 2*k-2
+        if min(m1, n1) < -1:
+            return
+        
+        # if only 1 line left, add the line and end
+        elif m1 == -1: 
+            res += M[k][k:n-k]
+            return
+        
+        # if only 1 col left, add the line and end
+        elif n1 == -1:
+            res += [M[i][k] for i in range(k,m-k)]
+            return 
+        
+        # if we still have rectangles to run
+        else:
+            
+            # add the top row
+            res += M[k][k:n-k]
+            # add the right col: j = n-k-1
+            for i in range(k+1, m-k):
+                res.append(M[i][n-k-1])
+
+            # add the bottom row: i = m-k-1
+            for j in range(n-k-2, k-1, -1):
+                res.append(M[m-k-1][j])
+            # add the left col: j = k
+            for i in range(m-k-2,k,-1):
+                res.append(M[i][k])
+
+            self.helper(M, k+1, m, n, res)
+```
+
+## 59. Spiral Matrix II
+
+```
+class Solution:
+    def generateMatrix(self, n: int) -> List[List[int]]:
+        M = [[0]*n for _ in range(n)]
+        self.helper(M, 1, n, 1)
+        return M
+        
+    def helper(self, M, k, n, s):
+        '''
+        Fill the k-th (outside most is the 1st) rectangular layer of an n*n matrix M.
+        s is the first number we need to use.
+        '''
+        if s > n*n:
+            return 
+        
+        if n%2==1 and k == n//2+1:
+            M[k-1][k-1] = s
+            return
+        
+        # fill top row: i=k-1
+        for j in range(k-1, n-k+1):
+            M[k-1][j] = s
+            s += 1
+        # fill right col: j = n-k
+        for i in range(k, n-k+1):
+            M[i][n-k] = s
+            s += 1
+        # fill bottom row: i = n-k
+        for j in range(n-k-1,k-2,-1):
+            M[n-k][j] = s
+            s += 1
+        # fill left col: j = k-1
+        for i in range(n-k-1,k-1,-1):
+            M[i][k-1] = s
+            s += 1
+        self.helper(M, k+1, n, s)
+```
+
+
+## 55. Jump Game
+
+Going backwards.
+
+```
+class Solution:
+    def canJump(self, nums: List[int]) -> bool:
+        goal = len(nums) - 1
+        for i in range(len(nums)-1,-1,-1):
+            if i+nums[i] >= goal:
+                goal = i
+        return goal == 0
+```
+
+## 45. Jump Game II
+
+Essentially a DFS in the guise of a greedy method.
+
+```
+class Solution:
+    def jump(self, nums: List[int]) -> int:
+        curFarthest, curEnd, res = 0 , 0, 0
+        for i in range(len(nums)):
+            
+            if curEnd >=  len(nums)-1:
+                return res
+            curFarthest=max(curFarthest, i+nums[i])
+            
+            if i == curEnd:
+                res += 1
+                curEnd = curFarthest
+```
+## 94. Binary Tree Inorder Traversal
+
+Trivial recursive method:
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def inorderTraversal(self, root: TreeNode) -> List[int]:
+        if not root:
+            return []
+        return self.inorderTraversal(root.left)+[root.val]+self.inorderTraversal(root.right)
+```
+
+Iterative method:
+```
+class Solution:
+    def inorderTraversal(self, root: TreeNode) -> List[int]:
+        res, stack = [], []
+        while True:
+            # Going all the way down to the left
+            while root:
+                stack.append(root)
+                root = root.left
+            # Return if nothing to pop
+            if not stack:
+                return res
+            
+            # From bottom left to top, pop the node, then traverse the right branch 
+            node = stack.pop()
+            res.append(node.val)
+            if node.right:
+                root = node.right         
+```
+
+## 56. Merge Intervals
+
+```
+class Solution:
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        intervals.sort(key=lambda x: x[0])
+        res,i = [], 0
+    
+        while i < len(intervals):
+            left, right = intervals[i][0], intervals[i][1]
+            next = i+1
+            while next < len(intervals) and intervals[next][0] <= right:
+                right, next = max(right,intervals[next][1]), next + 1
+            res.append([left,right])
+            i = next
+        return res
+```
+## 57. Insert Interval
+
+```
+class Solution:
+    def insert(self, intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:
+        if not intervals:
+            return [newInterval]
+        if intervals[-1][1] < newInterval[0]:
+            return intervals+[newInterval]
+        res, i = [], 0
+        newLeft, newRight = newInterval[0], newInterval[1]
+        while i < len(intervals):
+            if intervals[i][1] < newLeft:
+                i += 1
+            else:
+                res += intervals[:i]
+                if intervals[i][0] > newRight:
+                    res.append(newInterval)
+                    return res + intervals[i:]
+                
+                newLeft = min(newLeft, intervals[i][0])
+                newRight = max(newRight, intervals[i][1])
+                
+                i += 1
+                while i < len(intervals) and newRight >= intervals[i][0]:
+                    newRight = max(newRight, intervals[i][1])
+                    i += 1
+                res.append([newLeft, newRight])
+                res += intervals[i:]
+                break
+        return res
+```
+
+## 60. Permutation Sequence
+
+Equivalently, present any number `k` in the 'n-factorial' system.
+
+```
+class Solution:
+    def getPermutation(self, n: int, k: int) -> str:
+
+        res, nums, r = '', [i for i in range(1,n+1)], k-1 # r starts with k-1 since we are using the residual method
+        factorial = 1
+        for i in range(1,n):
+            factorial *= i
+        
+        # Long division in the 'n-factorial' setting. Remember to pop the numbers that have been used before.
+
+        for i in range(1,n):
+            q, r = int(r//factorial), r%factorial
+            res += str(nums.pop(q))
+            factorial = factorial/(n-i)
+            
+        res += str(nums[0])
+        return res
+```
+
+## 61. Rotate List
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def rotateRight(self, head: ListNode, k: int) -> ListNode:
+        if not head:
+            return head
+        
+        # Find the total length of the linked list
+        l, node = 1, head
+        while node.next:
+            l += 1
+            node = node.next
+               
+        # link the tail with the head to form loop
+        k, tail = k%l, node 
+        tail.next = head
+        
+        # find the new head
+        prev, cur = tail, head
+        for i in range(l-k):
+            prev, cur = cur, cur.next
+        
+        prev.next, head = None, cur
+        
+        return head
+```
