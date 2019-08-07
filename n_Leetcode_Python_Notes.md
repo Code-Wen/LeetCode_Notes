@@ -5181,3 +5181,87 @@ class Solution:
         backstrack(sx, sy, empty)
         return self.res
 ```
+
+## 73. Set Matrix Zeroes
+
+Method 1: Time O(mn), Space(m+n). Scan the entire matrix and record in  two lists `rows` and `cols` which rows and columns contains zeros. Then go through the matrix twice to modify.
+
+```
+class Solution:
+    def setZeroes(self, matrix: List[List[int]]) -> None:
+        """
+        Do not return anything, modify matrix in-place instead.
+        """
+        m, n = len(matrix), len(matrix[0])
+        rows, cols = [0]*m, [0]*n
+        
+        for i in range(m):
+            for j in range(n):
+                if matrix[i][j] == 0:
+                    rows[i], cols[j] = 1, 1
+        
+        for i in range(m):
+            if rows[i] == 1:
+                for j in range(n):
+                    matrix[i][j] = 0
+        
+        for j in range(n):
+            if cols[j] == 1:
+                for i in range(m):
+                    matrix[i][j] = 0
+```
+
+
+Method 2: Time O(mn), space O(1). Use the first row and first column to record zeros.
+
+```
+class Solution:
+    def setZeroes(self, matrix: List[List[int]]) -> None:
+        """
+        Do not return anything, modify matrix in-place instead.
+        """
+        # First rowc/col has zero?
+        m, n = len(matrix), len(matrix[0])
+        firstRowHasZero = not all(matrix[0])
+        firstColHasZero = not all([matrix[i][0] for i in range(m)])
+        # Use first row/column as marker, scan the matrix
+        for i in range(1, m):
+            for j in range(n):
+                if matrix[i][j] == 0:
+                    matrix[0][j] = matrix[i][0] = 0
+        # Set the zeros except for the first row and first column
+        for i in range(1, m):
+            for j in range(1,n):
+                if matrix[i][0] == 0 or matrix[0][j] == 0:
+                    matrix[i][j] = 0
+        # Set the zeros for the first row and first column
+        if firstRowHasZero:
+            matrix[0] = [0] * n
+        if firstColHasZero:
+            for i in range(m):
+                matrix[i][0] = 0
+```
+
+## 71. Simplify Path
+
+```
+class Solution:
+    def simplifyPath(self, path: str) -> str:
+        # we add a '/' to the end to ensure while loop will end
+        d, prev, path = [], 0,  path+'/'  
+        
+        while prev < len(path)-1:
+            next = path.find('/', prev+1)
+            word = path[prev+1: next]
+            prev =  next
+            if word == '.' or word == '':
+                continue
+            elif word == '..':
+                if d: d.pop()
+            else:
+                d.append('/'+word)
+        
+        if not d: return '/'
+        
+        return ''.join(d)
+```
