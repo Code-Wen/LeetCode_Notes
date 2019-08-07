@@ -5265,3 +5265,176 @@ class Solution:
         
         return ''.join(d)
 ```
+## 42. Trapping Rain Water
+
+```
+class Solution:
+    def trap(self, height: List[int]) -> int:
+        if len(height) <= 1: return 0
+        # The list peaks records the locations for all local max
+        peaks=[]
+        if height[0] > height[1]: peaks.append(0)
+            
+        for i in range(1, len(height)-1):
+            if (height[i] > height[i-1] and height[i] >= height[i+1]) or (height[i] >= height[i-1] and height[i] > height[i+1]):
+                peaks.append(i)
+        
+        if height[-1] > height[-2]:
+            peaks.append(len(height)-1)
+        # If just 1 local max, no water can be trapped
+        if len(peaks) <= 1:
+            return 0
+        
+        # Otherwise, check whether the local max can be overshadowed from both sides
+        
+        left_max, right_max = [-float('inf')]*len(peaks), [-float('inf')]*len(peaks)
+        for i in range(1, len(peaks)):
+            left_max[i], right_max[-i-1] = max(left_max[i-1], height[peaks[i-1]]), max(right_max[-i], height[peaks[-i]])
+        
+        # The list levels stores all the local max which stands out as boundaries
+        # for the water traps
+        levels = []
+        for i in range(len(peaks)):
+            if height[peaks[i]] > left_max[i] or height[peaks[i]] > right_max[i]:
+                levels.append(peaks[i])
+        
+        res = 0
+        for i in range(len(levels)-1):
+            left, right = levels[i], levels[i+1]
+            # Choose the lowest side as the height of the bucket
+            level = min(height[left],height[right])
+            
+            # Add the water in the bucket to the total amount
+            # Need to ignore those whose height exceeds the height of the bucket
+            for j in range(left+1, right):
+                if height[j] > level:
+                    j += 1
+                else:
+                    res += (level-height[j])
+        return res 
+```
+
+## 54. Spiral Matrix
+
+Time O(mn), Space O(1).
+
+```
+class Solution:
+    def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
+        
+        if not matrix:
+            return []
+        m, n, res = len(matrix), len(matrix[0]), []
+        self.helper(matrix, 0, m, n, res)
+        return res
+    
+    def helper(self, M, k, m, n, res):
+        '''
+        The helper will record the k-th (starting from 0 th) rectanglular outskirt layer of the  matrix M of size m*n where the top left corner is located at (k,k)
+        '''
+        m1, n1 = m - 2*k -2, n - 2*k-2
+        if min(m1, n1) < -1:
+            return
+        
+        # if only 1 line left, add the line and end
+        elif m1 == -1: 
+            res += M[k][k:n-k]
+            return
+        
+        # if only 1 col left, add the line and end
+        elif n1 == -1:
+            res += [M[i][k] for i in range(k,m-k)]
+            return 
+        
+        # if we still have rectangles to run
+        else:
+            
+            # add the top row
+            res += M[k][k:n-k]
+            # add the right col: j = n-k-1
+            for i in range(k+1, m-k):
+                res.append(M[i][n-k-1])
+
+            # add the bottom row: i = m-k-1
+            for j in range(n-k-2, k-1, -1):
+                res.append(M[m-k-1][j])
+            # add the left col: j = k
+            for i in range(m-k-2,k,-1):
+                res.append(M[i][k])
+
+            self.helper(M, k+1, m, n, res)
+```
+
+## 59. Spiral Matrix II
+
+```
+class Solution:
+    def generateMatrix(self, n: int) -> List[List[int]]:
+        M = [[0]*n for _ in range(n)]
+        self.helper(M, 1, n, 1)
+        return M
+        
+    def helper(self, M, k, n, s):
+        '''
+        Fill the k-th (outside most is the 1st) rectangular layer of an n*n matrix M.
+        s is the first number we need to use.
+        '''
+        if s > n*n:
+            return 
+        
+        if n%2==1 and k == n//2+1:
+            M[k-1][k-1] = s
+            return
+        
+        # fill top row: i=k-1
+        for j in range(k-1, n-k+1):
+            M[k-1][j] = s
+            s += 1
+        # fill right col: j = n-k
+        for i in range(k, n-k+1):
+            M[i][n-k] = s
+            s += 1
+        # fill bottom row: i = n-k
+        for j in range(n-k-1,k-2,-1):
+            M[n-k][j] = s
+            s += 1
+        # fill left col: j = k-1
+        for i in range(n-k-1,k-1,-1):
+            M[i][k-1] = s
+            s += 1
+        self.helper(M, k+1, n, s)
+```
+
+
+## 55. Jump Game
+
+Going backwards.
+
+```
+class Solution:
+    def canJump(self, nums: List[int]) -> bool:
+        goal = len(nums) - 1
+        for i in range(len(nums)-1,-1,-1):
+            if i+nums[i] >= goal:
+                goal = i
+        return goal == 0
+```
+
+## 45. Jump Game II
+
+Essentially a DFS in the guise of a greedy method.
+
+```
+class Solution:
+    def jump(self, nums: List[int]) -> int:
+        curFarthest, curEnd, res = 0 , 0, 0
+        for i in range(len(nums)):
+            
+            if curEnd >=  len(nums)-1:
+                return res
+            curFarthest=max(curFarthest, i+nums[i])
+            
+            if i == curEnd:
+                res += 1
+                curEnd = curFarthest
+```
