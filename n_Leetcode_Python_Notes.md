@@ -4663,7 +4663,7 @@ class Solution:
             return res
 ````
 
-Iterative solution:
+__Iterative solution:__
 ```
 class Solution:
     def permute(self, nums: List[int]) -> List[List[int]]:
@@ -4680,7 +4680,7 @@ class Solution:
 
 ## 47. Permutations II
 
-Recursive solution. Since lists are not hashable in `Python`, we have to check whether a permutation is already contained in the res or not before adding it. This greatly slows down the solution.
+__Recursive solution.__ Since lists are not hashable in `Python`, we have to check whether a permutation is already contained in the res or not before adding it. This greatly slows down the solution.
 
 ````
 class Solution:
@@ -4698,7 +4698,7 @@ class Solution:
 
 ````
 
-Iterative solution. Just adding one line to deal with the duplicate situation.
+__Iterative solution.__ Just adding one line to deal with the duplicate situation.
 
 ````
 Class Solution:
