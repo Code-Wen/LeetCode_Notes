@@ -5438,3 +5438,149 @@ class Solution:
                 res += 1
                 curEnd = curFarthest
 ```
+## 94. Binary Tree Inorder Traversal
+
+Trivial recursive method:
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def inorderTraversal(self, root: TreeNode) -> List[int]:
+        if not root:
+            return []
+        return self.inorderTraversal(root.left)+[root.val]+self.inorderTraversal(root.right)
+```
+
+Iterative method:
+```
+class Solution:
+    def inorderTraversal(self, root: TreeNode) -> List[int]:
+        res, stack = [], []
+        while True:
+            # Going all the way down to the left
+            while root:
+                stack.append(root)
+                root = root.left
+            # Return if nothing to pop
+            if not stack:
+                return res
+            
+            # From bottom left to top, pop the node, then traverse the right branch 
+            node = stack.pop()
+            res.append(node.val)
+            if node.right:
+                root = node.right         
+```
+
+## 56. Merge Intervals
+
+```
+class Solution:
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        intervals.sort(key=lambda x: x[0])
+        res,i = [], 0
+    
+        while i < len(intervals):
+            left, right = intervals[i][0], intervals[i][1]
+            next = i+1
+            while next < len(intervals) and intervals[next][0] <= right:
+                right, next = max(right,intervals[next][1]), next + 1
+            res.append([left,right])
+            i = next
+        return res
+```
+## 57. Insert Interval
+
+```
+class Solution:
+    def insert(self, intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:
+        if not intervals:
+            return [newInterval]
+        if intervals[-1][1] < newInterval[0]:
+            return intervals+[newInterval]
+        res, i = [], 0
+        newLeft, newRight = newInterval[0], newInterval[1]
+        while i < len(intervals):
+            if intervals[i][1] < newLeft:
+                i += 1
+            else:
+                res += intervals[:i]
+                if intervals[i][0] > newRight:
+                    res.append(newInterval)
+                    return res + intervals[i:]
+                
+                newLeft = min(newLeft, intervals[i][0])
+                newRight = max(newRight, intervals[i][1])
+                
+                i += 1
+                while i < len(intervals) and newRight >= intervals[i][0]:
+                    newRight = max(newRight, intervals[i][1])
+                    i += 1
+                res.append([newLeft, newRight])
+                res += intervals[i:]
+                break
+        return res
+```
+
+## 60. Permutation Sequence
+
+Equivalently, present any number `k` in the 'n-factorial' system.
+
+```
+class Solution:
+    def getPermutation(self, n: int, k: int) -> str:
+
+        res, nums, r = '', [i for i in range(1,n+1)], k-1 # r starts with k-1 since we are using the residual method
+        factorial = 1
+        for i in range(1,n):
+            factorial *= i
+        
+        # Long division in the 'n-factorial' setting. Remember to pop the numbers that have been used before.
+
+        for i in range(1,n):
+            q, r = int(r//factorial), r%factorial
+            res += str(nums.pop(q))
+            factorial = factorial/(n-i)
+            
+        res += str(nums[0])
+        return res
+```
+
+## 61. Rotate List
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def rotateRight(self, head: ListNode, k: int) -> ListNode:
+        if not head:
+            return head
+        
+        # Find the total length of the linked list
+        l, node = 1, head
+        while node.next:
+            l += 1
+            node = node.next
+               
+        # link the tail with the head to form loop
+        k, tail = k%l, node 
+        tail.next = head
+        
+        # find the new head
+        prev, cur = tail, head
+        for i in range(l-k):
+            prev, cur = cur, cur.next
+        
+        prev.next, head = None, cur
+        
+        return head
+```
