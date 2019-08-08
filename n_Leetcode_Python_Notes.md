@@ -5584,3 +5584,82 @@ class Solution:
         
         return head
 ```
+## 96. Unique Binary Search Trees
+
+Typical DP. Once we chose the root value as `k`, where `1<= k <= n`, then the left subtree must have `k-1` nodes and the right subtree must have `n-k` nodes.
+```
+class Solution:
+    def numTrees(self, n: int) -> int:
+        dp = [0] * (n+1)
+        
+        dp[1], dp[0] = 1, 1
+        
+        for i in range(2, n+1):
+            for j in range(1,i+1):
+                dp[i] += dp[j-1]*dp[i-j]
+        
+        return dp[-1]
+```
+
+## 97. Unique Binary Search Trees II
+
+I still need practicing on DFS.
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def generateTrees(self, n: int) -> List[TreeNode]:
+        if n==0:
+            return []
+        return self.dfs(1,n)
+    
+    def dfs(self, start, end):
+        if start > end:
+            return [None]
+        
+        res = []
+        for i in range(start, end+1):
+            for l in self.dfs(start, i-1) or [None]:
+                for r in self.dfs(i+1, end) or [None]:
+                    root = TreeNode(i)
+                    root.left, root.right = l, r
+                    res.append(root)
+        return res
+```
+
+## 443. String Compression
+
+Turns out to be really subtle for me.
+
+```
+class Solution:
+    def compress(self, chars: List[str]) -> int:
+        if len(chars) <= 1:
+            return len(chars)
+        
+        
+        cur, cnt, i = chars[0], 1, 1
+        
+        while i < len(chars):
+            
+            while i < len(chars) and chars[i] == cur:
+                cnt += 1
+                chars.pop(i)
+            if cnt > 1:
+                s = str(cnt)
+                for j in range(len(s)-1,-1,-1):
+                    chars.insert(i, s[j])
+                if i+len(s) < len(chars):
+                    cur, cnt = chars[i+len(s)], 1
+                i += len(s)+1
+            else:
+                cur = chars[i]
+                i += 1
+        return len(chars)
+```
