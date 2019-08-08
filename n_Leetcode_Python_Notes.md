@@ -5663,3 +5663,157 @@ class Solution:
                 i += 1
         return len(chars)
 ```
+
+## 51. N-Queens
+
+DFS exploration, still need to practice more.
+```
+class Solution:
+    def solveNQueens(self, n: int) -> List[List[str]]:
+        self.res = []
+        self.dfs(n,[],[],[])
+        return [['.'*(i-1) +'Q' + '.'*(n-i) for i in path] for path in self.res]
+        
+    def dfs(self, n, xy_sum, xy_dif, path):
+        if len(path) == n:
+            self.res.append(path)
+            return 
+        
+        x = len(path)
+        for y in range(1, n+1):
+            if y not in path and x+y not in xy_sum and x-y not in xy_dif:
+                self.dfs(n, xy_sum+[x+y],xy_dif+[x-y], path+[y])
+
+```
+## 52. N-Queens II
+
+```
+class Solution:
+    def totalNQueens(self, n: int) -> int:
+        self.res = 0
+        self.dfs(n,[],[],[])
+        return self.res
+        
+    def dfs(self, n, xy_sum, xy_dif, path):
+        if len(path) == n:
+            self.res += 1
+            return 
+        
+        x = len(path)
+        for y in range(1, n+1):
+            if y not in path and x+y not in xy_sum and x-y not in xy_dif:
+                self.dfs(n, xy_sum+[x+y],xy_dif+[x-y], path+[y])
+```
+## 74. Search a 2D Matrix
+
+```
+class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        if not matrix or not matrix[0]:
+            return False
+        
+        m, n = len(matrix), len(matrix[0])
+        top, bottom, left, right = 0, m-1, 0, n-1
+        
+        # Binary search for row number
+        if matrix[top][0] > target or matrix[bottom][-1] < target:
+            return False
+        
+        while top < bottom:
+            mid = (top+bottom)//2
+            if matrix[bottom][0] <= target:
+                i = bottom
+                break
+            elif matrix[top][-1] >= target:
+                i = top
+                break
+            elif matrix[mid][0] > target:
+                bottom = mid - 1
+            else:
+                top, bottom = mid, bottom - 1
+        if top == bottom:
+            i = top
+        if top > bottom: 
+            return False
+        
+        # Binary search for col number
+        if matrix[i][left] > target or matrix[i][right] < target:
+            return False
+        
+        while left <= right:
+            mid = (left+right)//2
+            if matrix[i][left] == target or matrix[i][right] == target or matrix[i][mid] == target:
+                return True
+            elif matrix[i][mid] <  target:
+                left = mid + 1
+            elif matrix[i][mid] > target:
+                right = mid - 1
+        return False
+```
+
+## 240. Search a 2D Matrix II
+
+```
+class Solution:
+    def searchMatrix(self, matrix, target):
+        """
+        :type matrix: List[List[int]]
+        :type target: int
+        :rtype: bool
+        """
+        if not matrix or not matrix[0]:
+            return False
+        
+        j = -1
+        for row in matrix:
+            while j + len(row) and target < row[j]:
+                j -= 1
+            if row[j] == target:
+                return True
+        return False
+```
+## 75. Sort Colors
+
+```
+class Solution:
+    def sortColors(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        # counts of 0 and 1 appeared so far
+        zero, one = 0, 0
+        for i in range(len(nums)):
+            val = nums[i]
+            nums[i] = 2
+            # if we get a new 0, add a new 0 in front. Note it may replace a previous 1, so we have to remedy
+            if val == 0:
+                if nums[zero] == 1:
+                    nums[zero+one] = 1
+                nums[zero] = 0
+                zero += 1
+            if val == 1:
+                nums[zero+one] = 1
+                one += 1
+```
+
+## 77. Combinations
+
+```
+class Solution:
+    def combine(self, n: int, k: int) -> List[List[int]]:
+        self.res = []
+        self.dfs(n, [], k, 1)
+        return self.res
+        
+    def dfs(self, n, path, k, start):
+        if k==0:
+            self.res.append(path)
+            return
+        
+        for i in range(start,n+1):
+            # if not enough numbers to choose from, break.
+            if k > n-start+1:
+                break
+            
+            self.dfs(n, path+[i], k-1, i+1)
+```
