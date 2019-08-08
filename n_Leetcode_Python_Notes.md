@@ -5817,3 +5817,63 @@ class Solution:
             
             self.dfs(n, path+[i], k-1, i+1)
 ```
+## 80. Remove Duplicates from Sorted Array II
+
+```
+class Solution:
+    def removeDuplicates(self, nums: List[int]) -> int:
+        if len(nums) <= 1:
+            return 
+        
+        i, prev, cnt  = 1, nums[0], 1
+        while i < len(nums):
+            if nums[i] != prev:
+                prev, i, cnt = nums[i], i+1, 1
+            
+            elif cnt == 2:
+                nums.pop(i)
+            elif cnt == 1:
+                i, cnt = i+1, cnt+1
+        
+        return len(nums)
+```
+## 82. Remove Duplicates from Sorted List II
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def deleteDuplicates(self, head: ListNode) -> ListNode:
+        if not head or not head.next:
+            return head
+            
+        
+        prev, cur, stack, cnt = head, head.next, [], 1
+        while cur:
+            while cur and cur.val == prev.val:
+                cur, cnt = cur.next, cnt+1
+            if cnt > 1:   
+                stack.append(prev.val)
+                cnt = 1
+            prev.next = cur
+            prev = cur
+            if cur:
+                cur = cur.next
+        
+        while head and stack and head.val == stack[0]:
+            stack.pop(0)
+            head = head.next
+            
+        if head:    
+            prev, node = head , head.next
+            while stack:
+                val = stack.pop(0)
+                while node.val != val:
+                    prev, node =  node, node.next
+                prev.next, node = node.next, node.next
+        return head
+```
