@@ -5877,3 +5877,97 @@ class Solution:
                 prev.next, node = node.next, node.next
         return head
 ```
+## 81. Search in Rotated Sorted Array II
+
+With duplicates, things become more involved. So we have to split and consider both halves.
+```
+class Solution:
+    def search(self, nums: List[int], target: int) -> bool:
+        l, r = 0, len(nums)-1
+        
+        while l <= r:
+            if target == nums[l] or target == nums[r]:
+                return True
+            mid = (l+r)//2
+            if l == mid:
+                return False
+            
+            if nums[mid] == target:
+                return True
+            
+            if nums[l] < nums[mid]:
+                if target < nums[mid] and target > nums[l]:
+                    l, r = l+1, mid-1
+                else:
+                    l, r = mid+1, r-1
+            elif nums[l] > nums[mid]:
+                if target < nums[mid] or target > nums[l]:
+                    l, r = l+1, mid-1
+                else:
+                    l, r = mid+1, r-1
+            # if nums[l] == nums[mid], we don't know how to do, so split and                     # consider both halves.
+            else: 
+                return self.search(nums[l+1:mid], target) or self.search(nums[mid+1:r],target)
+                
+        return False
+``` 
+## 79. Word Search
+My original code: 
+```
+class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        if not word:
+            return True
+        if not board or not board[0]:
+            return False
+        m, n = len(board), len(board[0])
+        for i in range(m):
+            for j in range(n):
+                if dfs(board, i, j, word, 0, []):
+                    return True
+        return False
+    def dfs(self, B, i, j, word, k, path):
+        # Search word in the given board B starting at (i,j). Return True if able to
+        # find the word[k:].
+        if k >= len(word):
+            return True
+        m, n = len(B), len(B[0])
+        if i >= m or j >= n or i<0 or j<0 or (i,j) in path:
+            return False
+        if B[i][j]  == word[k]:
+            return self.dfs(B,i+1,j, word, k+1, path+[(i,j)]) or self.dfs(B,i,j+1, word, k+1, path+[(i,j)]) or self.dfs(B,i-1,j, word, k+1, path+[(i,j)]) or self.dfs(B,i,j-1, word, k+1, path+[(i,j)])
+```
+
+To check where `(i,j)` is in `path` or not really slow things down. Below is a slight improvement.
+```
+class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        if not word:
+            return True
+        if not board or not board[0]:
+            return False
+        m, n = len(board), len(board[0])
+        for i in range(m):
+            for j in range(n):
+                if self.dfs(board, i, j, word, 0):
+                    return True
+        return False
+
+    def dfs(self,B, i, j, word, k):
+        '''
+        Search word in the given board B starting at (i,j). Return True if able to
+        find the word[k:].
+        '''
+        if k >= len(word):
+            return True
+        m, n = len(B), len(B[0])
+        if i >= m or j >= n or i<0 or j<0 or B[i][j]!=word[k]:
+            return False
+        # Here before the recursive call, we need to modify some inputs. 
+        # After calling it, we will change inputs back
+        temp = B[i][j]
+        B[i][j] = None
+        res = self.dfs(B,i+1,j, word, k+1) or self.dfs(B,i,j+1, word, k+1) or self.dfs(B,i-1,j, word, k+1) or self.dfs(B,i,j-1, word, k+1)
+        B[i][j] = temp
+        return res
+```
