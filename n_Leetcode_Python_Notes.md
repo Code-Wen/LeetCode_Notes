@@ -5879,7 +5879,6 @@ class Solution:
 ```
 ## 81. Search in Rotated Sorted Array II
 
-With duplicates, things become more involved. So we have to split and consider both halves.
 ```
 class Solution:
     def search(self, nums: List[int], target: int) -> bool:
@@ -5910,8 +5909,10 @@ class Solution:
                 return self.search(nums[l+1:mid], target) or self.search(nums[mid+1:r],target)
                 
         return False
-``` 
+```
+
 ## 79. Word Search
+
 My original code: 
 ```
 class Solution:
@@ -5969,5 +5970,357 @@ class Solution:
         B[i][j] = None
         res = self.dfs(B,i+1,j, word, k+1) or self.dfs(B,i,j+1, word, k+1) or self.dfs(B,i-1,j, word, k+1) or self.dfs(B,i,j-1, word, k+1)
         B[i][j] = temp
+        return res
+```
+## 89. Gray Code
+
+
+```
+class Solution:
+    def grayCode(self, n: int) -> List[int]:
+        '''
+        from up to down, then left to right
+
+        0   1   11  110
+                10  111
+                    101
+                    100
+
+        start:      [0]
+        i = 0:      [0, 1]  
+        i = 1:      [0, 1, 3, 2]
+        i = 2:      [0, 1, 3, 2, 6, 7, 5, 4]
+        '''
+        
+        res = [0]
+        for i in range(n):
+            power = 2 ** i
+            res += [x+power for x in res[::-1]]
+        return res
+```
+## 90. Subsets II
+
+```
+class Solution:
+    def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
+        
+        nums.sort()
+        res, cur = [[]], []
+        for i in range(len(nums)):
+            if i > 0 and nums[i] == nums[i-1]:
+                cur = [item + [nums[i]] for item in cur]
+            else:
+                cur = [item + [nums[i]] for item in res]
+            res += cur
+        return res
+```
+
+## 113. Path Sum II
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def pathSum(self, root: TreeNode, sum: int) -> List[List[int]]:
+        if not root:
+            return []
+        
+        self.res = []
+        self.dfs(root, 0, [], sum)
+        return self.res
+        
+    def dfs(self, root, Sum, path, target):
+        if not root.left and not root.right:
+            if Sum + root.val == target:
+                self.res.append(path+[root.val])
+                return
+        
+        if root.left:
+            self.dfs(root.left, Sum+root.val, path+[root.val], target)
+        if root.right:
+            self.dfs(root.right, Sum+root.val, path+[root.val], target)
+```
+## 437. Path Sum III
+
+Brute Force: Time O(n^2), where n is the number of nodes in the tree.
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def pathSum(self, root: TreeNode, sum: int) -> int:
+        self.res = 0 
+        
+        if root:
+            self.dfs(root, sum)
+            if root.left:
+                self.res += self.pathSum(root.left, sum)
+            if root.right:
+                self.res += self.pathSum(root.right, sum)
+        
+        return self.res
+        
+    def dfs(self, root, target):
+        '''
+        Add the number of paths starting with root with sum equal to target.
+        They may not end in leaves.
+        '''
+        if not root:
+            return 
+        if root.val == target:
+            self.res += 1
+        if root.left:
+            self.dfs(root.left, target-root.val)
+        if root.right:
+            self.dfs(root.right, target-root.val)
+```
+
+Using cache, O(n).
+
+- In order to optimize from the brutal force solution, we will have to think of a clear way to memorize the intermediate result. Namely in the brutal force solution, we did a lot repeated calculation. For example 1->3->5, we calculated: 1, 1+3, 1+3+5, 3, 3+5, 5.
+- This is a classical 'space and time tradeoff': we can create a dictionary (named `cache`) which saves all the path sum (from root to current node) and their frequency.
+- Again, we traverse through the tree, at each node, we can get the `currPathSum` (from root to current node). If within this path, there is a valid solution, then there must be a `oldPathSum` such that `currPathSum - oldPathSum` = `target`.
+- We just need to add the frequency of the `oldPathSum` to the result.
+- During the DFS break down, we need to -1 in `cache[currPathSum]`, because this path is not available in later traverse.
+
+```
+class Solution(object):
+    def pathSum(self, root, target):
+        # define global result and path
+        self.result = 0
+        cache = {0:1}
+        
+        # recursive to get result
+        self.dfs(root, target, 0, cache)
+        
+        # return result
+        return self.result
+    
+    def dfs(self, root, target, currPathSum, cache):
+        # exit condition
+        if root is None:
+            return  
+        # calculate currPathSum and required oldPathSum
+        currPathSum += root.val
+        oldPathSum = currPathSum - target
+        # update result and cache
+        self.result += cache.get(oldPathSum, 0)
+        cache[currPathSum] = cache.get(currPathSum, 0) + 1
+        
+        # dfs breakdown
+        self.dfs(root.left, target, currPathSum, cache)
+        self.dfs(root.right, target, currPathSum, cache)
+        # when move to a different branch, the currPathSum is no longer available, hence remove one. 
+        cache[currPathSum] -= 1
+```
+
+## 931. Minimum Falling Path Sum
+
+Brute Force using DFS:
+```
+class Solution:
+    def minFallingPathSum(self, A: List[List[int]]) -> int:
+        self.res = float('inf')
+        for j in range(len(A)):
+            self.dfs(A, 0, j, len(A), 0)
+        return self.res
+    
+    def dfs(self, M, i, j, n, Sum):
+        if i == n-1:
+            self.res = min(self.res, Sum+M[i][j])
+            return 
+        
+        for k in range(-1, 2):
+            if j+k >= 0 and j+k < n:
+                self.dfs(M, i+1, j+k, n, Sum+M[i][j])
+        
+```
+
+DP method:
+```
+class Solution:
+    def minFallingPathSum(self, A: List[List[int]]) -> int:
+        n = len(A)
+        dp = [A[0][j] for j in range(n)]
+        for i in range(1, n):
+            temp = [float('inf')]*n
+            for j in range(n):
+                for k in range(-1, 2):
+                    if j+k >=0 and j+k < n:
+                        temp[j] = min(temp[j], dp[j+k])
+            dp = [A[i][j] + temp[j] for j in range(n)]
+        return min(dp)
+```
+
+## 129. Sum Root to Leaf Numbers
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def sumNumbers(self, root: TreeNode) -> int:
+        if not root:
+            return 0
+        
+        self.leaves = []
+        self.dfs(root,'')
+        
+        return sum([int(i) for i in self.leaves])
+        
+    def dfs(self, root, path):
+        '''
+        Add the path from root to leaves as strings to the list 'leaves'
+        '''
+        if not root.left and not root.right:
+            self.leaves.append(path+str(root.val))
+            return
+        
+        if root.left:
+            self.dfs(root.left, path+str(root.val))
+        if root.right:
+            self.dfs(root.right, path+str(root.val))
+```
+
+## 102. Binary Tree Level Order Traversal
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def levelOrder(self, root: TreeNode) -> List[List[int]]:
+        if not root:
+            return []
+        
+        cur_cnt, next_cnt, temp, queue, res = 1, 0, [], collections.deque(), []
+        queue.append(root)
+        
+        while queue:
+            node = queue.popleft()
+            temp.append(node.val)
+            cur_cnt -= 1
+            if node.left:
+                queue.append(node.left)
+                next_cnt += 1
+            if node.right:
+                queue.append(node.right)
+                next_cnt += 1
+            # if the current level runs out, reset
+            if cur_cnt == 0:
+                res.append(temp)
+                temp, cur_cnt, next_cnt = [], next_cnt, 0
+            
+        return res
+            
+```
+## 103. Binary Tree Zigzag Level Order Traversal
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def zigzagLevelOrder(self, root: TreeNode) -> List[List[int]]:
+        if not root:
+            return []
+        
+        cur_cnt, next_cnt, temp, queue, res = 1, 0, [], [], []
+        direction = 0 # indicates the direction on the current level. 0 == L to R
+        queue.append(root)
+        
+        while queue:
+            
+            node = queue.pop(cur_cnt-1)
+            temp.append(node.val)
+            cur_cnt -= 1 
+            # when we are moving from L to R, we append from L to R
+            if direction == 0:
+                if node.left:
+                    queue.append(node.left)
+                    next_cnt += 1
+                if node.right:
+                    queue.append(node.right)
+                    next_cnt += 1
+            else: # if we are moving from R to L, we append from R to L
+                if node.right:
+                    queue.append(node.right)
+                    next_cnt += 1
+                if node.left:
+                    queue.append(node.left)
+                    next_cnt += 1
+            # if the current level runs out, reset and change direction
+            if cur_cnt == 0:
+                res.append(temp)
+                temp, cur_cnt, next_cnt = [], next_cnt, 0
+                direction = (direction+1)%2
+            
+        return res
+```
+## 144. Binary Tree Preorder Traversal
+
+Iterative method:
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def preorderTraversal(self, root: TreeNode) -> List[int]:
+        res, stack = [], []
+        if root:
+            stack.append(root)
+        
+        while stack:
+            node = stack.pop()
+            res.append(node.val)
+            if node.right:
+                stack.append(node.right)
+            if node.left:
+                stack.append(node.left)
+        return res
+```
+## 145. Binary Tree Postorder Traversal
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def postorderTraversal(self, root: TreeNode) -> List[int]:
+        res, stack = [], []
+        p = root
+        while stack or p:
+            if p:
+                stack.append(p)
+                res = [p.val]+res
+                p = p.right
+            else:
+                node = stack.pop()
+                p = node.left
         return res
 ```
