@@ -6324,3 +6324,151 @@ class Solution:
                 p = node.left
         return res
 ```
+## 91. Decode Ways
+```
+
+class Solution:
+    def numDecodings(self, s: str) -> int:
+        self.res = 0
+        self.helper(s, '0', 0, 1)
+        return self.res
+    
+    def helper(self, s, prefix, temp1, temp2):
+        if not s:
+            self.res += temp2
+            return
+        
+        if int(prefix + s[0]) == 0:
+            self.res = 0
+            return 
+        else:
+            if prefix == '0':
+                self.helper(s[1:], s[0], temp2, temp2)
+            elif s[0] == '0' and int(prefix+s[0]) <= 26:
+                self.helper(s[1:], s[0], temp1, temp1)
+            elif s[0] == '0' and int(prefix+s[0]) > 26:
+                self.res = 0
+                return
+            elif int(prefix+s[0]) > 26:
+                self.helper(s[1:], s[0], temp2, temp2)
+            else:
+                self.helper(s[1:], s[0], temp2, temp1+temp2)                             
+```
+
+
+## 215. Kth Largest Element in an Array
+
+Many different solutions:
+
+```
+# O(nlgn) time
+def findKthLargest1(self, nums, k):
+    return sorted(nums, reverse=True)[k-1]
+    
+# O(nk) time, bubble sort idea, TLE
+def findKthLargest2(self, nums, k):
+    for i in xrange(k):
+        for j in range(len(nums)-i-1):
+            if nums[j] > nums[j+1]:
+                # exchange elements, time consuming
+                nums[j], nums[j+1] = nums[j+1], nums[j]
+    return nums[len(nums)-k]
+    
+# O(nk) time, selection sort idea
+def findKthLargest3(self, nums, k):
+    for i in range(len(nums), len(nums)-k, -1):
+        tmp = 0
+        for j in xrange(i):
+            if nums[j] > nums[tmp]:
+                tmp = j
+        nums[tmp], nums[i-1] = nums[i-1], nums[tmp]
+    return nums[len(nums)-k]
+    
+# O(k+(n-k)lgk) time, min-heap
+def findKthLargest4(self, nums, k):
+    # minheap
+    array = nums[:k]
+    heapq.heapify(array) # O(k)
+    for num in nums[k:]: # O(n-k)
+        if num > array[0]:
+            heapq.heapreplace(array, num) # O(log k)
+    return array[0]
+
+    
+# O(n) time, quick selection
+def findKthLargest(self, nums, k):
+    # convert the kth largest to smallest
+    return self.findKthSmallest(nums, len(nums)+1-k)
+    
+def findKthSmallest(self, nums, k):
+    if nums:
+        pos = self.partition(nums, 0, len(nums)-1)
+        if k > pos+1:
+            return self.findKthSmallest(nums[pos+1:], k-pos-1)
+        elif k < pos+1:
+            return self.findKthSmallest(nums[:pos], k)
+        else:
+            return nums[pos]
+ 
+# choose the right-most element as pivot   
+def partition(self, nums, l, r):
+    low = l
+    while l < r:
+        if nums[l] < nums[r]:
+            nums[l], nums[low] = nums[low], nums[l]
+            low += 1
+        l += 1
+    nums[low], nums[r] = nums[r], nums[low]
+    return low
+```
+
+## 216. Combination Sum III
+
+```
+class Solution:
+    def combinationSum3(self, k: int, n: int) -> List[List[int]]:
+        self.res = []
+        if n >= 0 and n<= 50:
+            self.dfs(k, n, [], 1)
+        return self.res
+        
+    def dfs(self, k, target, path, start):
+        if k == 0 and target == 0:
+            self.res.append(path)
+            return 
+        elif start > target or start > 9:
+            return 
+        
+        for x in range(start, 10):
+            if x <= target:
+                self.dfs(k-1, target-x, path+[x], x+1)
+```
+## 230. Kth Smallest Element in a BST
+
+Use the iterative in-place traversal for BST and record how many nodes have been popped.
+```
+class Solution:
+    def kthSmallest(self, root: TreeNode, k: int) -> int:
+        stack, node, cnt = [], root, 0
+        while True:
+            while node:
+                stack.append(node)
+                node = node.left
+            
+            node = stack.pop()
+            cnt += 1
+            if cnt == k:
+                return node.val
+            node = node.right
+```
+
+## 226. Invert Binary Tree
+```
+class Solution:
+    def invertTree(self, root: TreeNode) -> TreeNode:
+        if root:
+            root.left, root.right = root.right, root.left
+            self.invertTree(root.left)
+            self.invertTree(root.right)
+        return root
+```
