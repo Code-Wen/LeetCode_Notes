@@ -6472,3 +6472,136 @@ class Solution:
             self.invertTree(root.right)
         return root
 ```
+
+## 92. Reverse Linked List II
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def reverseBetween(self, head: ListNode, m: int, n: int) -> ListNode:
+        # mid_head is the m-th node in the original list
+        if m == 1:
+            mid_head = head
+        
+        else:
+            i, prev, cur = 2, head, head.next
+            while i < m:
+                i, prev, cur = i+1, cur, cur.next 
+            mid_head = cur 
+        
+        # reverse 
+        cnt, slow, fast = 0, mid_head, mid_head.next
+        while cnt < n-m:
+            temp = fast.next
+            fast.next, slow, fast = slow, fast, temp
+            cnt += 1
+        
+        # attach the reversed part with the last part
+        mid_head.next = fast
+        # attach the first part (if m>1) with the reversed part
+        if m > 1:
+            prev.next = slow
+        # if m == 1, we have to reset the head
+        else:
+            head = slow
+        return head
+```
+## 492. Construct the Rectangle
+
+```
+class Solution:
+    def constructRectangle(self, area: int) -> List[int]:
+        start = math.floor(math.sqrt(area))
+        for W in range(start, 0, -1):
+            if area % W == 0:
+                return [ area//W, W]
+```
+
+## 406. Queue Reconstruction by Height
+
+The neat solution: 
+```
+class Solution:
+    def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
+        people = sorted(people, key = lambda x: (-x[0], x[1]))
+        res = []
+        for p in people:
+            res.insert(p[1], p)
+        return res
+```
+
+My clumsy solution:
+```
+class Solution:
+    def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
+        if not people:
+            return []
+        
+        self.res = []
+        
+        min, loc = float('inf'), 0
+        for i in range(len(people)):
+            if people[i][1] == 0 and people[i][0] < min:
+                min, loc = people[i][0], i
+        self.res.append(people.pop(loc))
+        aux = [x+[0] for x in people]
+        for i in range(len(people)):
+            self.findNext(aux, self.res[-1][0])
+        
+        return self.res
+           
+    def findNext(self, aux, prev):
+        minH, loc =  float('inf'), 0
+        for i in range(len(aux)):
+            if aux[i][0] <= prev:
+                aux[i][1], aux[i][2] = aux[i][1]-1, aux[i][2] + 1
+            if aux[i][1] == 0 and aux[i][0] < minH:
+                minH, loc = aux[i][0], i
+            
+        temp = aux.pop(loc)
+        temp[1] += temp[2]
+        self.res.append(temp[:2])
+```
+## 451. Sort Characters By Frequency
+
+```
+class Solution:
+    def frequencySort(self, s: str) -> str:
+        from collections import Counter
+        d, res = Counter(s), ''
+        for key, val in sorted(d.items(), key = lambda x: x[1], reverse = True):
+            res += key*val
+        return res
+```
+## 445. Add Two Numbers II
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
+        x1, x2 = 0, 0
+        while l1:
+            x1 = x1*10+l1.val
+            l1 = l1.next
+        while l2:
+            x2 = x2*10+l2.val
+            l2 = l2.next
+        x = x1 + x2
+        
+        head = ListNode(0)
+        if x == 0: return head
+        while x:
+            v, x = x%10, x//10
+            head.next, head.next.next = ListNode(v), head.next
+            
+        return head.next
+```
