@@ -6605,3 +6605,285 @@ class Solution:
             
         return head.next
 ```
+## 403. Frog Jump
+
+```
+class Solution:
+    def canCross(self, stones: List[int]) -> bool:
+        if stones[1] != 1:
+            return False
+        
+        # steps[i] records the distances (if any) the frog jumped from the previous           # stone to reach ith stone
+        steps = [[] for _ in range(len(stones))]
+        steps[0] = [0]
+        for i in range(len(stones)-1):
+            if not steps[i]:
+                continue
+                
+            M = max(steps[i])+1
+            for j in range(i+1, len(stones)):
+                dist_ij = stones[j]-stones[i]
+                if dist_ij > M:
+                    break
+                elif dist_ij-1 in steps[i] or dist_ij in steps[i] or dist_ij+1 in steps[i]:
+                    steps[j].append(dist_ij)
+        
+        return len(steps[-1]) > 0 
+```
+
+## 429. N-ary Tree Level Order Traversal
+
+```
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val, children):
+        self.val = val
+        self.children = children
+"""
+class Solution:
+    def levelOrder(self, root: 'Node') -> List[List[int]]:
+        if not root:
+            return []
+        
+        res, cur, nxt, q = [[]], 1,0, collections.deque()
+        q.append(root)
+        while q:
+            node, cur = q.popleft(), cur-1
+            res[-1].append(node.val)
+            q.extend(node.children)
+            nxt += len(node.children)
+            if cur == 0 and nxt > 0:
+                res.append([])
+                cur, nxt = nxt, 0
+        return res
+```
+## 442. Find All Duplicates in an Array
+
+Using `collections.Counter`:
+```
+class Solution:
+    def findDuplicates(self, nums: List[int]) -> List[int]:
+        from collections import Counter
+        d, res = Counter(nums), []
+        for key in d:
+            if d[key] == 2:
+                res.append(key)
+        return res
+```
+
+O(n) time, O(1) space solution:
+```
+class Solution:
+    def findDuplicates(self, nums: List[int]) -> List[int]:
+        res = []
+        for x in nums:
+            if nums[abs(x)-1] < 0:
+                res.append(abs(x))
+            else:
+                nums[abs(x)-1] *= -1
+        return res
+```
+
+## 482. License Key Formatting
+
+```
+class Solution:
+    def licenseKeyFormatting(self, S: str, K: int) -> str:
+        S = S.replace('-','').upper()
+        l, res = len(S), ''
+        q, r = l//K, l%K
+        res = S[:r]
+        for i in range(q):
+            res += '-'+S[r+i*K: r+(i+1)*K]
+        if r == 0:
+            res = res[1:]
+        return res
+```
+## 427. Construct Quad Tree
+```
+"""
+# Definition for a QuadTree node.
+class Node:
+    def __init__(self, val, isLeaf, topLeft, topRight, bottomLeft, bottomRight):
+        self.val = val
+        self.isLeaf = isLeaf
+        self.topLeft = topLeft
+        self.topRight = topRight
+        self.bottomLeft = bottomLeft
+        self.bottomRight = bottomRight
+"""
+class Solution:
+    def construct(self, grid: List[List[int]]) -> 'Node':
+        if not grid: return None
+        
+        if self.isLeaf(grid):
+            return Node(grid[0][0], True, None, None, None, None)
+        else:
+            n = len(grid)
+            return Node('*', False, \
+                       self.construct([row[:n//2] for row in grid[:n//2]]), \
+                       self.construct([row[n//2:] for row in grid[:n//2]]), \
+                       self.construct([row[:n//2] for row in grid[n//2:]]), \
+                       self.construct([row[n//2:] for row in grid[n//2:]]))
+        
+    def isLeaf(self, grid):
+        return all ([grid[i][j]==grid[0][0] for i in range(len(grid)) for j in range(len(grid))])
+```
+
+## 459. Repeated Substring Pattern
+
+```
+class Solution:
+    def repeatedSubstringPattern(self, s: str) -> bool:
+        l = len(s)
+        for i in range(1,l//2+1):
+            q, r = l//i, l%i
+            if r==0 and s[0]==s[i] and s[i-1]==s[-1]:
+                sub, j = s[:i], 1
+                while j < q:
+                    if sub != s[j*i:j*i+i]: break
+                    j += 1
+                if j==q: return True
+            else:
+                continue
+        return False
+```
+## 289. Game of Life
+
+Direct method, use an extra matrix of the same size.
+```
+class Solution:
+    def gameOfLife(self, board: List[List[int]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+        m, n = len(board), len(board[0])
+        res = [[0]*n for _ in range(m)]
+        
+        for i in range(m):
+            for j in range(n):
+                cnt = 0
+                for s in [i-1,i,i+1]:
+                    for t in [j-1,j,j+1]:
+                        if s < m and s>=0 and 0 <= t and t< n and not (s==i and t==j):
+                            cnt += board[s][t]
+                if board[i][j]==0:
+                    if cnt == 3: res[i][j] = 1
+                else:
+                    if cnt == 2 or cnt == 3: res[i][j] = 1
+        return res
+```
+
+In-place method. The trick is to use the following representations:
+0,2 are "dead", and "dead->live"
+1,3 are "live", and "live->dead"
+```
+def gameOfLife(self, board):
+    m,n = len(board), len(board[0])
+    for i in range(m):
+        for j in range(n):
+            if board[i][j] == 0 or board[i][j] == 2:
+                if self.nnb(board,i,j) == 3:
+                    board[i][j] = 2
+            else:
+                if self.nnb(board,i,j) < 2 or self.nnb(board,i,j) >3:
+                    board[i][j] = 3
+    for i in range(m):
+        for j in range(n):
+            if board[i][j] == 2: board[i][j] = 1
+            if board[i][j] == 3: board[i][j] = 0
+            
+def nnb(self, board, i, j):
+    m,n = len(board), len(board[0])
+    count = 0
+    if i-1 >= 0 and j-1 >= 0:   count += board[i-1][j-1]%2
+    if i-1 >= 0:                count += board[i-1][j]%2
+    if i-1 >= 0 and j+1 < n:    count += board[i-1][j+1]%2
+    if j-1 >= 0:                count += board[i][j-1]%2
+    if j+1 < n:                 count += board[i][j+1]%2
+    if i+1 < m and j-1 >= 0:    count += board[i+1][j-1]%2
+    if i+1 < m:                 count += board[i+1][j]%2
+    if i+1 < m and j+1 < n:     count += board[i+1][j+1]%2
+    return count
+```
+## 238. Product of Array Except Self
+
+Use extra space O(n):
+```
+class Solution:
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        # left[i], right[i] represent the products of the numbers on the left and right of nums[i], exclusive
+        left, right = [1]*len(nums), [1]*len(nums)
+        
+        for i in range(1,len(nums)):
+            left[i], right[-1-i] = left[i-1]*nums[i-1], right[-i]*nums[-i]
+        
+        return [left[i]*right[i] for i in range(len(nums))]
+```
+
+Same idea as above, with a clever manipulation to avoid extra space.
+```
+class Solution:
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        
+        p = 1
+        n = len(nums)
+        output = []
+        for i in range(0,n):
+            output.append(p)
+            p = p * nums[i]
+        p = 1
+        for i in range(n-1,-1,-1):
+            output[i] = output[i] * p
+            p = p * nums[i]
+        return output
+```
+## 137. Single Number II
+Using a counter:
+```
+class Solution:
+    def singleNumber(self, nums: List[int]) -> int:
+        d = {}
+        for x in nums:
+            d[x] = d.get(x, 0)+1
+        for x in d:
+            if d[x] == 1:
+                return x
+```
+
+## 260. Single Number III
+```
+class Solution:
+    def singleNumber(self, nums: List[int]) -> List[int]:
+        d, res = {}, []
+        for x in nums:
+            d[x] = d.get(x, 0)+1
+        for x in d:
+            if d[x] == 1:
+                res.append(x)
+        return res
+```
+
+
+Now use bitwise operations:
+```
+class Solution:
+    def singleNumber(self, nums: List[int]) -> List[int]:
+        xor = 0
+        for x in nums:
+            xor ^= x
+        
+        mask = 1
+        while not(xor & mask):
+            mask = mask << 1
+        
+        a, b = 0, 0
+        for x in nums:
+            if x & mask > 0:
+                a ^= x
+            else:
+                b ^= x
+        
+        return [a,b]
+```
