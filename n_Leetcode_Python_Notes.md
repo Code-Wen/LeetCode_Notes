@@ -6908,3 +6908,284 @@ class Solution:
             n -= 1
         return ugly[-1]
 ```
+
+## 105. Construct Binary Tree from Preorder and Inorder Traversal
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
+        if not preorder:
+            return None
+        
+        head_val = preorder.pop(0)
+        root, ind = TreeNode(head_val), inorder.index(head_val)
+        left_child = self.buildTree(preorder[:ind], inorder[:ind])
+        right_child = self.buildTree(preorder[ind:], inorder[ind+1:])
+        root.left, root.right = left_child, right_child
+        return root
+```
+## 106. Construct Binary Tree from Inorder and Postorder Traversal
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def buildTree(self, inorder: List[int], postorder: List[int]) -> TreeNode:
+        if not inorder:
+            return None
+        
+        head_val = postorder[-1]
+        root, ind, l = TreeNode(head_val), inorder.index(head_val), len(inorder)
+        left_child = self.buildTree(inorder[:ind], postorder[:ind])
+        right_child = self.buildTree(inorder[ind+1:], postorder[ind:l-1])
+        root.left, root.right = left_child, right_child
+        return root
+```
+## 109. Convert Sorted List to Binary Search Tree
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def sortedListToBST(self, head: ListNode) -> TreeNode:
+        nums = []
+        while head:
+            nums.append(head.val)
+            head = head.next
+        return self.construct(nums)
+            
+    def construct(self, nums):
+        if not nums:
+            return None
+        n = len(nums)//2
+        head = TreeNode(nums[n])
+        head.left = self.construct(nums[:n])
+        head.right = self.construct(nums[n+1:])
+        return head
+```
+
+## 114. Flatten Binary Tree to Linked List
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def flatten(self, root: TreeNode) -> None:
+        """
+        Do not return anything, modify root in-place instead.
+        """
+        if not root:
+            return None
+        left, right = root.left, root.right
+        self.flatten(right)
+        if left:
+            self.flatten(left)
+            root.left, root.right = None, left
+            bottom = left
+            while bottom.right:
+                bottom = bottom.right
+            bottom.right = right
+```
+## 116. Populating Next Right Pointers in Each Node
+
+```
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val, left, right, next):
+        self.val = val
+        self.left = left
+        self.right = right
+        self.next = next
+"""
+class Solution:
+    def connect(self, root: 'Node') -> 'Node':
+        if not root or not root.left:
+            return root
+        
+        root.left.next = root.right
+        l, r = root.left, root.right
+        while l.right:
+            l.right.next = r.left
+            l, r = l.right, r.left
+        self.connect(root.left)
+        self.connect(root.right)
+        return root
+```
+
+## 117. Populating Next Right Pointers in Each Node II
+
+The idea is view each level as a singly linked list. We need to use the nodes from the previous level to traverse, where `head` and `tail` are used to keep track of the starting of the previous level.
+
+```
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val, left, right, next):
+        self.val = val
+        self.left = left
+        self.right = right
+        self.next = next
+"""
+class Solution:
+    def connect(self, root: 'Node') -> 'Node':
+        head = tail = Node(0)
+        node = root
+        while node:
+            for x in (node.left, node.right):
+                tail.next = x
+                if x:
+                    tail = x
+            if node.next:
+                node = node.next
+            else:
+                node, tail = head.next, head
+        return root
+```
+
+## 173. Binary Search Tree Iterator
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class BSTIterator:
+
+    def __init__(self, root: TreeNode):
+        self.ind = 0
+        self.list = []
+        self.inplace(root)
+        
+
+    def next(self) -> int:
+        """
+        @return the next smallest number
+        """
+        res = self.list[self.ind]
+        self.ind += 1
+        return res
+        
+
+    def hasNext(self) -> bool:
+        """
+        @return whether we have a next smallest number
+        """
+        return self.ind < len(self.list)
+    
+    def inplace(self, root):
+        if not root:
+            return 
+        self.inplace(root.left)
+        self.list.append(root.val)
+        self.inplace(root.right)
+        
+
+
+# Your BSTIterator object will be instantiated and called as such:
+# obj = BSTIterator(root)
+# param_1 = obj.next()
+# param_2 = obj.hasNext()
+```
+## 128. Longest Consecutive Sequence
+```
+class Solution:
+    def longestConsecutive(self, nums: List[int]) -> int:
+        res, d = 0 , {}
+        for x in nums:
+            d[x] = d.get(x, 1)
+        
+        for k in d:
+            if d[k] == 1:
+                cnt, down, up = 1,  k-1 , k+1
+                d[k] = 0
+                while up in d and d[up]==1:
+                    d[up] = 0
+                    cnt, up = cnt + 1, up + 1
+                while down in d and d[down]==1:
+                    d[down] = 0
+                    cnt, down = cnt + 1, down - 1
+                res = max(res, cnt)
+        return res
+```
+## 199. Binary Tree Right Side View
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def rightSideView(self, root: TreeNode) -> List[int]:
+        if not root:
+            return []
+        res, q, cur, nxt = [], collections.deque(), 1, 0
+        q.append(root)
+        while q:
+            node, cur = q.popleft(), cur - 1
+            if node.left:
+                q.append(node.left)
+                nxt += 1
+            if node.right:
+                q.append(node.right)
+                nxt += 1
+            if cur == 0:
+                res.append(node.val)
+                cur, nxt = nxt, 0
+        return res
+```
+
+## 131. Palindrome Partitioning
+```
+class Solution:
+    def partition(self, s: str) -> List[List[str]]:
+        if not s:
+            return []
+        if len(s) == 1:
+            return [[s]]
+        res = []
+        for i in range(1, len(s)):
+            if self.isPalindrome(s[:i]):
+                res += [[s[:i]]+x for x in self.partition(s[i:])]
+        return res+[[s]] if self.isPalindrome(s) else res
+        
+    def isPalindrome(self, s):
+        left, right = 0, len(s)-1
+        while left <= right:
+            if s[left] != s[right]:
+                return False
+            else:
+                left, right = left+1, right-1
+        return True
+```
