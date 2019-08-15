@@ -7189,3 +7189,140 @@ class Solution:
                 left, right = left+1, right-1
         return True
 ```
+## 41. First Missing Positive
+```
+ def firstMissingPositive(self, nums):
+    """
+    :type nums: List[int]
+    :rtype: int
+     Basic idea:
+    1. for any array whose length is l, the first missing positive must be in range [1,...,l+1], 
+        so we only have to care about those elements in this range and remove the rest.
+    2. we can use the array index as the hash to restore the frequency of each number within 
+         the range [1,...,l+1] 
+    """
+    nums.append(0)
+    n = len(nums)
+    for i in range(len(nums)): #delete those useless elements
+        if nums[i]<0 or nums[i]>=n:
+            nums[i]=0
+    for i in range(len(nums)): #use the index as the hash to record the frequency of each number
+        nums[nums[i]%n]+=n
+    for i in range(1,len(nums)):
+        if nums[i]/n==0:
+            return i
+    return n
+```
+## 162. Find Peak Element
+
+A binary search problem in disguise! The trick is that if `nums[left-1]< nums[left]` and `nums[right]>nums[right+1]` and also adjacent elements are different, then by the picture, there must be a local max somewhere in between `left` and `right`.
+
+```
+class Solution:
+    def findPeakElement(self, nums: List[int]) -> int:
+        left, right = 0, len(nums)-1
+        
+        while left < right-1:
+            mid = (left+right)//2
+            if nums[mid] > nums[mid+1] and nums[mid] > nums[mid-1]:
+                return mid
+            elif nums[mid] < nums[mid+1]:
+                left = mid + 1
+            else:
+                right = mid - 1
+        
+        return left if nums[left]>=nums[right] else right
+```
+## 200. Number of Islands
+
+Go through the entire grid. Whenever we encounter a `'1'`, we use a DFS function to explore the entire island and change the visited island areas inplace.
+
+```
+class Solution:
+    def numIslands(self, grid: List[List[str]]) -> int:
+        if not grid or not grid[0]: return 0
+        m, n, res = len(grid), len(grid[0]), 0
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] == '1':
+                    res += 1
+                    self.explore(grid, m, n, i, j)
+        return res 
+    
+    def explore(self, grid, m, n, x, y):
+        grid[x][y] = 3
+        stack = [(x,y)]
+        while stack:
+            (i, j) = stack.pop()
+            if i-1 >= 0 and grid[i-1][j]=='1':
+                grid[i-1][j] = 3
+                stack.append((i-1,j))
+            if i+1 < m and grid[i+1][j]=='1':
+                grid[i+1][j] = 3
+                stack.append((i+1,j))
+            if j-1 >= 0 and grid[i][j-1]=='1':
+                grid[i][j-1] = 3
+                stack.append((i,j-1))
+            if j+1 < n and grid[i][j+1]=='1':
+                grid[i][j+1] = 3
+                stack.append((i,j+1))
+```
+## 142. Linked List Cycle II
+
+See [link](https://leetcode.com/problems/linked-list-cycle-ii/discuss/44783/Share-my-python-solution-with-detailed-explanation) for a detailed explanation (tho note that it contains some minor mistakes in his explanation)
+
+```
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution(object):
+    def detectCycle(self, head):
+        """
+        :type head: ListNode
+        :rtype: ListNode
+        """
+        
+        try:
+            fast = head.next
+            slow = head
+            while fast is not slow:
+                fast = fast.next.next
+                slow = slow.next
+        except:
+            # if there is an exception, we reach the end and there is no cycle
+            return None
+
+        # since fast starts at head.next, we need to move slow one step forward
+        slow = slow.next
+        while head is not slow:
+            head = head.next
+            slow = slow.next
+
+        return head
+```
+
+## 299. Bulls and Cows
+```
+class Solution(object):
+    def getHint(self, secret, guess):
+        """
+        :type secret: str
+        :type guess: str
+        :rtype: str
+        """
+        d1, d2, A, B = {},{},0,0
+        for i in range(len(guess)):
+            if guess[i] == secret[i]:
+                A += 1
+            else:
+                d1[secret[i]] = d1.get(secret[i], 0) + 1
+                d2[guess[i]] = d2.get(guess[i], 0) + 1
+        for x in d1:
+            if x in d2:
+                B += min(d1[x], d2[x])
+        
+        return str(A)+'A'+str(B)+'B'
+```
