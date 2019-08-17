@@ -7364,3 +7364,83 @@ class Solution:
                
         return max([max(row) for row in dp]) ** 2
 ```
+## 98. Validate Binary Search Tree
+
+```
+class Solution:
+    def isValidBST(self, root: TreeNode) -> bool:
+        return self.helper(root, -float('inf'), float('inf'))
+    
+    def helper(self, node, lower_bound, upper_bound):
+        if not node: return True
+        if node.val >= upper_bound or node.val <= lower_bound:
+            return False
+        left = self.helper(node.left, lower_bound, node.val)
+        right = self.helper(node.right, node.val, upper_bound)
+        return left and right
+```
+## 495. Teemo Attacking
+
+```
+class Solution:
+    def findPoisonedDuration(self, timeSeries: List[int], duration: int) -> int:
+        if not timeSeries:
+            return 0
+        
+        res, n = duration, len(timeSeries)
+        for i in range(n-1):
+            res += min(duration, timeSeries[i+1]-timeSeries[i])
+        return res
+```
+## 454. 4Sum II
+
+```
+class Solution:
+    def fourSumCount(self, A: List[int], B: List[int], C: List[int], D: List[int]) -> int:
+        AB = collections.Counter(a+b for a in A for b in B)
+       
+        return sum(AB[-c-d] for c in C for d in D)
+```
+
+A basic way of realizing the above algorithm:
+```
+class Solution:
+    def fourSumCount(self, A: List[int], B: List[int], C: List[int], D: List[int]) -> int:
+        A.sort()
+        B.sort()
+        C.sort()
+        D.sort()
+        res, i1 = 0, 0
+        while i1 < len(A):
+            i2, mult1 = 0, 1
+            while i1+1 < len(A) and A[i1+1] == A[i1]:
+                mult1 += 1
+                i1 += 1
+            while i2 < len(B):
+                twosum, mult2 = A[i1]+B[i2], 1
+                while i2+1 < len(B) and B[i2+1] == B[i2]:
+                    mult2 += 1
+                    i2 += 1
+                
+                i3 = 0
+                while i3 < len(C):
+                    wanted, mult3 = -C[i3]-twosum, 1
+                    while i3+1<len(C) and C[i3+1] == C[i3]:
+                        mult3 += 1
+                        i3 += 1
+                    temp, i4 = 0, 0
+                    while i4 < len(D):
+                        
+                        if D[i4] > wanted:
+                            break
+                        if D[i4] == wanted:
+                            temp += 1
+                            i4 += 1
+                        elif D[i4] < wanted:
+                            i4 += 1
+                    res += temp*mult1*mult2*mult3
+                    i3 += 1
+                i2 += 1
+            i1 += 1
+        return res
+```
