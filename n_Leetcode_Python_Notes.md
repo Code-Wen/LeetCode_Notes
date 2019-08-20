@@ -7444,3 +7444,268 @@ class Solution:
             i1 += 1
         return res
 ```
+
+## 419. Battleships in a Board
+
+```
+class Solution:
+    def countBattleships(self, board: List[List[str]]) -> int:
+        if not board or not board[0]:
+            return 0
+        
+        res, m, n = 0, len(board), len(board[0])
+        for i in range(m):
+            for j in range(n):
+                if board[i][j] == 'X':
+                    if (i-1 < 0 or (i-1 >= 0 and board[i-1][j] == '.')) and (j-1<0 or (j-1>=0 and board[i][j-1]  == '.')):
+                        res += 1
+        return res
+```
+
+## 922. Sort Array By Parity II
+
+This is a in-place method.
+```
+class Solution:
+    def sortArrayByParityII(self, A: List[int]) -> List[int]:
+        cur_odd, cur_even= 0, 0
+        for i in range(len(A)):
+            if A[i]%2 == 1:
+                cur_odd += 1
+                if cur_even > cur_odd:
+                    A[2*cur_odd-1], A[i] =  A[i], A[2*cur_odd-1] 
+            else:
+                cur_even += 1
+                if cur_odd >= cur_even:
+                    A[2*cur_even-2], A[i] = A[i], A[2*cur_even-2]
+        return A
+```
+## 942. DI String Match
+```
+class Solution:
+    def diStringMatch(self, S: str) -> List[int]:
+        min, max, res =0, len(S), [0]*(len(S)+1)
+        for i in range(len(S)):
+            if S[i] == 'I':
+                res[i], min = min, min+1
+            else:
+                res[i], max = max, max-1
+        res[-1] = min
+        
+        return res
+```
+## 284. Peeking Iterator
+```
+# Below is the interface for Iterator, which is already defined for you.
+#
+# class Iterator:
+#     def __init__(self, nums):
+#         """
+#         Initializes an iterator object to the beginning of a list.
+#         :type nums: List[int]
+#         """
+#
+#     def hasNext(self):
+#         """
+#         Returns true if the iteration has more elements.
+#         :rtype: bool
+#         """
+#
+#     def next(self):
+#         """
+#         Returns the next element in the iteration.
+#         :rtype: int
+#         """
+
+class PeekingIterator:
+    def __init__(self, iterator):
+        """
+        Initialize your data structure here.
+        :type iterator: Iterator
+        """
+        self.items = []
+        self.ind = 0
+        while iterator.hasNext():
+            self.items.append(iterator.next())
+        
+
+    def peek(self):
+        """
+        Returns the next element in the iteration without advancing the iterator.
+        :rtype: int
+        """
+        return self.items[self.ind]
+        
+
+    def next(self):
+        """
+        :rtype: int
+        """
+        temp, self.ind = self.items[self.ind], self.ind+1
+        return temp
+        
+
+    def hasNext(self):
+        """
+        :rtype: bool
+        """
+        return self.ind < len(self.items)
+        
+
+# Your PeekingIterator object will be instantiated and called as such:
+# iter = PeekingIterator(Iterator(nums))
+# while iter.hasNext():
+#     val = iter.peek()   # Get the next element but not advance the iterator.
+#     iter.next()         # Should return the same value as [val].
+```
+
+## 209. Minimum Size Subarray Sum
+```
+class Solution:
+    def minSubArrayLen(self, s: int, nums: List[int]) -> int:
+        total, left, res = 0, 0, len(nums)+1
+        for right, num in enumerate(nums):
+            total += num
+            while total >= s:
+                res = min(res, right-left+1)
+                total -= nums[left]
+                left += 1
+        return res if res < len(nums)+1 else 0
+```
+## 211. Add and Search Word - Data structure design
+
+```
+class WordDictionary:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.words = {0:''}
+
+    def addWord(self, word: str) -> None:
+        """
+        Adds a word into the data structure.
+        """
+        self.words[len(word)] = self.words.get(len(word), [])+[word]
+
+    def search(self, word: str) -> bool:
+        """
+        Returns if the word is in the data structure. A word could contain the dot character '.' to represent any one letter.
+        """
+        if len(word) not in self.words:
+            return False
+        
+        for w in self.words[len(word)]:
+            match = True
+            for i in range(len(word)):
+                if word[i] == '.':
+                    continue
+                else:
+                    if word[i] != w[i]:
+                        match = False
+                        break
+            if match == True: return True
+        return False
+
+
+# Your WordDictionary object will be instantiated and called as such:
+# obj = WordDictionary()
+# obj.addWord(word)
+# param_2 = obj.search(word)
+```
+## 222. Count Complete Tree Nodes
+
+Compare the depth between left sub tree and right sub tree.
+- If it is equal, it means the left sub tree is a full binary tree
+- If it is not , it means the right sub tree is a full binary tree
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def countNodes(self, root: TreeNode) -> int:
+        if not root:
+            return 0
+        leftDepth = self.depth(root.left)
+        rightDepth = self.depth(root.right)
+        if leftDepth == rightDepth:
+            return 2**leftDepth + self.countNodes(root.right)
+        else:
+            return 2**rightDepth + self.countNodes(root.left)
+        
+    def depth(self, root):
+        if not root:
+            return 0
+        return 1+self.depth(root.left)
+```
+## 227. Basic Calculator II
+```
+class Solution:
+    def calculate(self, s: str) -> int:
+        s=s.replace(' ', '')
+        stack, num, op = [], 0, '+'
+        for i in range(len(s)):
+            if s[i].isdigit(): num = num * 10 + int(s[i])
+            if not s[i].isdigit() or i==len(s)-1:
+                if op == '+': stack.append(num)
+                elif op == '-': stack.append(-num)
+                elif op == '*': stack.append(stack.pop()*num)
+                else:
+                    temp = stack.pop()
+                    if temp < 0 and temp%num != 0:
+                        stack.append(temp//num + 1)
+                    else:
+                        stack.append(temp//num)
+                num, op = 0, s[i]
+        return sum(stack)
+```
+## 241. Different Ways to Add Parentheses
+```
+class Solution:
+    def diffWaysToCompute(self, input: str) -> List[int]:
+        if input.isdigit():
+            return [int(input)]
+        res = []
+        for i in range(len(input)):
+            if input[i] in '+-*':
+                sign = input[i]
+                res += [self.helper(n1,n2,sign) for n1 in self.diffWaysToCompute(input[:i]) for n2 in self.diffWaysToCompute(input[i+1:])]
+        return res
+                
+        
+    def helper(self, n1, n2, sign):
+        if sign == '+':
+            return n1+n2
+        if sign == '-':
+            return n1 - n2
+        if sign == '*':
+            return n1 * n2
+```
+## 220. Contains Duplicate III
+
+Bucket sort (or pigeon-hole principle).
+
+```
+class Solution:
+    def containsNearbyAlmostDuplicate(self, nums: List[int], k: int, t: int) -> bool:
+        if t<0 or k==0: return False
+        d, s = {}, t+1
+        for i in range(len(nums)):
+            m = nums[i]//s
+            if m in d:
+                return True
+            if m-1 in d and nums[i]-d[m-1] <= t:
+                return True
+            if m+1 in d and d[m+1]-nums[i] <= t:
+                return True
+            d[m] = nums[i]
+            if i >= k:
+                del d[nums[i-k]//s]
+        return False
+```
