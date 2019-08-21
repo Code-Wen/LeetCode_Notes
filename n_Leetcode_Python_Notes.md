@@ -7872,3 +7872,106 @@ class Solution:
             sell[i] = max(buy[i-1]+prices[i-2], sell[i-1])
         return sell[-1]
 ```
+
+## 310. Minimum Height Trees
+
+Method 1: Remove leaves until we have at most two leaves left. Those two nodes is the mid points of the longest path in the tree, which are the roots of the minimal depth rooted trees.
+```
+class Solution:
+    def findMinHeightTrees(self, n: int, edges: List[List[int]]) -> List[int]:
+        if n==1: return [0]
+        adjacent = collections.defaultdict(set)
+        for i, j in edges:
+            adjacent[i].add(j)
+            adjacent[j].add(i)
+        
+        leaves = [i for i in adjacent if len(adjacent[i])==1]
+        
+        while n > 2:
+            n -= len(leaves)
+            newleaves = []
+            for i in leaves:
+                j = adjacent[i].pop()
+                adjacent[j].remove(i)
+                if len(adjacent[j]) == 1: newleaves.append(j)
+            leaves = newleaves
+        return leaves
+```
+## 301. Remove Invalid Parentheses
+
+```
+class Solution:
+    def removeInvalidParentheses(self, s: str) -> List[str]:
+        def isvalid(s):
+            ctr = 0
+            for c in s:
+                if c == '(':
+                    ctr += 1
+                elif c == ')':
+                    ctr -= 1
+                    if ctr < 0:
+                        return False
+            return ctr == 0
+        level = {s}
+        while True:
+            valid = [x for x in level if isvalid(x)]
+            if valid:
+                return valid
+            level = {s[:i] + s[i+1:] for s in level for i in range(len(s)) if s[i] in '()'}
+```
+
+## 318. Maximum Product of Word Lengths
+```
+class Solution:
+    def maxProduct(self, words: List[str]) -> int:
+        # The essential part is to find a one to quickly check, store and 
+        # access the alphabet for each word. We use bitwise operations to store those.
+        
+        
+        d = {}
+        for w in words:
+            alphabet = 0
+            for s in set(w):
+                alphabet |= (1 << (ord(s)-ord('a')))
+            
+            d[alphabet] = max(d.get(alphabet, 0), len(w))
+        
+        return max([d[x]*d[y] for x in d for y in d if not x&y]+[0])
+```
+
+
+## 589. N-ary Tree Preorder Traversal
+```
+class Solution:
+    def preorder(self, root: 'Node') -> List[int]:
+        if not root: return []
+        stack, res = [root], []
+        while stack:
+            node = stack.pop()
+            if node.children:
+                stack += node.children[::-1] 
+            res.append(node.val)
+        return res
+```
+
+## 590. N-ary Tree Postorder Traversal
+```
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val, children):
+        self.val = val
+        self.children = children
+"""
+class Solution:
+    def postorder(self, root: 'Node') -> List[int]:
+        if not root: return []
+        
+        stack, res = [root], []
+        while stack:
+            node = stack.pop()
+            res.append(node.val)
+            if node.children:
+                stack += node.children
+        return res[::-1]
+```
