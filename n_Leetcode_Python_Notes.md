@@ -7709,3 +7709,166 @@ class Solution:
                 del d[nums[i-k]//s]
         return False
 ```
+## 279. Perfect Squares
+```
+class Solution:
+    def numSquares(self, n: int) -> int:
+        lst = [i**2 for i in range(1, int(n**0.5)+1)]
+        res, toCheck = 0, {n}
+        while toCheck:
+            res += 1
+            temp = set()
+            for x in toCheck:
+                for y in lst:
+                    if x==y: return res
+                    if x < y: break
+                    temp.add(x-y)
+            toCheck = temp
+        return res
+```
+## 754. Reach a Number
+```
+class Solution:
+    def reachNumber(self, target: int) -> int:
+        # Equivalent to find the smallest positive integer i such that:
+        # 1. 1+2+...+i >= target;
+        # 2. 1+2+...+i and target share the same parity.
+
+        target = abs(target)
+        i = int(target**0.5)
+        temp = i*(i+1)/2
+        while  temp < target or (target-temp)%2:
+            i += 1
+            temp = i*(i+1)/2
+        return i
+```
+## 334. Increasing Triplet Subsequence
+```
+class Solution:
+    def increasingTriplet(self, nums: List[int]) -> bool:
+        # We just need to find a way to track the most promising increasing 
+        # subsequence of length 2 (i.e. whose elements are smallest so far)
+        track = [float('inf')]*2
+        for i in range(len(nums)):
+            if nums[i] > track[1]:
+                return True
+            if nums[i] < track[0]:
+                track[0] = nums[i]
+            elif track[0] < nums[i] < track[1]:
+                track[1] = nums[i]
+        return False
+```
+## 300. Longest Increasing Subsequence
+```
+class Solution:
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        if not nums: return 0
+        track = [nums[0]]
+        for i in range(1,len(nums)):
+            temp = nums[i]
+            if temp > track[-1]:
+                track.append(temp)
+            else:
+                for j in range(len(track)):
+                    if temp <= track[j]:
+                        track[j] = temp
+                        break
+        return len(track)
+```
+## 646. Maximum Length of Pair Chain
+```
+class Solution:
+    def findLongestChain(self, pairs: List[List[int]]) -> int:
+        if not pairs: return 0
+    
+        pairs = sorted(pairs, key = lambda x: (x[0], x[1]))
+        track = [pairs[0]]
+        for i in range(1, len(pairs)):
+            temp = pairs[i]
+            for j in range(len(track)):
+                if temp[0] > track[-1][1]:
+                    track.append(temp)
+                elif j==0 and temp[1] <= track[j][1]:
+                    track[j] = temp
+                    break
+                elif j-1 >= 0 and temp[0] > track[j-1][1] and temp[1] <= track[j][1]:
+                    track[j] = temp
+                    break
+        return len(track)
+```
+## 491. Increasing Subsequences
+The trick is to use tuples instead of lists since lists are not hashable (hence we cannot easily get rid of the repetitive lists).
+```
+class Solution:
+    def findSubsequences(self, nums: List[int]) -> List[List[int]]:
+        res = {()}
+        for n in nums:
+            res = res.union({s+(n,) for s in res if not s or s[-1]<=n})
+        return [s for s in res if len(s)>1]
+```
+## 398. Random Pick Index
+
+```
+class Solution:
+
+    def __init__(self, nums: List[int]):
+        self.dic = {}
+        for i, n in enumerate(nums):
+            self.dic[n] = self.dic.get(n, [])+[i]
+
+    def pick(self, target: int) -> int:
+        return random.choice(self.dic[target])
+
+
+# Your Solution object will be instantiated and called as such:
+# obj = Solution(nums)
+# param_1 = obj.pick(target)
+```
+## 357. Count Numbers with Unique Digits
+```
+class Solution:
+    def countNumbersWithUniqueDigits(self, n: int) -> int:
+        if n == 0: return 1
+        # dp[i] is the total number of integer numbers with i distinct digits.
+        dp = [0]*11
+        dp[1] = 10
+        dp[2] = 81
+        for i in range(3, min(11,n+1)):
+            dp[i] = dp[i-1] *(11-i)
+        
+        return sum(dp[:n+1])
+```
+## 313. Super Ugly Number
+
+```
+class Solution:
+    def nthSuperUglyNumber(self, n: int, primes: List[int]) -> int:
+        ugly= [1]
+        idx, candidates = [0]*len(primes), [x for x in primes]
+        while n > 1:
+            m = min(candidates)
+            i = candidates.index(m)
+            idx[i] += 1
+            if m > ugly[-1]:
+                ugly.append(m)
+                n -= 1
+            candidates[i] = ugly[idx[i]] * primes[i]
+            
+        return ugly[-1]
+```
+## 309. Best Time to Buy and Sell Stock with Cooldown
+
+A good example of DP with more than one states to handle.
+
+```
+class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+        if len(prices) < 2: return 0
+        
+        buy, sell = [0] * (len(prices)+2), [0] * (len(prices)+2)
+        buy[1] = -prices[0]
+        for i in range(2, len(buy)):
+            buy[i] = max(sell[i-2]-prices[i-2], buy[i-1])
+            sell[i] = max(buy[i-1]+prices[i-2], sell[i-1])
+        return sell[-1]
+```
