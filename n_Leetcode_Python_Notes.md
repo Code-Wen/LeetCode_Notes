@@ -8108,3 +8108,67 @@ class Solution:
             idx += 1
         return S[:n].count(1)
 ```
+
+## 462. Minimum Moves to Equal Array Elements II
+```
+class Solution:
+    def minMoves2(self, nums: List[int]) -> int:
+        if  len(nums) < 2: return 0
+        
+        nums.sort()
+        n = len(nums)
+        return min(sum([abs(x-nums[n//2]) for x in nums]), sum([abs(x-nums[n//2-1]) for x in nums]))
+```
+
+##  416. Partition Equal Subset Sum
+```
+class Solution:
+    def canPartition(self, nums: List[int]) -> bool:
+        Sum = sum(nums)
+        if Sum%2 == 1: return False
+        
+        target = Sum/2
+        obtainable = {0}
+        for n in nums:
+            if target in obtainable:
+                return True
+            obtainable |= {n+x for x in obtainable}
+        return False
+```
+## 470. Implement Rand10() Using Rand7()
+```
+# The rand7() API is already defined for you.
+# def rand7():
+# @return a random integer in the range 1 to 7
+
+class Solution:
+    def rand10(self):
+        """
+        :rtype: int
+        """
+        i = rand7()
+        while i == 7:
+            i = rand7()
+        x = i%2
+        y = rand7()
+        while y > 5:
+            y = rand7()
+        return x*5+y
+ ```
+
+## 452. Minimum Number of Arrows to Burst Balloons
+ ```
+ class Solution:
+    def findMinArrowShots(self, points: List[List[int]]) -> int:
+        points.sort(key = lambda x: x[1])
+        res, i = 0, 0
+        while i < len(points):
+            res, right_bd = res + 1, points[i][1]
+            while i+1<len(points) and points[i+1][0] <= right_bd:
+                right_bd = min(right_bd, points[i+1][1])
+                i += 1
+            i += 1
+        return res
+```
+
+
