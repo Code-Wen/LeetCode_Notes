@@ -8170,5 +8170,60 @@ class Solution:
             i += 1
         return res
 ```
+## 450. Delete Node in a BST
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
 
+class Solution:
+    def deleteNode(self, root: TreeNode, key: int) -> TreeNode:
+        if not root: return 
+        
+        sentinel = TreeNode(float('inf'))
+        sentinel.left = root
+        
+        pre, cur = sentinel, root
+        while cur and cur.val != key:
+            if cur.val > key:
+                pre, cur = cur, cur.left
+            else:
+                pre, cur = cur, cur.right
+        if not cur: return root
+        
+        if cur.right: # use the minimal node from right to replace
+            (cur.val, cur.right) = self.removeMin(cur.right)
+        elif cur.left and not cur.right: # use the max node from left to replace
+            (cur.val, cur.left) = self.removeMax(cur.left)
+        else:
+            if pre.val > key:
+                pre.left = None
+            else:
+                pre.right = None
+        return sentinel.left
+    
+    def removeMin(self, root):
+        # we assume tree is not empty
+        if not root.left: return (root.val, root.right)
+        else:
+            pre, cur = root, root.left
+            while cur.left:
+                pre, cur = cur, cur.left
+            Min = cur.val
+            pre.left = cur.right
+            return (Min, root)
+        
+    def removeMax(self, root):
+        if not root.right: return (root.val, root.left)
+        else:
+            pre, cur = root, root.right
+            while cur.right:
+                pre, cur = cur, cur.right
+            Max = cur.val
+            pre.right = cur.left
+            return (Max, root)
+```
 
