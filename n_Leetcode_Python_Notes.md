@@ -7975,3 +7975,136 @@ class Solution:
                 stack += node.children
         return res[::-1]
 ```
+## 494. Target Sum
+
+Brute-force:
+
+```
+class Solution:
+    def findTargetSumWays(self, nums: List[int], S: int) -> int:
+        if not nums:
+            if S == 0: return 1
+            else: return 0
+        return self.findTargetSumWays(nums[1:], S-nums[0])+self.findTargetSumWays(nums[1:], S+nums[0])
+```
+
+
+DP:
+```
+class Solution:
+    def findTargetSumWays(self, nums: List[int], S: int) -> int:
+        # Idea: from left to right, we add nums[i] into
+        # consideration. Each time, we use a dictionary to record 
+        # the possible outcome (key) and how many ways to come up with 
+        # each outcome (value) using the first several numbers.
+        
+        if not nums: return 0
+        if nums[0] == 0:
+            dic = {0:2}
+        else: dic = {nums[0]:1, -nums[0]:1}
+        
+        for x in nums[1:]:
+            temp = {}
+            for d in dic:
+                temp[d+x] = temp.get(d+x, 0) + dic[d]
+                temp[d-x] = temp.get(d-x, 0) + dic[d]
+            dic = temp
+        return dic.get(S, 0)
+```
+
+## 413. Arithmetic Slices
+```
+class Solution:
+    def numberOfArithmeticSlices(self, A: List[int]) -> int:
+        if len(A) < 3: return 0
+        # compute the differences between adjacent numbers
+        diff = [A[i]-A[i-1] for i in range(1, len(A))]
+        i, lengths = 0, []
+
+        # go through the list of differences to find the lengths of the maximal contigent arithmetic sublists
+        # Here our 'l' is actually length-1
+        while i<len(diff):
+            l = 1
+            while i+1<len(diff) and diff[i+1]==diff[i]:
+                i, l = i+1, l+1
+            if l > 1:
+                lengths.append(l)
+            i += 1
+        
+        return sum([l*(l-1)//2 for l in lengths])
+```
+## 486. Predict the Winner
+```
+class Solution:
+    def PredictTheWinner(self, nums: List[int]) -> bool:
+        # dp[start][end] = max total for the first player using nums[start:end+1], assuming both played optimally.
+        # dp[i][j] = max(sum(nums[i:j+1])-dp[i+1][j], sum(nums[i:j+1])-dp[i][j-1])
+
+        n = len(nums)
+        dp = [[0]*n for _ in range(n)]
+        left_sums = [0]*n
+        left_sums[0] = nums[0]
+        for i in range(1,n):
+            left_sums[i] = nums[i]+left_sums[i-1]
+        for j in range(n):
+            for i in range(j, -1, -1):
+                if i==j:
+                    dp[i][j] = nums[i]
+                else:
+                    if i > 0:
+                        total = left_sums[j]-left_sums[i-1]
+                    else: total = left_sums[j]
+                    dp[i][j] = max(total-dp[i+1][j], total-dp[i][j-1])
+        return dp[0][n-1]*2 >= left_sums[-1]
+```
+
+
+## 498. Diagonal Traverse
+
+```
+class Solution:
+    def findDiagonalOrder(self, matrix: List[List[int]]) -> List[int]:
+        if not matrix or not matrix[0]: return []
+        
+        res = []
+        m, n, up = len(matrix), len(matrix[0]), 1
+        i, j = 0, 0
+        while i < m-1 or j < n-1:
+            
+            if up:
+                while i-1>=0 and j+1 < n:
+                    res.append(matrix[i][j])
+                    (i, j) = (i-1,j+1)
+                    
+                res.append(matrix[i][j])
+                if i == 0 and j+1 < n:
+                    j = j+1
+                else:
+                    i = i+1
+                up = 0
+            else:
+                while i+1 < m and j-1>=0:
+                    res.append(matrix[i][j])
+                    (i,j) = (i+1, j-1)
+                    
+                res.append(matrix[i][j])
+                if j == 0 and i+1 < m:
+                    i = i+1
+                else:
+                    j = j+1
+                up = 1
+        res.append(matrix[i][j])
+        return res
+```
+
+## 481. Magical String
+```
+class Solution:
+    def magicalString(self, n: int) -> int:
+        S = [1,2,2]
+        idx = 2
+        while len(S) < n:
+            S += [3-S[-1]]*S[idx]
+            idx += 1
+        return S[:n].count(1)
+```
