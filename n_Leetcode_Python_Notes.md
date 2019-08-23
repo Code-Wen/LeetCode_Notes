@@ -8226,4 +8226,18 @@ class Solution:
             pre.right = cur.left
             return (Max, root)
 ```
+## 477. Total Hamming Distance
+```
+class Solution:
+    def totalHammingDistance(self, nums: List[int]) -> int:
+        if not nums: return 0
+        n, k = len(nums), len(bin(max(nums)))-2
+        counts = [0] * k
+        for num in nums:
+            s = bin(num)[2:][::-1]
+            for i in range(len(s)):
+                if s[i] == '1':
+                    counts[i] += 1
+        return sum([x*(n-x) for x in counts])
+```
 
