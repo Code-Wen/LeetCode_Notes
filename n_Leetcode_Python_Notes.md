@@ -8241,3 +8241,104 @@ class Solution:
         return sum([x*(n-x) for x in counts])
 ```
 
+## 784. Letter Case Permutation
+```
+class Solution:
+    def letterCasePermutation(self, S: str) -> List[str]:
+        if not S: return []
+        res = ['']
+        for letter in S:
+            if letter.isdigit():
+                res = [x+letter for x in res]
+            else:
+                res = [x+l for x in res for l in [letter.lower(), letter.upper()]]
+        return res
+```
+
+## 421. Maximum XOR of Two Numbers in an Array
+
+Explanation link: https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array/discuss/171747/Python-O(n)-solution-easily-explained
+General form of solution is to find two numbers which have the highest bits complementing each other (0 and 1). Then store that max, look at the next less significant bit and see if another two numbers complement each other (which includes the bits sets from the previous max). If so, this number will
+be greater than the previous maximum. Steps:
+
+Find the new possible maximum by setting the next bit to 1 on the current maximum
+use a mask with all 1s up to the current bit i and & all numbers with this mask to see which bit in that number up to bit i are set as 1.
+Critical part: to solve this in O(n) it's important to know that If a ^ b = c, then a ^ c = b and c ^ b = a. So, if we are looking for a particular number (in our case a possible maximum) we can do the following search: iterate in the numbers that we &'d with the mask. If our potental maximum is c, and our current number is a, we're looking for another number b that XOR'd with a gives c. Since we also know from above that a ^ c = b, we can just look for b it directly in our numbers (i.e. b = a ^ c, or in my code, bit ^ possible_mx).
+
+```
+class Solution:
+    def findMaximumXOR(self, nums: List[int]) -> int:
+        res, mask = 0, 0
+        for i in range(31, -1 ,-1):
+            temp_max, mask = res | 1<<i, mask | 1 << i
+            bits = set()
+            for n in nums:
+                bits.add(n & mask)
+            for bit in bits:
+                if bit ^ temp_max in bits:
+                    res = temp_max
+                    break
+        return res
+```
+## 458. Poor Pigs
+
+[Explanation:](https://leetcode.com/problems/poor-pigs/discuss/94266/Another-explanation-and-solution)
+
+```
+class Solution:
+    def poorPigs(self, buckets: int, minutesToDie: int, minutesToTest: int) -> int:
+        pigs, trial_num = 0, minutesToTest//minutesToDie+1
+        while trial_num ** pigs < buckets:
+            pigs += 1
+        return pigs
+```
+## 464. Can I Win
+
+Just a recursive brute-force with cache to save time.
+```
+class Solution:
+    def canIWin(self, maxChoosableInteger: int, desiredTotal: int) -> bool:
+        seen = {}
+
+        def can_win(choices, remainder):
+            # if the largest choice exceeds the remainder, then we can win!
+            if choices[-1] >= remainder:
+                return True
+
+            # if we have seen this exact scenario play out, then we know the outcome
+            seen_key = tuple(choices)+ (remainder,)
+            if seen_key in seen:
+                return seen[seen_key]
+
+            # we haven't won yet.. it's the next player's turn.
+            # importantly, if we win just one permutation then
+            # we're still on our way to being able to 'force their hand'
+            for index in range(len(choices)):
+                if not can_win(choices[:index] + choices[index + 1:], remainder - choices[index]):
+                    seen[seen_key] = True
+                    return True
+
+            # uh-oh if we got here then next player won all permutations, we can't force their hand
+            # actually, they were able to force our hand :(
+            seen[seen_key] = False
+            return False
+
+
+        # note: usefully, choices is already sorted
+        choices = list(range(1, maxChoosableInteger + 1))
+
+        # let's do some quick checks before we journey through the tree of permutations
+        summed_choices = sum(choices)
+
+        # if all the choices added up are less then the total, no-one can win
+        if summed_choices < desiredTotal:
+            return False
+
+        # if the sum matches desiredTotal exactly, then as
+        # long as there is an odd number of choices then first player wins
+        if summed_choices == desiredTotal and len(choices) % 2:
+            return True
+
+        # slow: time to go through the tree of permutations
+        return can_win(choices, desiredTotal)
+```
