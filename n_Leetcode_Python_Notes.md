@@ -8342,3 +8342,73 @@ class Solution:
         # slow: time to go through the tree of permutations
         return can_win(choices, desiredTotal)
 ```
+## 86. Partition List
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def partition(self, head: ListNode, x: int) -> ListNode:
+        """
+        Use two linked lists to store the nodes less than x and the nodes greater than or equal to x, respectively
+        """
+        if not head: return head
+        
+        sentinel1 = ListNode(1)
+        sentinel2 = ListNode(2)
+        node1, node2 = sentinel1, sentinel2
+        cur, nxt = head, head.next
+        
+        while cur:
+            nxt = cur.next
+            if cur.val < x:
+                node1.next = cur
+                node1 = cur
+            else:
+                node2.next = cur
+                node2 = cur
+            cur.next = None
+            cur = nxt
+            
+        if sentinel1.next:
+            node1.next = sentinel2.next
+            return sentinel1.next
+        else:
+            return sentinel2.next
+```
+## 127. Word Ladder
+
+The most beautiful part of this answer lies in the construction of the function `construct_dict`, which gives a quick access of the fact whether two words are adjacent or not (i.e. can be changed from one to another by just changing a single letter).
+```
+class Solution:
+    def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
+        def construct_dict(word_list):
+            d = {}
+            for word in word_list:
+                for i in range(len(word)):
+                    s = word[:i] + "_" + word[i+1:]
+                    d[s] = d.get(s, []) + [word]
+            return d
+            
+        def bfs_words(begin, end, dict_words):
+            queue, visited = collections.deque([(begin, 1)]), set()
+            while queue:
+                word, steps = queue.popleft()
+                if word not in visited:
+                    visited.add(word)
+                    if word == end:
+                        return steps
+                    for i in range(len(word)):
+                        s = word[:i] + "_" + word[i+1:]
+                        neigh_words = dict_words.get(s, [])
+                        for neigh in neigh_words:
+                            if neigh not in visited:
+                                queue.append((neigh, steps + 1))
+            return 0
+        
+        d = construct_dict(set(wordList))
+        return bfs_words(beginWord, endWord, d)
+```
