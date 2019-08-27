@@ -8412,3 +8412,21 @@ class Solution:
         d = construct_dict(set(wordList))
         return bfs_words(beginWord, endWord, d)
 ```
+## 390. Elimination Game
+```
+class Solution:
+    def lastRemaining(self, n: int) -> int:
+        return self.helper(n, True)
+        
+    def helper(self, n, L2R):
+        if n==1: return 1
+        # if from left to right, simply remove all the odd numbers
+        if L2R:
+            return 2*self.helper(n//2, False)
+        # if from right to left and length is odd, again remove odd numbers
+        elif n%2 == 1:
+            return 2*self.helper(n//2, True)
+        # if from right to left and length is even, remove even numbers
+        else:
+            return 2*self.helper(n//2, True)-1
+```
