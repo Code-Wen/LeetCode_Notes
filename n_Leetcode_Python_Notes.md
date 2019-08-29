@@ -8430,3 +8430,481 @@ class Solution:
         else:
             return 2*self.helper(n//2, True)-1
 ```
+## 611. Valid Triangle Number
+```
+class Solution:
+    def triangleNumber(self, nums: List[int]) -> int:
+        res, n = 0, len(nums)
+        nums.sort()
+        for i in range(n-1, 1, -1):
+            low, hi = 0, i-1
+            while low < hi:
+                if nums[low]+nums[hi] > nums[i]:
+                    res += hi-low
+                    hi -= 1
+                else:
+                    low += 1
+        return res
+```
+
+## 228. Summary Ranges
+```
+class Solution:
+    def summaryRanges(self, nums: List[int]) -> List[str]:
+        # use a dictionary to store the ranges. The key is the current right end point of the interval + 1 (end+1), and the key is the current left end pointof the interval (start).
+        # This works for not sorted arrays as well.
+
+        d, res = {}, []
+        for n in nums:
+            if n in d:
+                start = d.pop(n)
+                d[n+1] = start
+            else:
+                d[n+1] = n
+        for key in d:
+            if d[key] == key-1:
+                res.append(str(key-1))
+            else:
+                res.append(str(d[key])+'->'+str(key-1))
+        return res
+```
+
+## 93. Restore IP Addresses
+```
+class Solution:
+    def restoreIpAddresses(self, s: str) -> List[str]:
+        # A valid IP address consists of four numbers, each between 0 and 255 inclusive, separated by dot. 0 can only be the leading digit if the number is 0.
+        # Typical DFS.
+        self.res = []
+        self.dfs(s, [])
+        return ['.'.join(path) for path in self.res]
+        
+    def dfs(self, s, path):
+        if len(s) > (4-len(path))*3:
+            return 
+        if not s and len(path) == 4:
+            self.res.append(path)
+            return
+        for i in range(1, min(4, len(s)+1)):
+            if 0 <= int(s[:i]) <= 255:
+                self.dfs(s[i:], path+[str(s[:i])])
+            else:
+                break
+            if (i == 1 and s[:i]=='0'):
+                break
+```
+## 130. Surrounded Regions
+
+```
+class Solution:
+    def solve(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+        if not board or not board[0]: return
+        
+        m, n = len(board), len(board[0])
+        self.record = [[0]*n for _ in range(m)]
+        
+        def dfs(board, i, j):
+            self.record[i][j] = 1
+            stack = [(i,j)]
+            while stack:
+                (x,y) = stack.pop()
+                if x-1 >= 0 and board[x-1][y]=='O' and self.record[x-1][y] == 0: 
+                    self.record[x-1][y] = 1
+                    stack.append((x-1, y))
+                if x+1 < m and board[x+1][y]=='O' and self.record[x+1][y] == 0: 
+                    self.record[x+1][y] = 1
+                    stack.append((x+1, y))
+                if y-1 >= 0 and board[x][y-1]=='O' and self.record[x][y-1] == 0: 
+                    self.record[x][y-1] = 1
+                    stack.append((x, y-1))
+                if y+1 < n and board[x][y+1]=='O' and self.record[x][y+1] == 0: 
+                    self.record[x][y+1] = 1
+                    stack.append((x, y+1))
+            return 
+    
+        for i in [0,m-1]:
+            for j in range(1, n-1):
+                if board[i][j] == 'O' and not self.record[i][j]:
+                    dfs(board, i,j)
+        for j in [0,n-1]:
+            for i in range(m):
+                if board[i][j]=='O' and not self.record[i][j]:
+                    dfs(board, i, j)
+        for i in range(m):
+            for j in range(n):
+                if self.record[i][j]==0:
+                    board[i][j] = 'X'
+        return 
+```
+## 134. Gas Station
+
+Here is a quick proof of the statement: if the total sum of `gas[i]-cost[i]` is nonnegative, then there exists a solution.
+
+Suppose the sum of all terms of the form gas[i]-cost[i] is greater than or equal to 0. Choose an index i_0 such that starting from i_0 in the clockwise direction we obtain the largest possible partial sum of the form gas[i_0]-cost[i_0]+gas[i_0+1]-cost[i_0+1]+...+gas[i_1]-cost[i_1], among all possible choice of i_0 and i_1(here we are imagine the indices are all mode len(gas), thus a circle), denote this partial sum by S.
+
+We claim that i_0 is a solution (we do not assume uniqueness of the solution).
+
+Suppose it is not the case. Then either we can find an index i_2 between i_0 and i_1, or between i_1 and i_0 (remember, we are considering a circle, so the order matters!), such that the partial sum from i_0 to i_2 is less than 0, then one can easily construct a contradiction. If i_2 in between i_0 and i_1, we simply consider the partial sum from i_2+1 to i_1, which is S plus some positive number, contradicting that S is the largest partial sum. If i_2 lies in between i_1 and i_0, then, since the total sum is nonnegative, we know that the partial sum from i_2+1 to i_0 is strictly positive, thus, the partial sum from i_2+1 to i_1 is again strictly greater than S, again contradicts our assumption that S is maximal.
+```
+class Solution:
+    def canCompleteCircuit(self, gas: List[int], cost: List[int]) -> int:
+        res, net, total = 0, 0, 0
+        for i in range(len(gas)):
+            net += gas[i] - cost[i]
+            if net < 0:
+                total +=  net
+                net = 0
+                res = i+1
+        total += net
+        if total < 0: return -1
+        
+        return res
+```
+
+## 133. Clone Graph
+```
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val, neighbors):
+        self.val = val
+        self.neighbors = neighbors
+"""
+class Solution:
+    def cloneGraph(self, node: 'Node') -> 'Node':
+        copied = {}
+        res = Node(node.val,[])
+        copied[node] = res
+        stack=[node]
+        while stack:
+            origin = stack.pop()
+            copy = copied[origin]
+            for neighbor in origin.neighbors:
+                if neighbor not in copied:
+                    copy_neighbor = Node(neighbor.val,[])
+                    copied[neighbor]=copy_neighbor
+                    stack.append(neighbor)
+                else:
+                    copy_neighbor = copied[neighbor]
+                copy.neighbors.append(copy_neighbor)
+        return res
+```
+## 138. Copy List with Random Pointer
+
+```
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val, next, random):
+        self.val = val
+        self.next = next
+        self.random = random
+"""
+class Solution:
+    def copyRandomList(self, head: 'Node') -> 'Node':
+        if not head:
+            return None
+        cur,dic = head, {}
+        # copy nodes:
+        while cur:
+            dic[cur] = Node(cur.val, None, None)
+            cur = cur.next
+        # copy next and random attributes
+        cur = head
+        while cur:
+            if cur.next:
+                dic[cur].next = dic[cur.next]
+            if cur.random:
+                dic[cur].random = dic[cur.random]
+            cur = cur.next
+        return dic[head]
+```
+
+## 115. Distinct Subsequences
+
+Brute-force recursive solution:
+
+```
+class Solution:
+    def numDistinct(self, s: str, t: str) -> int:
+        return self.distinctCount(s, 0, t, 0)
+    
+    def distinctCount(self, s, pos1, target, pos2):
+        '''
+        Count the number of disctinct subsequences of s[pos1:] which equals target[pos2:].
+        '''
+        if len(target)-pos2 > len(s)-pos1:
+            return 0
+        if pos2 == len(target)-1:
+            return s[pos1:].count(target[-1])
+        
+        res = 0
+        for i in range(pos1, len(s)):
+            if s[i] != target[pos2]: continue
+            else:
+                res += self.distinctCount(s, i+1, target, pos2+1)
+        return res
+```
+
+Another solution using hash maps. Idea is that go through `s` to generate a dictionary whose keys are letters in `s` and the values are the positions of the letters. Then we just need to count how many strictly increasing sequences we can generate by `d[s[1]], d[s[2]],...,d[s[-1]]`.
+
+```
+class Solution:
+    def numDistinct(self, s: str, t: str) -> int:
+        d = {}
+        for i in range(len(s)):
+            d[s[i]] = d.get(s[i],[])+[i]
+        for letter in set(t):
+            if len(d.get(letter,[])) < t.count(letter):
+                return 0
+        return len(self.generateIncreasingTuples(d, t))
+    def generateIncreasingTuples(self, d, t):
+        res = [[-1]]
+        for letter in t:
+            res += [s+[x] for s in res for x in d[letter] if s[-1] < x]
+        return [x for x in res if len(x) == len(t)+1]
+```
+
+Turns out it is another DP problem:
+
+```
+class Solution:
+    def numDistinct(self, s: str, t: str) -> int:
+        sl, tl = len(s), len(t)
+        if tl > sl: return 0
+        
+        # dp[i][j] equals the number of matches between s[:i] and t[:j]
+        dp = [[0]*(tl+1) for _ in range(sl+1)]
+        # if j==0, t[:0] is empty string, automatically matches with all
+        for i in range(sl+1):
+            dp[i][0] = 1
+        for j in range(1, tl+1):
+            for i in range(1,sl+1):
+                if s[i-1]==t[j-1]:
+                    dp[i][j] = dp[i-1][j]+dp[i-1][j-1]
+                else:
+                    dp[i][j] = dp[i-1][j]
+        return dp[-1][-1]
+```
+## 164. Maximum Gap
+```
+class Solution:
+    def maximumGap(self, nums: List[int]) -> int:
+        if len(nums)<2: return 0
+        
+        nums = self.radixSort(nums)
+        return max(nums[i+1]-nums[i] for i in range(len(nums)-1))
+        
+    def radixSort(self, nums):
+        k = len(bin(max(nums)))-2
+        for i in range(k):
+            mask = 1 << i
+            zeros, ones = [], []
+            for n in nums:
+                if n & mask:
+                    ones.append(n)
+                else:
+                    zeros.append(n)
+            nums = zeros + ones
+        return nums
+```
+## 223. Rectangle Area
+```
+class Solution:
+    def computeArea(self, A: int, B: int, C: int, D: int, E: int, F: int, G: int, H: int) -> int:
+        return (C-A)*(D-B)+(G-E)*(H-F)-self.overlapArea(A,B,C,D,E,F,G,H)
+    
+    def overlapArea(self, A, B, C,D,E,F,G,H):
+        if A <= E <= C:
+            left, right = E, min(C, G)
+        elif E <= A <= G:
+            left, right = A, min(C,G)
+        else:
+            return 0
+        
+        if B <= F <= D:
+            low, high = F, min(H, D)
+        elif F <= B <= H:
+            low, high = B, min(H, D)
+        else:
+            return 0
+        return (right-left)*(high-low)
+```
+## 229. Majority Element II
+Boyer-Moore Majority Vote algorithm: see [link](http://goo.gl/64Nams)
+Can be easily generalized to work for any number of majority vote.
+```
+class Solution:
+    def majorityElement(self, nums: List[int]) -> List[int]:
+
+        cand1, cand2, cnt1, cnt2 = 0,1,0,0
+        for n in nums:
+            if n==cand1: cnt1 += 1
+            elif n==cand2: cnt2 += 1
+            elif cnt1==0: cand1, cnt1 = n, 1
+            elif cnt2==0: cand2, cnt2 = n, 1
+            else:
+                cnt1 -= 1
+                cnt2 -= 1
+        return [x for x in (cand1,cand2) if nums.count(x) > len(nums)//3]
+```
+## 304. Range Sum Query 2D - Immutable
+
+Perfect example of trade off between space and time.
+```
+class NumMatrix:
+
+    def __init__(self, matrix: List[List[int]]):
+        self.sums = matrix
+        if matrix and matrix[0]:
+            # self.sums record the sums from (0,0) to (i,j)
+            for i in range(1,len(matrix)):
+                self.sums[i][0] += self.sums[i-1][0]
+            for j in range(1, len(matrix[0])):
+                self.sums[0][j] += self.sums[0][j-1]
+            for i in range(1,len(matrix)):
+                for j in range(1,len(matrix[0])):
+                    self.sums[i][j] = self.sums[i][j]+self.sums[i-1][j]+self.sums[i][j-1]-self.sums[i-1][j-1]
+
+                
+
+    def sumRegion(self, row1: int, col1: int, row2: int, col2: int) -> int:
+        if (row1,col1)==(0,0): return self.sums[row2][col2]
+        elif row1==0:
+            return self.sums[row2][col2] - self.sums[row2][col1-1]
+        elif col1 == 0:
+            return self.sums[row2][col2]-self.sums[row1-1][col2]
+        else:
+            return self.sums[row2][col2]+self.sums[row1-1][col1-1]-self.sums[row1-1][col2]-self.sums[row2][col1-1]
+
+
+# Your NumMatrix object will be instantiated and called as such:
+# obj = NumMatrix(matrix)
+# param_1 = obj.sumRegion(row1,col1,row2,col2)
+```
+## 324. Wiggle Sort II
+
+Note: this is not a O(n) solution as wanted.
+
+```
+class Solution:
+    def wiggleSort(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        arr = sorted(nums)
+        for i in range(1, len(nums), 2): nums[i] = arr.pop() 
+        for i in range(0, len(nums), 2): nums[i] = arr.pop()
+```
+
+## 372. Super Pow
+```
+class Solution:
+    def superPow(self, a: int, b: List[int]) -> int:
+        # note that 1337 = 7*91, a product of two primes
+        # We use Fermat's Little Thm and Chinese Reminder Thm 
+
+        a = a % 1337
+        b1, b2 = 0, 0
+        for i in b:
+            b1, b2 = (b1*10+i)%6, (b2*10+i)%190
+        
+        if a%7==0: r1 = 0
+        else: r1 = (a**(b1))%7
+        if a%191==0: r2 = 0
+        else: r2 = (a**(b2))%191
+            
+        x1,x2 = 1, 1
+        while (x1*191)%7 != 1:
+            x1 += 1
+        while (x2*7)%191 != 1:
+            x2 += 1
+        return (x1*191*r1+x2*7*r2)%1337
+```
+## 322. Coin Change
+
+```
+class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        if amount == 0:
+            return 0
+        dp = [-1]*(amount+1)
+        dp[0] = 0
+        for x in coins:
+            if x <= amount:
+                dp[x] = 1
+        for i in range(1, amount+1):
+            temp = [dp[i-x]+1 for x in coins if i-x >= 0  and dp[i-x]>=0]
+            if temp: 
+                dp[i] = min(temp)
+        return dp[-1]
+```
+## 983. Minimum Cost For Tickets
+```
+class Solution:
+    def mincostTickets(self, days: List[int], costs: List[int]) -> int:
+        d = {n:1 for n in days}
+        dp = [0]*(days[-1]+1)
+        for i in range(1,len(dp)):
+            if i not in d:
+                dp[i] = dp[i-1]
+            else:
+                dp[i] = min(dp[max(0,i-1)]+costs[0],dp[max(0,i-7)]+costs[1],dp[max(0,i-30)]+costs[2])
+        return dp[-1]
+```
+## 368. Largest Divisible Subset
+
+A O(n^2) DP solution:
+```
+class Solution:
+    def largestDivisibleSubset(self, nums: List[int]) -> List[int]:
+        if not nums: return []
+        
+        dp = [0]*len(nums)
+        nums.sort()
+        dp[0] =[nums[0]]
+        for i in range(1, len(nums)):
+            temp = []
+            for j in range(i):
+                if len(dp[j]) > len(temp) and nums[i]%nums[j]==0:
+                    temp = dp[j].copy()
+            dp[i] = temp+[nums[i]]
+        
+        res = []
+        for i in range(len(nums)):
+            if len(dp[i]) > len(res):
+                res = dp[i]
+        return res
+
+```
+Same idea as above, but notice that we don't need to record the paths. We simply use `dp[i]` to record the length of the longest path ends at `nums[i]`.
+```
+class Solution:
+    def largestDivisibleSubset(self, nums: List[int]) -> List[int]:
+        if not nums: return []
+        
+        dp = [0]*len(nums)
+        nums.sort()
+        dp[0] = 1
+        for i in range(1, len(nums)):
+            l = 0
+            for j in range(i-1,-1, -1):
+                if dp[j] > l and nums[i]%nums[j]==0:
+                    l = dp[j]
+            dp[i] = l+1
+        
+        max_length = max(dp)
+        res, pos = [], dp.index(max_length)
+        while max_length > 0:
+            res.append(nums[pos])
+            max_length -= 1
+            if max_length == 0: break
+                
+            prev, pos = pos, dp.index(max_length)
+            while nums[prev]%nums[pos] != 0:
+                pos = dp.index(max_length, pos+1)
+        return res[::-1]
+```
