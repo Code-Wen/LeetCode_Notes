@@ -8908,3 +8908,214 @@ class Solution:
                 pos = dp.index(max_length, pos+1)
         return res[::-1]
 ```
+
+## 139. Word Break
+
+Brute-force recursive solution: 
+```
+class Solution:
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        d = {w:1 for w in wordDict}
+        
+        def dfs(s, d):
+            if s == '': return True
+            
+            for i in range(len(s)):
+                if s[:i+1] in d:
+                    if dfs(s[i+1:], d):
+                        return True
+                    else: continue
+            return False
+        
+        return dfs(s, d)
+```
+
+DP
+```
+class Solution:
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        d = {w:1 for w in wordDict}
+        
+        dp = [0]*(len(s)+1)
+        dp[0] = 1
+        for i in range(1, len(s)+1):
+            for j in range(i, -1, -1):
+                if dp[j] & (s[j:i] in d): 
+                    dp[i] = 1
+                    break
+        return dp[-1]
+```
+## 143. Reorder List
+Time O(n), space O(n) solution:
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def reorderList(self, head: ListNode) -> None:
+        """
+        Do not return anything, modify head in-place instead.
+        
+        """
+        if not head: return 
+        
+        deq = collections.deque()
+        node = head
+        while node:
+            deq.append(node)
+            node = node.next
+        
+        prev = deq.popleft()
+        end = 1
+        while deq:
+            if end == 1:
+                cur = deq.pop()
+            else:
+                cur = deq.popleft()
+            prev.next, cur.next = cur, None
+            prev = cur
+            end = (end+1)%2
+```
+Time O(n), space O(1) solution:
+```
+# Splits in place a list in two halves, the first half is >= in size than the second.
+# @return A tuple containing the heads of the two halves
+def _splitList(head):
+    fast = head
+    slow = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next
+        fast = fast.next
+
+    middle = slow.next
+    slow.next = None
+
+    return head, middle
+
+# Reverses in place a list.
+# @return Returns the head of the new reversed list
+def _reverseList(head):
+
+  last = None
+  currentNode = head
+
+  while currentNode:
+    nextNode = currentNode.next
+    currentNode.next = last
+    last = currentNode
+    currentNode = nextNode
+
+  return last
+
+# Merges in place two lists
+# @return The newly merged list.
+def _mergeLists(a, b):
+
+    tail = a
+    head = a
+
+    a = a.next
+    while b:
+        tail.next = b
+        tail = tail.next
+        b = b.next
+        if a:
+            a, b = b, a
+            
+    return head
+
+
+class Solution:
+
+    # @param head, a ListNode
+    # @return nothing
+    def reorderList(self, head):
+
+        if not head or not head.next:
+            return
+
+        a, b = _splitList(head)
+        b = _reverseList(b)
+        head = _mergeLists(a, b)
+```
+## 147. Insertion Sort List
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def insertionSortList(self, head: ListNode) -> ListNode:
+        if not head: return head
+        
+        sentinel = ListNode(float('-inf'))
+        sentinel.next = head
+        prev, cur = head, head.next
+        while cur:
+            if cur.val >= prev.val:
+                prev, cur = cur, cur.next
+            else:
+                tmp_prev, tmp = sentinel, sentinel.next
+                while tmp.val < cur.val:
+                    tmp_prev, tmp = tmp, tmp.next
+                prev.next = cur.next
+                tmp_prev.next, cur.next = cur, tmp 
+                cur = prev.next
+        return sentinel.next
+```
+## 179. Largest Number
+
+Remark: this is essentially a sorting problem. One just replaces the usual compare between two integers by a new partial order, thus the best solution is O(n lg n).
+```
+class Solution:
+    def largestNumber(self, nums: List[int]) -> str:
+        res = ''
+        nums = nums
+        for i in range(1,len(nums)):
+            cur = str(nums[i])
+            j = i-1
+            while j >= 0:
+                temp = str(nums[j])
+                if int(cur+temp) < int(temp+cur):
+                    nums[j+1], nums[j] = nums[j], nums[j+1]
+                    j -= 1
+                else:
+                    break
+        for n in nums[::-1]:
+            res += str(n)
+        return res if res[0]!='0' else '0'
+```
+## 146. LRU Cache
+
+```
+class LRUCache:
+
+    def __init__(self, capacity: int):
+        self.store = {}
+        self.cnt = 0
+        self.cap = capacity
+        
+
+    def get(self, key: int) -> int:
+        if key not in self.store:
+            return -1
+        else:
+            self.cnt += 1
+            self.store[key][1] = self.cnt 
+            return self.store[key][0]
+
+    def put(self, key: int, value: int) -> None:
+        self.cnt += 1
+        if len(self.store) == self.cap and key not in self.store:
+            discard = min(self.store, key=lambda k:self.store[k][1] )
+            del self.store[discard]
+        
+        self.store[key] = [value, self.cnt]
+```
