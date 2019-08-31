@@ -6754,25 +6754,33 @@ class Solution:
 Direct method, use an extra matrix of the same size.
 ```
 class Solution:
-    def gameOfLife(self, board: List[List[int]]) -> None:
-        """
-        Do not return anything, modify board in-place instead.
-        """
-        m, n = len(board), len(board[0])
-        res = [[0]*n for _ in range(m)]
-        
+    def gameOfLife(self, board):
+        m,n = len(board), len(board[0])
         for i in range(m):
             for j in range(n):
-                cnt = 0
-                for s in [i-1,i,i+1]:
-                    for t in [j-1,j,j+1]:
-                        if s < m and s>=0 and 0 <= t and t< n and not (s==i and t==j):
-                            cnt += board[s][t]
-                if board[i][j]==0:
-                    if cnt == 3: res[i][j] = 1
+                if board[i][j] == 0 or board[i][j] == 2:
+                    if self.nnb(board,i,j) == 3:
+                        board[i][j] = 2
                 else:
-                    if cnt == 2 or cnt == 3: res[i][j] = 1
-        return res
+                    if self.nnb(board,i,j) < 2 or self.nnb(board,i,j) >3:
+                        board[i][j] = 3
+        for i in range(m):
+            for j in range(n):
+                if board[i][j] == 2: board[i][j] = 1
+                if board[i][j] == 3: board[i][j] = 0
+
+    def nnb(self, board, i, j):
+        m,n = len(board), len(board[0])
+        count = 0
+        if i-1 >= 0 and j-1 >= 0:   count += board[i-1][j-1]%2
+        if i-1 >= 0:                count += board[i-1][j]%2
+        if i-1 >= 0 and j+1 < n:    count += board[i-1][j+1]%2
+        if j-1 >= 0:                count += board[i][j-1]%2
+        if j+1 < n:                 count += board[i][j+1]%2
+        if i+1 < m and j-1 >= 0:    count += board[i+1][j-1]%2
+        if i+1 < m:                 count += board[i+1][j]%2
+        if i+1 < m and j+1 < n:     count += board[i+1][j+1]%2
+        return count
 ```
 
 In-place method. The trick is to use the following representations:
@@ -9118,4 +9126,246 @@ class LRUCache:
             del self.store[discard]
         
         self.store[key] = [value, self.cnt]
+```
+
+A much better solution is to use `collections.OrderedDict()`
+```
+class LRUCache:
+
+    def __init__(self, capacity: int):
+        self.dic = collections.OrderedDict()
+        self.remain = capacity
+        
+
+    def get(self, key: int) -> int:
+        if key not in self.dic:
+            return -1
+        v = self.dic.pop(key) 
+        self.dic[key] = v   # set key as the newest one
+        return v
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.dic:    
+            self.dic.pop(key)
+        else:
+            if self.remain > 0:
+                self.remain -= 1  
+            else:  # self.dic is full
+                self.dic.popitem(last=False) 
+        self.dic[key] = value
+```
+
+## 165. Compare Version Numbers
+
+```
+class Solution:
+    def compareVersion(self, version1: str, version2: str) -> int:
+        l1, l2 = version1.split('.'), version2.split('.')
+        for i in range(min(len(l1), len(l2))):
+            if self.compare(l1[i],l2[i]) == 1: return 1
+            elif self.compare(l1[i],l2[i]) == -1: return -1
+            else:
+                continue
+        if len(l1) > len(l2) and any([int(l1[i])>0 for i in range(len(l2), len(l1))]):
+            return 1  
+        elif len(l1) < len(l2) and any([int(l2[i])>0 for i in range(len(l1), len(l2))]):
+            return -1 
+        else:
+            return 0
+    def compare(self, s1, s2):
+        s1, s2 = str(int(s1)), str(int(s2))
+        
+        if int(s1) > int(s2): return 1
+        elif int(s1) < int(s2): return -1
+        else:
+            return 0
+```
+
+## 150. Evaluate Reverse Polish Notation
+```
+class Solution:
+    def evalRPN(self, tokens: List[str]) -> int:
+        stack = []
+        for i in range(len(tokens)):
+            if tokens[i] in '/*+-':
+                n2 = stack.pop()
+                n1 = stack.pop()
+                stack.append(self.binaryCompute(int(n1),int(n2),tokens[i]))
+            else:
+                stack.append(tokens[i])
+        
+        return stack[0]
+        
+    def binaryCompute(self, n1, n2, op):
+        
+        if op == '*':
+            return n1*n2
+        elif op == '+':
+            return n1+n2
+        elif op == '-':
+            return n1-n2
+        else:
+            q = n1/n2
+            return math.floor(q) if q > 0 else math.ceil(q)
+```
+
+## 153. Find Minimum in Rotated Sorted Array
+```
+class Solution:
+    def findMin(self, nums: List[int]) -> int:
+        l, r = 0, len(nums)-1
+        while l <= r:
+            if nums[l] <= nums[r]: return nums[l]
+            
+            mid = (l+r)//2
+            if nums[mid] == nums[l]:
+                return nums[r]
+            elif nums[mid] > nums[l]:
+                l = mid+1
+            else:
+                r = mid
+```
+## 152. Maximum Product Subarray
+
+```
+class Solution:
+    def maxProduct(self, nums: List[int]) -> int:
+        dp = [0]*(len(nums))
+        dp[0] = [nums[0],nums[0]]
+        for i in range(1, len(nums)):
+            temp1, temp2 = dp[i-1][0] * nums[i], dp[i-1][1] * nums[i]
+            dp[i] = [min(temp1, temp2, nums[i]), max(temp1,temp2,nums[i])]
+        return max(dp[i][1] for i in range(len(nums)))
+```
+## 151. Reverse Words in a String
+```
+class Solution:
+    def reverseWords(self, s: str) -> str:
+        vocab = s.split()
+        res = ''
+        for w in vocab[::-1]:
+            res += ' '+w
+        return res[1:]
+```
+## 187. Repeated DNA Sequences
+```
+class Solution:
+    def findRepeatedDnaSequences(self, s: str) -> List[str]:
+        if len(s) < 10: return []
+        
+        history = {}
+        res = []
+        for i in range(9, len(s)):
+            temp = s[i-9:i+1] 
+            if temp in history and history[temp] == 1: 
+                res.append(temp)
+                history[temp] += 1
+            else: history[temp] = history.get(temp,0)+1
+        return res
+```
+
+## 208. Implement Trie (Prefix Tree)
+```
+class TrieNode:
+    
+    def __init__(self, s):
+        self.children = {}
+        self.value = s
+        self.valid = False
+        
+class Trie:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.root = TrieNode("")
+        
+
+    def insert(self, word: str) -> None:
+        """
+        Inserts a word into the trie.
+        """
+        parent = self.root
+        for i in range(len(word)):
+            if word[i] not in parent.children:
+                node = TrieNode(word[:i+1])
+                parent.children[word[i]] = node
+            parent = parent.children[word[i]]
+        parent.valid = True
+
+    def search(self, word: str) -> bool:
+        """
+        Returns if the word is in the trie.
+        """
+        parent = self.root
+        for l in word:
+            if l not in parent.children:
+                return False
+            parent = parent.children[l]
+        return parent.valid
+
+    def startsWith(self, prefix: str) -> bool:
+        """
+        Returns if there is any word in the trie that starts with the given prefix.
+        """
+        parent = self.root
+        for l in prefix:
+            if l not in parent.children:
+                return False
+            parent = parent.children[l]
+        return True
+
+
+# Your Trie object will be instantiated and called as such:
+# obj = Trie()
+# obj.insert(word)
+# param_2 = obj.search(word)
+# param_3 = obj.startsWith(prefix)
+```
+## 306. Additive Number
+```
+class Solution:
+    def isAdditiveNumber(self, num: str) -> bool:
+        if len(num) < 3: return False
+        
+        for i in range(len(num)-2):
+            for j in range(i+1, len(num)-1):
+                s1, s2 = num[:i+1], num[i+1:j+1]
+                if len(str(int(s2))) < j-i: break
+                if self.checkAdditive(s1, s2, num, j+1): return True
+        return False
+        
+    def checkAdditive(self, s1, s2, num, i):
+        '''
+        Check whether num[i:] satisfies the additive property, assuming the previous numbers are already known as strings s1 and s2
+        '''
+        while i < len(num):
+            s3 = self.sum(s1, s2)
+            if s3 != num[i:i+len(s3)]: return False
+            else:
+                i, s1, s2 = i+len(s3), s2, s3
+        return True
+        
+        
+    def sum(self, s1, s2):
+        '''
+        Given two strings of digits, return the sum as string (this would avoid overflow)
+        '''
+        if len(s1) > len(s2):
+            s2 = '0'*(len(s1)-len(s2))+s2
+        else:
+            s1 = '0'*(len(s2)-len(s1))+s1
+        
+        additional, res = 0, ''
+        for i in range(1, len(s2)+1):
+            d1, d2 = int(s1[-i]), int(s2[-i])
+            temp_sum = d1+d2+additional
+            additional = temp_sum//10
+            res = str(temp_sum%10)+res
+                
+        if additional == 1:
+            return '1'+res
+        else: 
+            return res
 ```
