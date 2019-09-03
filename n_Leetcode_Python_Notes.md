@@ -9369,3 +9369,479 @@ class Solution:
         else: 
             return res
 ```
+## 328. Odd Even Linked List
+
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def oddEvenList(self, head: ListNode) -> ListNode:
+        if not head or not head.next: return head
+        even_head = head.next
+        cur_odd, cur_even = head, head.next
+        while cur_even.next and cur_even.next.next:
+            next_odd, next_even = cur_even.next, cur_even.next.next
+            cur_odd.next, cur_even.next = next_odd, next_even
+            cur_odd, cur_even = next_odd, next_even
+        if not cur_even.next: 
+            cur_odd.next = even_head
+        else:
+            cur_odd.next = cur_even.next
+            cur_odd = cur_odd.next
+            # Very import to avoid loops!
+            cur_even.next = None
+            
+            cur_odd.next = even_head
+        return head
+```
+## 319. Bulb Switcher
+```
+class Solution:
+    def bulbSwitch(self, n: int) -> int:
+        # For the ith bulb, whether it will be on or not after n operations, only depends on the total number of divisors(including 1 and i itself): odd -> on, even -> off
+        # The the prime factorization of an integer number tells you that only if when n is a complete square, that its total number of divisors is odd (since every exponent of disctinct prime factors has to be even)
+        
+        return int(math.sqrt(n))
+```
+## 672. Bulb Switcher II
+```
+class Solution:
+    def flipLights(self, n: int, m: int) -> int:
+        # Fact1: it is easy to notice and prove that the status of ith bulb and the (6+i)th are always the same. Moreover, it suffices to consider n <= 3: one can show that if the first three bulbs are X,Y,Z, then the 4-6th are X^Y^Z, Z, Y.
+        
+        # Fact2: given n, the function is an increasing function wrt m: if one get k status with n bulbs and m-1 operations, then for mth operation we can simply choose flipping all the lights, which will given at least k status(but other choices may be able to yield more status).
+        # Fact3: all operations are commutative and applying the same operation twice equals doing nothing. So only need to figure out m < 16.
+        seen = set()
+        for cand in itertools.product((0, 1), repeat = 4):
+            if sum(cand) % 2 == m % 2 and sum(cand) <= m:
+                A = []
+                for i in range(min(n, 3)):
+                    light = 1
+                    light ^= cand[0]
+                    light ^= cand[1] and i % 2
+                    light ^= cand[2] and i % 2 == 0
+                    light ^= cand[3] and i % 3 == 0
+                    A.append(light)
+                seen.add(tuple(A))
+
+        return len(seen)
+```
+## 559. Maximum Depth of N-ary Tree
+```
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val, children):
+        self.val = val
+        self.children = children
+"""
+class Solution:
+    def maxDepth(self, root: 'Node') -> int:
+        if not root: return 0
+        deq = collections.deque()
+        deq.append(root)
+        cnt, depth, next_cnt = 1, 1, 0
+        while deq:
+            node = deq.popleft()
+            cnt -= 1
+            for child in node.children:
+                deq.append(child)
+                next_cnt += 1
+            if cnt == 0 and deq:
+                depth += 1
+                cnt, next_cnt = next_cnt, 0
+        return depth
+```
+## 696. Count Binary Substrings
+```
+class Solution:
+    def countBinarySubstrings(self, s: str) -> int:
+        if len(s) < 2: return 0
+        
+        s += '9'
+        cnt, temp = 1, []
+        for i in range(1,len(s)):
+            if s[i] == s[i-1]:
+                cnt += 1
+            else:
+                temp.append(cnt)
+                cnt = 1
+        
+        res = 0
+        for i in range(0,len(temp)-1):
+            res += min(temp[i], temp[i+1])
+        return res
+```
+
+## 337. House Robber III
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def rob(self, root: TreeNode) -> int:
+        
+        if not root: return 0
+        # dp[node] = max possible profit robbing the subtree with root equal to node.
+        # We go from bottom of the tree up to the top.
+        cnt, next_cnt, queue, stack, dp = 1, 0, collections.deque(), [], {}
+        queue.append(root)
+        while queue:
+            node = queue.popleft()
+            stack.append(node)
+            dp[node] = 0
+            cnt -= 1
+            if node.left:
+                queue.append(node.left)
+                next_cnt += 1
+            if node.right:
+                queue.append(node.right)
+                next_cnt += 1
+            if cnt == 0:
+                cnt, next_cnt = next_cnt, 0 
+        while stack:
+            node = stack.pop()
+            if not node.left and not node.right:
+                dp[node] = node.val
+            else:
+                if node.left:
+                    left_sum = dp[node.left]
+                    left_sum1 = dp[node.left.left] if node.left.left else 0
+                    left_sum2 = dp[node.left.right] if node.left.right else 0
+                else:
+                    left_sum, left_sum1, left_sum2 = 0, 0, 0
+                if node.right:
+                    right_sum = dp[node.right]
+                    right_sum1 = dp[node.right.left] if node.right.left else 0
+                    right_sum2 = dp[node.right.right] if node.right.right else 0
+                else:
+                    right_sum, right_sum1, right_sum2 = 0, 0, 0
+                dp[node] = max(node.val+left_sum1+left_sum2+right_sum1+right_sum2, left_sum+right_sum)
+        return dp[root]
+```
+## 581. Shortest Unsorted Continuous Subarray
+
+```
+class Solution:
+    def findUnsortedSubarray(self, nums: List[int]) -> int:
+        # It suffices to find the left and right position of the continuous subarray which needs to be sorted
+        # For the right position, it will be the largest i such that nums[i] < max(nums[:i]). Left position is similar
+        if len(nums) < 2: return 0
+        
+        m, M, left, right = float('inf'), float('-inf'), len(nums)-1, 0
+        for i in range(len(nums)):
+            if nums[i] < M: right = i
+            if nums[-i-1] > m: left = len(nums)-1-i
+            m, M = min(nums[-i-1],m), max(nums[i],M)
+        if left > right: return 0
+        else: return right - left+1
+```
+## 617. Merge Two Binary Trees
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def mergeTrees(self, t1: TreeNode, t2: TreeNode) -> TreeNode:
+        if t1 and t2:
+            node = TreeNode(t1.val+t2.val)
+            node.left = self.mergeTrees(t1.left, t2.left)
+            node.right = self.mergeTrees(t1.right, t2.right)
+            return node
+        elif t1 and not t2:
+            node = TreeNode(t1.val)
+            node.left = t1.left
+            node.right = t1.right
+            return node
+        elif t2 and not t1:
+            node = TreeNode(t2.val)
+            node.left = t2.left
+            node.right = t2.right
+            return node
+        else:
+            return None
+```
+## 343. Integer Break
+
+O(n^2) solution using direct DP:
+```
+class Solution:
+    def integerBreak(self, n: int) -> int:
+        dp = [1]*(n+1)
+        dp[1], dp[2] = 1, 1
+        for i in range(3, n+1):
+            dp[i] = max([j*max(dp[i-j],i-j) for j in range(1, i)])
+        return dp[-1]
+```
+O(n) solution: the key observation is that one only need to consider breaking the integer into sum of 2, 3 and 1. Suppose f >= 4 is a factor, then breaking f into f-2 and 2 will always yield an equal or strictly bigger result: 2(f-2) = 2f-4 >= f.
+```
+class Solution:
+    def integerBreak(self, n: int) -> int:
+        dp = [1]*59
+        dp[1], dp[2], dp[3], dp[4] = 1, 1, 2, 4
+        for i in range(5, 59):
+            dp[i] = max([j*max(dp[i-j],i-j) for j in range(2, 4)])
+        return dp[n]
+```
+## 341. Flatten Nested List Iterator
+
+```
+# """
+# This is the interface that allows for creating nested lists.
+# You should not implement it, or speculate about its implementation
+# """
+#class NestedInteger(object):
+#    def isInteger(self):
+#        """
+#        @return True if this NestedInteger holds a single integer, rather than a nested list.
+#        :rtype bool
+#        """
+#
+#    def getInteger(self):
+#        """
+#        @return the single integer that this NestedInteger holds, if it holds a single integer
+#        Return None if this NestedInteger holds a nested list
+#        :rtype int
+#        """
+#
+#    def getList(self):
+#        """
+#        @return the nested list that this NestedInteger holds, if it holds a nested list
+#        Return None if this NestedInteger holds a single integer
+#        :rtype List[NestedInteger]
+#        """
+
+class NestedIterator(object):
+
+    def __init__(self, nestedList):
+        """
+        Initialize your data structure here.
+        :type nestedList: List[NestedInteger]
+        """
+        self.stack = nestedList[::-1]
+
+    def next(self):
+        """
+        :rtype: int
+        """
+        return self.stack.pop().getInteger()
+
+    def hasNext(self):
+        """
+        :rtype: bool
+        """
+        while self.stack:
+            top = self.stack[-1]
+            if top.isInteger():
+                return True
+            self.stack = self.stack[:-1]+top.getList()[::-1]
+        return False
+
+# Your NestedIterator object will be instantiated and called as such:
+# i, v = NestedIterator(nestedList), []
+# while i.hasNext(): v.append(i.next())
+```
+## 687. Longest Univalue Path
+My BFS bottom-up solution. Time O(n), space O(n).
+```
+# Definition for a binary tree node.
+# class TreeNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution(object):
+    def longestUnivaluePath(self, root):
+        """
+        :type root: TreeNode
+        :rtype: int
+        """
+        if not root: return 0
+        
+        q, stack, d = collections.deque(), [], {}
+        q.append(root)
+        while q:
+            node = q.popleft()
+            stack.append(node)
+            if node.left:
+                q.append(node.left)
+            if node.right:
+                q.append(node.right)
+                
+        # the two functions below find the longest path starting from a given node on the left/right subtree
+        def longestLeftPath(node):
+            if node in d: return d[node][0]
+            if not node or not node.left: return 0
+            if node.left.val != node.val: return 0
+            if node.left and node.left.val == node.val:
+                return 1+max(longestLeftPath(node.left), longestRightPath(node.left))
+            
+        def longestRightPath(node):
+            if node in d: return d[node][1]
+            if not node or not node.right: return 0
+            if node.right.val != node.val: return 0
+            if node.right and node.right.val == node.val:
+                return 1+max(longestRightPath(node.right), longestLeftPath(node.right))
+        
+        res =0
+        while stack:
+            node = stack.pop()
+            d[node] = [longestLeftPath(node), longestRightPath(node)]
+            res = max(res, sum(d[node]))
+        return res
+```
+A dfs solution. I thought it should be slower than my solution since one has to repeatedly call `dfs`. But it turns out it was much faster. Maybe the testcases are too small?
+
+Also note that change `res` to a number is not going to work since we do need `res` to be global.
+```
+# Definition for a binary tree node.
+# class TreeNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution(object):
+    def longestUnivaluePath(self, root):
+        """
+        :type root: TreeNode
+        :rtype: int
+        """
+        def dfs(root,res):
+            l,r=0,0
+            if root.left:
+                l=dfs(root.left,res)
+                l=l+1 if root.left.val==root.val else 0
+            if root.right:
+                r=dfs(root.right,res)
+                r=r+1 if root.right.val==root.val else 0
+            res[0]=max(res[0],r+l)
+            return max(l,r)
+               
+
+        if not root:
+            return 0
+        res=[0]
+        dfs(root,res)
+        return res[0]
+```
+
+## 375. Guess Number Higher or Lower II
+```
+def getMoneyAmount(self, n):
+    need = [[0] * (n+1) for _ in range(n+1)]
+    for lo in range(n, 0, -1):
+        for hi in range(lo+1, n+1):
+            need[lo][hi] = min(x + max(need[lo][x-1], need[x+1][hi])
+                               for x in range(lo, hi))
+    return need[1][n]
+```
+## 373. Find K Pairs with Smallest Sums
+
+Use heaps. See #378.
+```
+class Solution(object):
+    def kSmallestPairs(self, nums1, nums2, k):
+        """
+        :type nums1: List[int]
+        :type nums2: List[int]
+        :type k: int
+        :rtype: List[List[int]]
+        """
+        queue = []
+        def push(i, j):
+            if i < len(nums1) and j < len(nums2):
+                heapq.heappush(queue, [nums1[i] + nums2[j], i, j])
+        push(0, 0)
+        pairs = []
+        while queue and len(pairs) < k:
+            _, i, j = heapq.heappop(queue)
+            pairs.append([nums1[i], nums2[j]])
+            push(i, j + 1)
+            if j == 0:
+                push(i + 1, 0)
+        return pairs
+```
+## 378. Kth Smallest Element in a Sorted Matrix
+
+Application of the heap.
+```
+class Solution(object):
+    def kthSmallest(self, matrix, k):
+        """
+        :type matrix: List[List[int]]
+        :type k: int
+        :rtype: int
+        """
+        queue = []
+        def push(i, j):
+            if i < len(matrix) and j < len(matrix):
+                heapq.heappush(queue, [matrix[i][j], i, j])
+        push(0, 0)
+        res = 0
+        while queue and k>0:
+            x, i, j = heapq.heappop(queue)
+            k -= 1
+            res = x
+            push(i, j + 1)
+            if j == 0:
+                push(i + 1, 0)
+        return res
+```
+## 376. Wiggle Subsequence
+[Explanation](https://leetcode.com/problems/wiggle-subsequence/discuss/84843/Easy-understanding-DP-solution-with-O(n)-Java-version)
+```
+class Solution(object):
+    def wiggleMaxLength(self, nums):
+        """
+        :type nums: List[int]
+        :rtype: int
+        """
+        if len(nums)<2: return len(nums)
+        
+        up, down = 1,1
+        for i in range(1, len(nums)):
+            if nums[i] > nums[i-1]:
+                up = down + 1
+            elif nums[i] < nums[i-1]:
+                down = up + 1
+        return max(up, down)
+```
+## 377. Combination Sum IV
+
+```
+class Solution(object):
+    def combinationSum4(self, nums, target):
+        """
+        :type nums: List[int]
+        :type target: int
+        :rtype: int
+        """
+        nums.sort()
+        dp = [0]*(target+1)
+        for i in range(1,target+1):
+            res = 0
+            for n in nums:
+                if n < i:
+                    res += dp[i-n]
+                elif n == i:
+                    res += 1
+                else:
+                    break
+            dp[i] = res
+        return dp[-1]
+```
