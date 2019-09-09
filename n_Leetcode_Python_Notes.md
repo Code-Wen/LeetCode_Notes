@@ -9845,3 +9845,384 @@ class Solution(object):
             dp[i] = res
         return dp[-1]
 ```
+## 796. Rotate String
+```
+class Solution:
+    def rotateString(self, A: str, B: str) -> bool:
+        
+        return len(A)==len(B) and A in B+B
+```
+
+## 266. Palindrome Permutation
+```
+class Solution:
+    def canPermutePalindrome(self, s: str) -> bool:
+        d = {}
+        for letter in s:
+            d[letter] = d.get(letter, 0)+1
+        
+        odd_cnt = 0
+        for key in d:
+            if d[key]%2 != 0: odd_cnt += 1
+        
+        return odd_cnt == 0 if len(s)%2==0 else odd_cnt == 1
+```
+## 1089. Duplicate Zeros
+
+Brute-Force:
+```
+class Solution:
+    def duplicateZeros(self, arr: List[int]) -> None:
+        """
+        Do not return anything, modify arr in-place instead.
+        """
+        i = 0
+        while i < len(arr):
+            if arr[i] != 0:
+                i += 1
+            else:
+                j = len(arr)-1
+                while j > i+1:
+                    arr[j] = arr[j-1]
+                    j -= 1
+                if i+1 < len(arr): arr[i+1] = 0
+                i += 2
+```
+
+Time O(N), space O(1):
+```
+class Solution:
+    def duplicateZeros(self, arr: List[int]) -> None:
+        """
+        Do not return anything, modify arr in-place instead.
+        """
+        left, right = 0 , 0
+        while right <= len(arr)-1 and left < len(arr):
+            if arr[left] == 0:
+                right += 2
+            else:
+                right += 1
+            left += 1
+        left -= 1
+        right -= 1
+        # edge case: right overflows. It happens only when the last number is 0 and there is not enough space to store an extra zero
+        if right >= len(arr):
+            arr[-1] = 0
+            left -= 1
+            right = len(arr)-2
+        
+        while left < right:
+            if arr[left] == 0:
+                arr[right], arr[right-1] = 0 ,0 
+                right -= 2
+            else:
+                arr[right] = arr[left]
+                right -= 1
+            left -= 1
+```
+## 161. One Edit Distance
+```
+class Solution:
+    def isOneEditDistance(self, s: str, t: str) -> bool:
+        if len(s) < len(t): 
+            s, t = t, s
+        
+        if len(s) == len(t):
+            diff = 0
+            for i in range(len(s)):
+                if s[i] != t[i]:
+                    diff += 1
+            return diff == 1
+        
+        else:
+            i = 0
+            while i<len(t) and s[i]==t[i]: 
+                i += 1
+            return s[:i]==t[:i] and s[i+1:]==t[i:]
+```
+## 157. Read N Characters Given Read4
+
+```
+"""
+The read4 API is already defined for you.
+
+    @param buf, a list of characters
+    @return an integer
+    def read4(buf):
+
+# Below is an example of how the read4 API can be called.
+file = File("abcdefghijk") # File is "abcdefghijk", initially file pointer (fp) points to 'a'
+buf = [' '] * 4 # Create buffer with enough space to store characters
+read4(buf) # read4 returns 4. Now buf = ['a','b','c','d'], fp points to 'e'
+read4(buf) # read4 returns 4. Now buf = ['e','f','g','h'], fp points to 'i'
+read4(buf) # read4 returns 3. Now buf = ['i','j','k',...], fp points to end of file
+"""
+class Solution:
+    def read(self, buf, n):
+        """
+        :type buf: Destination buffer (List[str])
+        :type n: Number of characters to read (int)
+        :rtype: The number of actual characters read (int)
+        """
+        idx = 0
+        while n > 0:
+            # read file to buf4
+            buf4 = [""]*4
+            l = read4(buf4)
+            # if no more char in file, return
+            if not l:
+                return idx
+            # write buf4 into buf directly
+            rem = min(l,n)
+            for i in range(rem):
+                buf[idx] = buf4[i]
+                idx += 1
+                n -= 1
+        return idx
+```
+## 163. Missing Ranges
+```
+class Solution:
+    def findMissingRanges(self, nums: List[int], lower: int, upper: int) -> List[str]:
+        res = []
+        nums = [lower-1]+nums+[upper+1]
+        for i in range(len(nums)-1):
+            if nums[i+1] - nums[i] <= 1: continue
+            elif nums[i+1]-nums[i] == 2:
+                res.append(str(nums[i]+1))
+            else:
+                res.append(str(nums[i]+1)+'->'+str(nums[i+1]-1))
+        return res
+```
+## 156. Binary Tree Upside Down
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def upsideDownBinaryTree(self, root: TreeNode) -> TreeNode:
+        if not root or not root.left: return root
+        
+        node = root
+        new_parent, new_left = node.left, node.right
+        node.left, node.right = None, None
+        new_right = node
+        while new_parent.left:
+            next_parent, next_left = new_parent.left, new_parent.right
+            new_parent.left, new_parent.right = new_left, new_right
+            new_right = new_parent
+            new_parent = next_parent
+            new_left = next_left
+        new_parent.left, new_parent.right = new_left, new_right
+        return new_parent
+```
+
+## 159. Longest Substring with At Most Two Distinct Characters
+```
+class Solution:
+    def lengthOfLongestSubstringTwoDistinct(self, s: str) -> int:
+        if not s: return 0
+        
+        res = 1
+        # DP. max1 is the length of the current longest substring with only one distinct letter which ends with s[i]
+        # max2 is a list. The first element is the length of the current longest substring with at most 2 distinct letters which ends with s[i]. The second element stores the possibly two letters.
+
+        max1, max2 = 1, [1, [s[0]]]
+        for i in range(1,len(s)):
+            if s[i] == s[i-1]:
+                max1 += 1
+                max2[0] += 1
+                
+            else:
+                if s[i] in max2[1]:
+                    max2[0] += 1
+                else:
+                    max2[0] = max1+1
+                    max2[1] = [s[i],s[i-1]]
+                max1 = 1
+            res = max(res, max2[0])    
+        return res
+```
+## 186. Reverse Words in a String II
+```
+class Solution:
+    def reverseWords(self, s: List[str]) -> None:
+        """
+        Do not return anything, modify s in-place instead.
+        """
+        self.reverse(s, 0, len(s)-1)
+        
+        start = 0
+        for i in range(len(s)):
+            if i < len(s)-1 and s[i] == ' ':
+                self.reverse(s, start, i-1)
+                start = i+1
+            elif i == len(s)-1:
+                self.reverse(s, start, i)
+        
+    def reverse(self, s, start, end):
+        while start < end:
+            s[start],s[end] = s[end], s[start]
+            start += 1
+            end -= 1
+```
+## 170. Two Sum III - Data structure design
+```
+class TwoSum:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        
+        self.nums = {}
+
+    def add(self, number: int) -> None:
+        """
+        Add the number to an internal data structure..
+        """
+        self.nums[number] = self.nums.get(number,0)+1
+        
+
+    def find(self, value: int) -> bool:
+        """
+        Find if there exists any pair of numbers which sum is equal to the value.
+        """
+        for n in self.nums:
+            rem = value - n
+            if rem == n:
+                if self.nums[n]>1: return True
+            else:
+                if rem in self.nums: return True
+        return False
+
+
+# Your TwoSum object will be instantiated and called as such:
+# obj = TwoSum()
+# obj.add(number)
+# param_2 = obj.find(value)
+```
+## 190. Reverse Bits
+```
+class Solution:
+    # @param n, an integer
+    # @return an integer
+    def reverseBits(self, n):
+        rev_binary = []
+        q, r = n//2, n%2
+        while q>0:
+            rev_binary.append(r)
+            q, r = q//2, q%2
+        rev_binary.append(r)
+        
+        res = 0
+        power = pow(2, 32-len(rev_binary))
+        while rev_binary:
+            digit = rev_binary.pop()
+            res += power*digit
+            power *= 2
+        return res
+```
+## 293. Flip Game
+
+```
+class Solution:
+    def generatePossibleNextMoves(self, s: str) -> List[str]:
+        res = []
+        for i in range(len(s)-1):
+            if s[i]=='+' and s[i+1]=='+':
+                res.append(s[:i]+'--'+s[i+2:])
+        return res
+```
+## 294. Flip Game II
+```
+class Solution:
+    
+    _memo = {}
+    def canWin(self, s):
+        memo = self._memo
+        if s not in memo:
+            memo[s] = any(s[i:i+2] == '++' and not self.canWin(s[:i] + '-' + s[i+2:])
+                          for i in range(len(s)))
+        return memo[s]
+```
+## 243. Shortest Word Distance
+```
+class Solution:
+    def shortestDistance(self, words: List[str], word1: str, word2: str) -> int:
+        res, s = len(words), [word1, word2]
+        start = 0
+        while words[start] not in s:
+            start += 1
+        prev_word, prev_loc = words[start], start
+        for i in range(start+1, len(words)):
+            if words[i] in s:
+                if words[i] != prev_word:
+                    res = min(res, i-prev_loc)
+                prev_word, prev_loc = words[i], i
+        return res
+```
+
+## 244. Shortest Word Distance II
+```
+class WordDistance:
+
+    def __init__(self, words: List[str]):
+        self.words =  words
+        self.locations = {}
+        self.dist = {}
+        for i in range(len(self.words)):
+            self.locations[self.words[i]] = self.locations.get(self.words[i],[])+[i]
+        
+
+    def shortest(self, word1: str, word2: str) -> int:
+        if set([word1, word2]) in self.dist:
+            return self.dist[(word1, word2)]
+        
+        else:
+            res = min([abs(i-j) for i in self.locations[word1] for j in self.locations[word2]])
+            self.dist[set([word1,word2])] = res
+            return res
+```
+
+## 245. Shortest Word Distance III
+```
+class Solution:
+    def shortestWordDistance(self, words: List[str], word1: str, word2: str) -> int:
+        locations = {}
+        
+        for i in range(len(words)):
+            locations[words[i]] = locations.get(words[i],[])+[i]
+        
+        if word1!=word2:
+            return min([abs(i-j) for i in locations[word1] for j in locations[word2]])
+        else:
+            return min([locations[word1][i+1]-locations[word1][i] for i in range(len(locations[word1])-1)])
+```
+
+Or
+```
+class Solution:
+    def shortestWordDistance(self, words: List[str], word1: str, word2: str) -> int:
+        res, s = len(words), [word1, word2]
+        start = 0
+        while words[start] not in s:
+            start += 1
+        prev_word, prev_loc = words[start], start
+        if word1 != word2:
+            for i in range(start+1, len(words)):
+                if words[i] in s:
+                    if words[i] != prev_word:
+                        res = min(res, i-prev_loc)
+                    prev_word, prev_loc = words[i], i
+        else:
+            for i in range(start+1, len(words)):
+                if words[i] in s:
+                    res = min(res, i-prev_loc)
+                    prev_word, prev_loc = words[i], i
+        return res
+```
