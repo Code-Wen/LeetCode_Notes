@@ -10226,3 +10226,304 @@ class Solution:
                     prev_word, prev_loc = words[i], i
         return res
 ```
+## 252. Meeting Rooms
+```
+class Solution:
+    def canAttendMeetings(self, intervals: List[List[int]]) -> bool:
+        intervals.sort(key = lambda x: x[0])
+        for i in range(len(intervals)-1):
+            if intervals[i][1] > intervals[i+1][0]:
+                return False
+        return True
+```
+## 253. Meeting Rooms II
+```
+class Solution:
+    def minMeetingRooms(self, intervals: List[List[int]]) -> int:
+        starts = []
+        ends = []
+        for i in intervals:
+            starts.append(i[0])
+            ends.append(i[1])
+        
+        starts.sort()
+        ends.sort()
+        s = e = 0
+        numRooms = available = 0
+        while s < len(starts):
+            if starts[s] < ends[e]:
+                if available == 0:
+                    numRooms += 1
+                else:
+                    available -= 1
+                    
+                s += 1
+            else:
+                available += 1
+                e += 1
+        
+        return numRooms
+```
+
+Another solution using heap
+
+```
+class Solution:
+    def minMeetingRooms(self, intervals: List[List[int]]) -> int:
+        intervals.sort(key=lambda x:x[0])
+        heap = []  # stores the end time of intervals
+        for i in intervals:
+            if heap and i[0] >= heap[0]: 
+                # means two intervals can use the same room
+                heapq.heapreplace(heap, i[1])
+            else:
+                # a new room is allocated
+                heapq.heappush(heap, i[1])
+        return len(heap)
+```
+## 246. Strobogrammatic Number
+```
+class Solution:
+    def isStrobogrammatic(self, num: str) -> bool:
+        pairs =[set(['6','9']),set(['8']), set(['0']), set(['1'])]
+        l, r = 0, len(num)-1
+        while l <= r:
+            if set([num[l],num[r]]) not in pairs:
+                return False
+            l+=1
+            r-=1
+        return True
+```
+## 247. Strobogrammatic Number II
+```
+class Solution:
+    def findStrobogrammatic(self, n: int) -> List[str]:
+        pairs = [('6','9'),('9','6'),('8','8'),('1','1'),('0','0')]
+        res = ['']
+        if n%2 != 0:
+            res = ['0','1','8']
+        if n//2 - 1 >= 0:
+            for _ in range(n//2-1):
+                res = [l+x+r for x in res for (l,r) in pairs]
+            res = [l+x+r  for x in res for (l,r) in pairs if (l,r)!=('0','0')]
+        return res
+```
+## 248. Strobogrammatic Number III
+```
+class Solution:
+    def strobogrammaticInRange(self, low: str, high: str) -> int:
+        res = []
+        n1, n2 = len(low), len(high)
+        
+        for n in range(n1, n2+1):
+            res += self.findStrobogrammatic(n)
+        low_num, high_num = int(low), int(high)
+        return len([x for x in res if high_num >= int(x) >= low_num])
+        
+    def findStrobogrammatic(self, n: int) -> List[str]:
+        pairs = [('6','9'),('9','6'),('8','8'),('1','1'),('0','0')]
+        res = ['']
+        if n%2 != 0:
+            res = ['0','1','8']
+        if n//2 - 1 >= 0:
+            for _ in range(n//2-1):
+                res = [l+x+r for x in res for (l,r) in pairs]
+            res = [l+x+r  for x in res for (l,r) in pairs if (l,r)!=('0','0')]
+        return res
+```
+## 249. Group Shifted Strings
+```
+class Solution:
+    def groupStrings(self, strings: List[str]) -> List[List[str]]:
+        d = {chr(x):x-ord('a') for x in range(ord('a'), ord('z')+1)}
+        temp, res = {}, []
+        for s in strings:
+            if len(s) == 1:
+                temp[1] = temp.get(1, [])+[s]
+            else:
+                diff = ()
+                for i in range(len(s)-1):
+                    diff += ((ord(s[i+1])-ord(s[i]))%26, )
+                temp[diff] = temp.get(diff, [])+[s]
+        for k in temp:
+            res += [temp[k]]
+        
+        return res
+```
+## 256. Paint House
+```
+class Solution:
+    def minCost(self, costs: List[List[int]]) -> int:
+        if not costs: return 0
+        dp = [[0,0,0] for _ in range(len(costs))]
+        dp[0] = costs[0]
+        for i in range(1, len(costs)):
+            dp[i][0] = costs[i][0]+min(dp[i-1][1],dp[i-1][2])
+            dp[i][1] = costs[i][1]+min(dp[i-1][0],dp[i-1][2])
+            dp[i][2] = costs[i][2]+min(dp[i-1][1],dp[i-1][0])
+        return min(dp[-1])
+```
+## 265. Paint House II
+```
+class Solution:
+    def minCostII(self, costs: List[List[int]]) -> int:
+        if not costs or not costs[0]: return 0
+        
+        n, k = len(costs), len(costs[0])
+        dp = costs[0]
+        for i in range(1,n):
+            temp = costs[i]
+            for j in range(k):
+                temp[j] += min([dp[s] for s in range(k) if s!=j])
+            dp = temp
+        return min(dp)
+```
+## 276. Paint Fence
+```
+class Solution:
+    def numWays(self, n: int, k: int) -> int:
+        if n == 0: return 0
+        
+        diff, same = k, 0
+        for _ in range(1,n):
+            diff, same = (diff+same)*(k-1), diff
+        return diff+same
+```
+
+## 250. Count Univalue Subtrees
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def countUnivalSubtrees(self, root: TreeNode) -> int:
+        if not root: return 0
+        
+        stack, q = [], collections.deque()
+        q.append(root)
+        while q:
+            node = q.popleft()
+            if node.left:
+                q.append(node.left)
+            if node.right:
+                q.append(node.right)
+            stack.append(node)
+            
+        d, res = {}, 0
+        
+        while stack:
+            node = stack.pop()
+            if not node.left and not node.right:
+                res += 1
+                d[node] = 1
+            elif not node.left and node.right:
+                if d[node.right] == 1 and node.val == node.right.val:
+                    res += 1
+                    d[node] = 1
+                else:
+                    d[node] = 0
+            elif not node.right and node.left:
+                if d[node.left] == 1 and node.val == node.left.val:
+                    res += 1
+                    d[node] = 1
+                else:
+                    d[node] = 0
+            else:
+                if d[node.right] == 1 and d[node.left] == 1 and node.left.val == node.val and node.right.val == node.val:
+                    d[node] = 1
+                    res += 1
+                else:
+                    d[node] = 0
+        
+        return res
+```
+## 280. Wiggle Sort
+```
+class Solution:
+    def wiggleSort(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        nums.sort()
+        for i in range(1, len(nums)):
+            if i%2 == 1 and i+1 < len(nums):
+                nums[i], nums[i+1] = nums[i+1], nums[i]
+```
+## 259. 3Sum Smaller
+```
+class Solution:
+    def threeSumSmaller(self, nums: List[int], target: int) -> int:
+        if len(nums) < 3: return 0
+        
+        nums.sort()
+        res = 0
+        for i in range(len(nums)-2):
+            res += self.twoSumSmaller(nums[i+1:], target-nums[i])
+        return res
+    
+    def twoSumSmaller(self, nums, t):
+        left, right = 0, len(nums)-1
+        res = 0
+        while left < right:
+            if nums[left]+nums[right] < t:
+                res +=  right-left
+                left += 1
+            else:
+                right -= 1
+        return res
+```
+## 270. Closest Binary Search Tree Value
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def closestValue(self, root: TreeNode, target: float) -> int:
+        node = root
+        res = node.val
+        while node:
+            if abs(node.val - target) < abs(res - target):
+                res = node.val
+            node = node.left if target < node.val else node.right
+        return res
+```
+## 311. Sparse Matrix Multiplication
+
+Idea is that since both matrices are sparces, it is very effecient to first scan both to make two hash tables containing the nonzero entries. Then use the two hash tables to make the multiplication since most of the terms will be zeros.
+
+```
+class Solution:
+    def multiply(self, A: List[List[int]], B: List[List[int]]) -> List[List[int]]:
+        if A is None or B is None: return None
+        m, n = len(A), len(A[0])
+        if len(B) != n:
+            raise Exception("A's column number must be equal to B's row number.")
+        l = len(B[0])
+        table_A, table_B = {}, {}
+        for i, row in enumerate(A):
+            for j, ele in enumerate(row):
+                if ele:
+                    if i not in table_A: table_A[i] = {}
+                    table_A[i][j] = ele
+        for i, row in enumerate(B):
+            for j, ele in enumerate(row):
+                if ele:
+                    if i not in table_B: table_B[i] = {}
+                    table_B[i][j] = ele
+        C = [[0 for j in range(l)] for i in range(m)]
+        for i in table_A:
+            for k in table_A[i]:
+                if k not in table_B: continue
+                for j in table_B[k]:
+                    C[i][j] += table_A[i][k] * table_B[k][j]
+        return C
+```
