@@ -10527,3 +10527,271 @@ class Solution:
                     C[i][j] += table_A[i][k] * table_B[k][j]
         return C
 ```
+## 339. Nested List Weight Sum
+```
+# """
+# This is the interface that allows for creating nested lists.
+# You should not implement it, or speculate about its implementation
+# """
+#class NestedInteger:
+#    def __init__(self, value=None):
+#        """
+#        If value is not specified, initializes an empty list.
+#        Otherwise initializes a single integer equal to value.
+#        """
+#
+#    def isInteger(self):
+#        """
+#        @return True if this NestedInteger holds a single integer, rather than a nested list.
+#        :rtype bool
+#        """
+#
+#    def add(self, elem):
+#        """
+#        Set this NestedInteger to hold a nested list and adds a nested integer elem to it.
+#        :rtype void
+#        """
+#
+#    def setInteger(self, value):
+#        """
+#        Set this NestedInteger to hold a single integer equal to value.
+#        :rtype void
+#        """
+#
+#    def getInteger(self):
+#        """
+#        @return the single integer that this NestedInteger holds, if it holds a single integer
+#        Return None if this NestedInteger holds a nested list
+#        :rtype int
+#        """
+#
+#    def getList(self):
+#        """
+#        @return the nested list that this NestedInteger holds, if it holds a nested list
+#        Return None if this NestedInteger holds a single integer
+#        :rtype List[NestedInteger]
+#        """
+
+class Solution:
+    def depthSum(self, nestedList: List[NestedInteger]) -> int:
+        depth, res = 1, 0
+        while nestedList:
+            res += depth * sum([x.getInteger() for x in nestedList if x.isInteger() ])
+            nestedList = sum([x.getList() for x in nestedList if not x.isInteger()],[])
+            depth += 1
+        return res
+```
+## 251. Flatten 2D Vector
+
+```
+class Vector2D:
+
+    def __init__(self, v: List[List[int]]):
+        self.flat = []
+        self.ind = 0
+        for l in v:
+            self.flat += l
+
+    def next(self) -> int:
+        temp = self.flat[self.ind]
+        self.ind += 1
+        return temp
+
+    def hasNext(self) -> bool:
+        return self.ind < len(self.flat)
+```
+## 296. Best Meeting Point
+```
+class Solution:
+    def minTotalDistance(self, grid: List[List[int]]) -> int:
+        row, col = [], []
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if grid[i][j]==1:
+                    row.append(i)
+                    col.append(j)
+        row.sort()
+        col.sort()
+        if len(row) % 2 == 0:
+            x1, x2 = row[len(row)//2], row[len(row)//2-1]
+            y1, y2 = col[len(row)//2], col[len(row)//2-1]
+            row_dist = min(sum([abs(x-x1) for x in row]), sum([abs(x-x2) for x in row]))
+            col_dist = min(sum([abs(y-y1) for y in col]), sum([abs(y-y2) for y in col]))
+            return row_dist+col_dist
+        else:
+            x0, y0 = row[len(row)//2], col[len(row)//2]
+            return sum([abs(x-x0) for x in row])+sum([abs(y-y0) for y in col])
+```
+## 277. Find the Celebrity
+```
+# The knows API is already defined for you.
+# @param a, person a
+# @param b, person b
+# @return a boolean, whether a knows b
+# def knows(a, b):
+
+class Solution(object):
+    def findCelebrity(self, n):
+        """
+        :type n: int
+        :rtype: int
+        """
+        if n == 0: return -1
+        candidates = collections.deque([i for i in range(n)])
+        non = set()
+        while len(candidates) > 1:
+            x = candidates.popleft()
+            y = candidates.popleft()
+            if not knows(x,y):
+                x, y = y, x
+            non.add(x)
+            candidates.appendleft(y)
+        x = candidates.pop()
+        for y in non:
+            if knows(x,y) or not knows(y,x): return -1
+        
+        return x
+```
+
+## 359. Logger Rate Limiter
+```
+class Logger:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.hist = {}
+
+    def shouldPrintMessage(self, timestamp: int, message: str) -> bool:
+        """
+        Returns true if the message should be printed in the given timestamp, otherwise returns false.
+        If this method returns false, the message will not be printed.
+        The timestamp is in seconds granularity.
+        """
+        if timestamp < self.hist.get(message, 0):
+            return False
+        else:
+            self.hist[message] = timestamp+10
+            return True
+
+
+# Your Logger object will be instantiated and called as such:
+# obj = Logger()
+# param_1 = obj.shouldPrintMessage(timestamp,message)
+```
+## 346. Moving Average from Data Stream
+```
+class MovingAverage:
+
+    def __init__(self, size: int):
+        """
+        Initialize your data structure here.
+        """
+        self.items = collections.deque()
+        self.size = size
+        self.sum = 0
+
+    def next(self, val: int) -> float:
+        self.items.append(val)
+        self.sum +=  val
+        if len(self.items) > self.size:
+            self.sum -= self.items.popleft()
+        return self.sum/len(self.items)
+        
+            
+        
+
+
+# Your MovingAverage object will be instantiated and called as such:
+# obj = MovingAverage(size)
+# param_1 = obj.next(val)
+```
+## 669. Trim a Binary Search Tree
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def trimBST(self, root: TreeNode, L: int, R: int) -> TreeNode:
+        if not root: return None
+        
+        if root.val < L:
+            return self.trimBST(root.right, L, R)
+        elif root.val > R:
+            return self.trimBST(root.left, L, R)
+        else:
+            root.left = self.trimBST(root.left, L, R)
+            root.right = self.trimBST(root.right, L, R)
+            return root
+```
+## 422. Valid Word Square
+```
+class Solution:
+    def validWordSquare(self, words: List[str]) -> bool:
+        for i in range(len(words)):
+            if len(words[i]) > len(words): return False
+            for j in range(len(words[i])):
+                if len(words[j]) < i+1 or words[i][j] != words[j][i]: return False
+            if len(words[i]) < len(words):
+                for j in range(len(words[i]), len(words)):
+                    if len(words[j]) > i: return False
+        return True
+```
+## 392. Is Subsequence
+
+```
+class Solution:
+    def isSubsequence(self, s: str, t: str) -> bool:
+        start = 0
+        for i in range(len(s)):
+            if s[i] not in t[start:]: return False
+            start = t.find(s[i],start) + 1
+        return True
+```
+## 476. Number Complement
+```
+class Solution:
+    def findComplement(self, num: int) -> int:
+        q, r = num//2, num%2
+        binary = []
+        while q > 0:
+            binary.append(r)
+            q, r = q//2, q%2
+        if r == 1: binary.append(r)
+        binary = binary[::-1]
+        binary = [(x+1)%2 for x in binary]
+        
+        mult, res = 1, 0
+        while binary:
+            res += mult*binary.pop()
+            mult *= 2
+        return res
+```
+## 538. Convert BST to Greater Tree
+
+Very nice way of traversing the tree without a stack.
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def convertBST(self, root: TreeNode) -> TreeNode:
+        self.val = 0
+        def addGreater(root):
+            if root:
+                addGreater(root.right)
+                root.val += self.val
+                self.val = root.val
+                addGreater(root.left)
+        addGreater(root)
+        return root
+```
