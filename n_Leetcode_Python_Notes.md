@@ -10795,3 +10795,189 @@ class Solution:
         addGreater(root)
         return root
 ```
+
+## 475. Heaters
+```
+class Solution:
+    def findRadius(self, houses: List[int], heaters: List[int]) -> int:
+        houses.sort()
+        heaters.sort()
+        heaters += [float('inf')]
+        i, res = 0, 0
+        for x in houses:
+            while x > sum(heaters[i:i+2])/2.0 :
+                i += 1
+            res = max(res, abs(heaters[i]-x))
+        return res
+```
+## 408. Valid Word Abbreviation
+
+```
+class Solution:
+    def validWordAbbreviation(self, word: str, abbr: str) -> bool:
+        subs,j, length= [], 0,0
+        
+        while j < len(abbr):
+            sub = ''
+            if abbr[j] not in '0123456789':
+                while j < len(abbr) and abbr[j] not in '0123456789':
+                    sub += abbr[j]
+                    j += 1
+            elif abbr[j] == '0': return False
+            else:
+                while j < len(abbr) and abbr[j] in '0123456789':
+                    sub += abbr[j]
+                    j += 1
+            if sub.isdigit():
+                subs.append(sub)
+                length +=  int(sub)
+            else:
+                subs.append(sub)
+                length += len(sub)
+        if len(word) != length: return False
+        
+        i = 0
+        for x in subs:
+            if x.isdigit(): i += int(x)
+            else:
+                if x != word[i:i+len(x)]: return False
+                else:
+                    i += len(x)
+        return True
+```
+## 543. Diameter of Binary Tree
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def diameterOfBinaryTree(self, root: TreeNode) -> int:
+        self.res = 0
+        def depth(node):
+            if not node: return 0
+            l, r = depth(node.left), depth(node.right)
+            self.res = max(self.res, l+r)
+            return 1+max(l,r)
+        depth(root)
+        return self.res
+```
+## 551. Student Attendance Record I
+```
+class Solution:
+    def checkRecord(self, s: str) -> bool:
+        absent = 0
+        for i in range(len(s)):
+            if s[i] == 'A': absent += 1
+            elif s[i] == 'L': 
+                if i+2 < len(s) and s[i+1] == 'L' and s[i+2] == 'L': return False
+            
+            if absent > 1: return False
+        return True
+```
+## 558. Quad Tree Intersection
+
+```
+"""
+# Definition for a QuadTree node.
+class Node:
+    def __init__(self, val, isLeaf, topLeft, topRight, bottomLeft, bottomRight):
+        self.val = val
+        self.isLeaf = isLeaf
+        self.topLeft = topLeft
+        self.topRight = topRight
+        self.bottomLeft = bottomLeft
+        self.bottomRight = bottomRight
+"""
+class Solution:
+    def intersect(self, q1: 'Node', q2: 'Node') -> 'Node':
+        if q1.isLeaf:
+            return q1.val and q1 or q2
+        elif q2.isLeaf:
+            return q2.val and q2 or q1
+        else:
+            tLeft = self.intersect(q1.topLeft, q2.topLeft)
+            tRight = self.intersect(q1.topRight, q2.topRight)
+            bLeft = self.intersect(q1.bottomLeft, q2.bottomLeft)
+            bRight = self.intersect(q1.bottomRight, q2.bottomRight)
+            if tLeft.isLeaf and tRight.isLeaf and bLeft.isLeaf and bRight.isLeaf and tLeft.val == tRight.val == bLeft.val == bRight.val:
+                node = Node(tLeft.val, True, None, None, None, None) 
+            else:
+                node = Node(False, False, tLeft, tRight, bLeft, bRight)
+        return node
+```
+
+## 572. Subtree of Another Tree
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def isSubtree(self, s: TreeNode, t: TreeNode) -> bool:
+        stack = [s]
+        while stack:
+            node = stack.pop()
+            if node.left: stack.append(node.left)
+            if node.right: stack.append(node.right)
+            if node.val == t.val:
+                if self.isSame(node, t): return True
+                
+        return False
+    
+    def isSame(self, node1, node2):
+        '''
+        Compare whether two binary trees have the same structure.
+        '''
+        if (node1 and not node2) or (node2 and not node1): return False
+        elif not node1 and not node2: return True
+        else:
+            if node1.val != node2.val: return False
+            
+            return  self.isSame(node1.left, node2.left) and self.isSame(node1.right, node2.right)
+```
+A better solution is to convert the trees to strings then compare.
+```
+class Solution:
+    def isSubtree(self, s: TreeNode, t: TreeNode) -> bool:
+        def convert(p):
+            return "^" + str(p.val) + "#" + convert(p.left) + convert(p.right) if p else "$"
+        
+        return convert(t) in convert(s)
+```
+
+## 637. Average of Levels in Binary Tree
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def averageOfLevels(self, root: TreeNode) -> List[float]:
+        q, res, temp = collections.deque() ,[], 0
+        remaining, cnt, next_cnt = 1, 1, 0
+        q.append(root)
+        while q:
+            node = q.popleft()
+            remaining -= 1
+            temp += node.val
+            if node.left: 
+                q.append(node.left)
+                next_cnt += 1
+            if node.right: 
+                q.append(node.right)
+                next_cnt += 1
+            if remaining == 0:
+                res.append(temp/float(cnt))
+                temp, remaining, cnt, next_cnt = 0, next_cnt, next_cnt, 0
+        return res
+```
