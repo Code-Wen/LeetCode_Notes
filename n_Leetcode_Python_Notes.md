@@ -10981,3 +10981,791 @@ class Solution:
                 temp, remaining, cnt, next_cnt = 0, next_cnt, next_cnt, 0
         return res
 ```
+## 653. Two Sum IV - Input is a BST
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def findTarget(self, root: TreeNode, k: int) -> bool:
+        def inplace(root):
+            if not root: return []
+            return inplace(root.left)+[root.val]+inplace(root.right)
+        
+        nums = inplace(root)
+        if len(nums) < 2: return False
+        l, r = 0, len(nums)-1
+        while l<r:
+            if nums[l]+nums[r] == k: return True
+            elif nums[l]+nums[r] > k: r -= 1
+            else: l += 1
+        return False
+```
+
+## 624. Maximum Distance in Arrays
+
+Just need to keep the largest, the second largest, the smallest and the second smallest and where they come from. 
+```
+class Solution:
+    def maxDistance(self, arrays: List[List[int]]) -> int:
+        Max,  Min = [[float('-inf'),len(arrays)], [float('-inf'),len(arrays)]] , [[float('inf'),len(arrays)], [float('inf'),len(arrays)]]
+        for i in range(len(arrays)):
+            m, M = arrays[i][0], arrays[i][-1]
+            if m < Min[0][0]:
+                
+                Min[0], Min[1] = [m, i], Min[0]
+            elif m <= Min[1][0]:
+                Min[1] = [m, i]
+            
+            if M > Max[0][0]: 
+                Max[0], Max[1] = [M, i], Max[0]
+            elif M >= Max[1][0]:
+                Max[1] = [M, i]
+        
+        return max([abs(m[0]-M[0]) for m in Min for M in Max if m[1]<len(arrays) and M[1]<len(arrays) and m[1]!=M[1]])
+```
+## 604. Design Compressed String Iterator
+```
+class StringIterator:
+
+    def __init__(self, compressedString: str):
+        self.s = compressedString
+        self.cur_letter = ' '
+        self.loc = 0
+        self.cur_cnt = 0
+
+    def next(self) -> str:
+        if self.cur_cnt > 0:
+            self.cur_cnt -= 1
+            return self.cur_letter
+        
+        if self.cur_cnt == 0 and self.loc < len(self.s):
+            self.cur_letter, digit = self.s[self.loc], ''
+            self.loc += 1
+            while self.loc<len(self.s) and self.s[self.loc] in '0123456789':
+                digit += self.s[self.loc]
+                self.loc += 1
+            self.cur_cnt = int(digit)-1
+            return self.cur_letter
+        if self.cur_cnt == 0 and self.loc >= len(self.s):
+            return ' '
+        
+    def hasNext(self) -> bool:
+        return self.cur_cnt > 0 or self.loc < len(self.s)
+```
+
+## 606. Construct String from Binary Tree
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def tree2str(self, t: TreeNode) -> str:
+        if not t: return ''
+
+        if (not t.left) and t.right:
+            l, r = '()', self.tree2str(t.right)
+            return str(t.val)+l+'('+r+')'
+        elif not t.left and not t.right:
+            return str(t.val)
+        elif t.left and not t.right:
+            l = self.tree2str(t.left)
+            return str(t.val)+'('+l+')'
+        else:
+            return str(t.val)+'('+self.tree2str(t.left)+')'+'('+self.tree2str(t.right)+')'
+```
+## 703. Kth Largest Element in a Stream
+```
+class KthLargest:
+
+    def __init__(self, k: int, nums: List[int]):
+        self.heap = []
+        self.k = k
+        for x in nums:
+            if len(self.heap) >= k:
+                heapq.heappushpop(self.heap, x)
+            else:
+                heapq.heappush(self.heap, x)
+
+    def add(self, val: int) -> int:
+        if len(self.heap) < self.k:
+            heapq.heappush(self.heap, val)
+        else:
+            heapq.heappushpop(self.heap, val)
+        return self.heap[0]
+
+
+# Your KthLargest object will be instantiated and called as such:
+# obj = KthLargest(k, nums)
+# param_1 = obj.add(val)
+```
+## 724. Find Pivot Index
+```
+class Solution:
+    def pivotIndex(self, nums: List[int]) -> int:
+        if len(nums)==1: return 1
+        if not nums: return -1
+        
+        total = sum(nums)
+        if total == nums[0]: return 0
+        else:
+            sub_total = nums[0]
+            for i in range(1, len(nums)):
+                if total-nums[i]-sub_total == sub_total: return i
+                sub_total += nums[i]
+            return -1
+```
+## 733. Flood Fill
+```
+class Solution:
+    def floodFill(self, image: List[List[int]], sr: int, sc: int, newColor: int) -> List[List[int]]:
+        m, n = len(image), len(image[0])
+        stack, visited, old = [(sr, sc)], set(), image[sr][sc]
+        while stack:
+            (x, y) = stack.pop()
+            image[x][y] = newColor
+            visited.add((x,y))
+            if x-1 >= 0 and image[x-1][y] == old and (x-1,y) not in visited: 
+                stack.append((x-1,y))
+            if y-1 >= 0 and image[x][y-1] == old and (x,y-1) not in visited:
+                stack.append((x,y-1))
+            if x+1 < m and image[x+1][y] == old and (x+1,y) not in visited: 
+                stack.append((x+1,y))
+            if y+1 < n and image[x][y+1] == old and (x,y+1) not in visited: 
+                stack.append((x,y+1))
+        return image
+```
+## 734. Sentence Similarity
+```
+class Solution:
+    def areSentencesSimilar(self, words1: List[str], words2: List[str], pairs: List[List[str]]) -> bool:
+        if len(words1)!=len(words2): return False
+        d = {}
+        for w1,w2 in pairs:
+            d[w1] = d.get(w1,set()).union(set([w2]))
+            d[w2] = d.get(w2, set()).union(set([w1]))
+        for i in range(len(words1)):
+            if words1[i] == words2[i]: continue
+            else:
+                if words1[i] not in d or not words2[i] in d[words1[i]]: return False
+        return True
+```
+## 744. Find Smallest Letter Greater Than Target
+```
+class Solution:
+    def nextGreatestLetter(self, letters: List[str], target: str) -> str:
+        unique = [letters[0]]
+        for l in letters[1:]:
+            if l != unique[-1]: unique.append(l)
+                
+        for x in unique:
+            if ord(x)>ord(target): return x
+        
+        return unique[0]
+```
+## 747. Largest Number At Least Twice of Others
+```
+class Solution:
+    def dominantIndex(self, nums: List[int]) -> int:
+        if len(nums) == 1: return 0
+        
+        largest, sec_largest = [nums[0], 0], [float('-inf'),len(nums)]
+        for i in range(1,len(nums)):
+            if nums[i] > largest[0]:
+                largest, sec_largest = [nums[i],i], largest
+            elif nums[i] >= sec_largest[0]:
+                sec_largest = [nums[i],i]
+        return largest[1] if largest[0]>=2*sec_largest[0] else -1
+```
+## 762. Prime Number of Set Bits in Binary Representation
+```
+class Solution:
+    def countPrimeSetBits(self, L: int, R: int) -> int:
+        primes = set([2,3,5,7,11,13,17,19,23])
+        res = 0
+        for i in range(L,R+1):
+            if bin(i).count('1') in primes: res += 1
+        return res
+```
+## 760. Find Anagram Mappings
+```
+class Solution:
+    def anagramMappings(self, A: List[int], B: List[int]) -> List[int]:
+        d = {}
+        for i in range(len(B)):
+            d[B[i]] = d.get(B[i], [])+[i]
+        
+        res = []
+        for x in A:
+            res.append(d[x].pop())
+        return res
+```
+## 758. Bold Words in String
+
+My ugly code:
+
+```
+class Solution:
+    def boldWords(self, words: List[str], S: str) -> str:
+        if not words: return S
+        d, L = set(words), max([len(x) for x in words])
+        l, r, loc = -1, -1, []
+        i=0
+        while i < len(S):
+            for j in range(1,L+1):
+                if S[i:i+j] in d: 
+                    if l < 0: 
+                        l, r = i, i+j
+                    else:
+                        r = max(r, i+j)
+                if r >= len(S):
+                    r = len(S)
+                    break
+                
+            if l >= 0:
+                if loc and l<=loc[-1][1]: 
+                    loc[-1][1] = max(r, loc[-1][1])
+                else:
+                    loc.append([l,r])
+                l,r = -1, -1
+            i += 1
+        
+        if not loc: return S
+        pre, post = S[:loc[0][0]], S[loc[-1][1]:]
+        
+        return pre+''.join(['<b>'+S[loc[i][0]:loc[i][1]]+'</b>'+S[loc[i][1]:loc[i+1][0]] for i in range(len(loc)-1)])+'<b>'+S[loc[-1][0]:loc[-1][1]]+'</b>'+post
+```
+## 766. Toeplitz Matrix
+```
+class Solution:
+    def isToeplitzMatrix(self, matrix: List[List[int]]) -> bool:
+        m, n = len(matrix), len(matrix[0])
+        for y in range(n):
+            i,val = 1, matrix[0][y]
+            while i < m and y+i < n:
+                if matrix[i][y+i] != val: return False
+                i += 1
+        for x in range(1, m):
+            i, val = 1, matrix[x][0]
+            while x+i < m and i < n:
+                if matrix[x+i][i] != val: return False
+                i += 1
+        return True
+```
+## 783. Minimum Distance Between BST Nodes
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def minDiffInBST(self, root: TreeNode) -> int:
+        def preorder(root):
+            if not root: return []
+            return preorder(root.left)+[root.val]+preorder(root.right)
+        l = preorder(root)
+        res = float('inf')
+        for i in range(len(l)-1):
+            res = min(l[i+1]-l[i],res)
+        return res
+```
+## 788. Rotated Digits
+```
+class Solution:
+    def rotatedDigits(self, N: int) -> int:
+        res = 0
+        great, bad = set(['2','5','6','9']), set(['4','3','7'])
+        for i in range(N+1):
+            s, fine = str(i), 1
+            for d in bad:
+                if d in s: 
+                    fine = 0
+                    break
+            if not fine: continue
+            for d in great:
+                if d in s: 
+                    res += 1
+                    break
+        return res
+```
+## 800. Similar RGB Color
+```
+class Solution:
+    def similarRGB(self, color: str) -> str:
+        d = {str(i):i for i in range(10)}
+        d.update({chr(i):i-ord('a')+10 for i in range(ord('a'),ord('g'))})
+        short = {17*d[x]:x*2 for x in d}
+        res = '#'
+        for i in [1,3,5]:
+            temp = 16 * d[color[i]]+d[color[i+1]]
+            min_diff = min([abs(n-temp) for n in short])
+            n = temp+min_diff if temp+min_diff in short else temp-min_diff
+            res += short[n]
+        return res
+```
+## 806. Number of Lines To Write String
+```
+class Solution:
+    def numberOfLines(self, widths: List[int], S: str) -> List[int]:
+        
+        alphabet ='abcdefghijklmnopqrstuvwxyz'
+        d = {alphabet[i]:widths[i] for i in range(26)}
+        lines, rem = 0, 0
+        for i in range(len(S)):
+            if rem < d[S[i]]:
+                lines += 1
+                rem = 100
+            rem -= d[S[i]]
+        return [lines, 100-rem]
+```
+## 812. Largest Triangle Area
+```
+class Solution:
+    def largestTriangleArea(self, points: List[List[int]]) -> float:
+        # Brute-force. Key is to remember that the abs of the determinant of a 2x2 matrix is the area of the parallel shape with vectors from a vertex to its two adjacent vertices.
+        return max(0.5 * abs(i[0] * j[1] + j[0] * k[1] + k[0] * i[1]- j[0] * i[1] - k[0] * j[1] - i[0] * k[1])
+            for i, j, k in itertools.combinations(points, 3))
+```
+## 819. Most Common Word
+```
+class Solution:
+    def mostCommonWord(self, paragraph: str, banned: List[str]) -> str:
+        banned_lower, d, prev = set([w.lower() for w in banned]), {}, 0
+        for i in range(len(paragraph)):
+            if paragraph[i] in " !?',;.":
+                d[paragraph[prev:i].lower()] = d.get(paragraph[prev:i].lower(),0)+1
+                prev = i+1
+        d[paragraph[prev:].lower()] = d.get(paragraph[prev:].lower(),0)+1
+        
+        max_cnt, cur_word = -1, ''
+        for word in d: 
+            if word and word not in banned_lower and d[word] > max_cnt:
+                max_cnt, cur_word = d[word], word
+        return cur_word
+```
+## 821. Shortest Distance to a Character
+```
+class Solution:
+    def shortestToChar(self, S: str, C: str) -> List[int]:
+        loc = []
+        for i in range(len(S)):
+            if S[i] == C: loc.append(i)
+        
+        return [min([abs(i-x) for x in loc]) for i in range(len(S))]
+```
+## 824. Goat Latin
+```
+class Solution:
+    def toGoatLatin(self, S: str) -> str:
+        l, vowels = S.split(' '), set('aeiouAEIOU')
+        for i in range(len(l)):
+            temp = l[i]
+            if temp[0] not in vowels:
+                temp = temp[1:]+temp[0]+'ma'+'a'*(i+1)
+            else:
+                temp = temp+'ma'+'a'*(i+1)
+            l[i] = temp
+        return ' '.join(l)
+```
+## 830. Positions of Large Groups
+```
+class Solution:
+    def largeGroupPositions(self, S: str) -> List[List[int]]:
+        res, i = [], 0
+        while i < len(S):
+            left = i
+            while i+1 < len(S) and S[i]==S[i+1]:
+                i += 1
+            right = i
+            if right-left > 1:
+                res.append([left, right])
+            i += 1
+        return res
+```
+## 832. Flipping an Image
+```
+class Solution:
+    def flipAndInvertImage(self, A: List[List[int]]) -> List[List[int]]:
+        for i in range(len(A)):
+            A[i] = [(A[i][-j]+1)%2 for j in range(1,len(A[i])+1)]
+        return A
+```
+## 849. Maximize Distance to Closest Person
+```
+class Solution:
+    def maxDistToClosest(self, seats: List[int]) -> int:
+        res = 0
+        i = 0
+        while i < len(seats) and seats[i] != 1:
+            i += 1
+        prev, res = i, i
+        while i < len(seats):
+            if seats[i] == 1:
+                prev, res = i, max(res, (i-prev)//2)
+            i += 1
+        if prev != len(seats)-1:
+            res = max(res, len(seats)-1-prev)
+        return res
+```
+## 859. Buddy Strings
+```
+class Solution:
+    def buddyStrings(self, A: str, B: str) -> bool:
+        if len(A) != len(B): return False
+        diff, dA, dB = 0, {chr(i):0 for i in range(ord('a'), ord('z')+1)}, {chr(i):0 for i in range(ord('a'), ord('z')+1)}
+        for i in range(len(A)):
+            if A[i] != B[i]: diff += 1
+            dA[A[i]] += 1
+            dB[B[i]] += 1
+        return all([dA[x]==dB[x] for x in dA]) and ((diff == 0 and max([dA[x] for x in dA]) >1) or diff == 2)
+```
+## 840. Magic Squares In Grid
+```
+class Solution:
+    def numMagicSquaresInside(self, grid: List[List[int]]) -> int:
+        if len(grid)<3 or len(grid[0])<3: return 0
+        
+        def checkMagicSquare(grid, x, y):
+            digits = []
+            for i in [0,1,2]:
+                digits += grid[x+i][y:y+3]
+            if set(digits) != set([1,2,3,4,5,6,7,8,9]): return False
+            s = sum(grid[x][y:y+3])
+            for i in [1,2]:
+                if sum(grid[x+i][y:y+3]) != s: return False
+            for i in [0,1,2]:
+                if sum([grid[x+j][y+i] for j in range(3)]) != s: return False
+            if sum([grid[x+i][y+i] for i in range(3)]) != s: return False
+            if sum([grid[x+i][y+2-i] for i in range(3)]) != s: return False
+            return True
+        
+        m, n, res = len(grid), len(grid[0]), 0
+        for i in range(m-2):
+            for j in range(n-2):
+                if checkMagicSquare(grid, i, j): res += 1
+        return res
+```
+## 867. Transpose Matrix
+```
+class Solution:
+    def transpose(self, A: List[List[int]]) -> List[List[int]]:
+        if not A or not A[0]: return A
+        m, n  = len(A), len(A[0])
+        res = [[0]*m for _ in range(n)]
+        for i in range(m):
+            for j in range(n):
+                res[j][i] = A[i][j]
+        return res
+```
+## 872. Leaf-Similar Trees
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def leafSimilar(self, root1: TreeNode, root2: TreeNode) -> bool:
+        self.leaves1, self.leaves2 = [], []
+        def getLeaves1(root):
+            if not root: return 
+            if not root.left and not root.right: 
+                self.leaves1.append(root.val)
+            else:
+                getLeaves1(root.left)
+                getLeaves1(root.right)
+        
+        def getLeaves2(root):
+            if not root: return 
+            if not root.left and not root.right: 
+                self.leaves2.append(root.val)
+            else:
+                getLeaves2(root.left)
+                getLeaves2(root.right)
+        getLeaves1(root1)
+        getLeaves2(root2)
+        return len(self.leaves1) == len(self.leaves2) and all([self.leaves1[i]==self.leaves2[i] for i in range(len(self.leaves1))])
+```
+## 883. Projection Area of 3D Shapes
+```
+class Solution:
+    def projectionArea(self, grid: List[List[int]]) -> int:
+        if not grid or not grid[0]: return 0
+        res, x, y = 0, len(grid), len(grid[0])
+        # Get x-y area:
+        for i in range(x):
+            for j in range(y):
+                res += (grid[i][j] > 0)
+        if res == 0: return 0
+        
+        # Get x-z area:
+        for i in range(x):
+            res += max(grid[i])
+        # Get y-z area:
+        for j in range(y):
+            res += max([grid[i][j] for i in range(x)])
+        
+        return res
+```
+## 888. Fair Candy Swap
+```
+class Solution:
+    def fairCandySwap(self, A: List[int], B: List[int]) -> List[int]:
+        sumA, sumB = sum(A), sum(B)
+        diff, setB = (sumA - sumB)//2, set(B)
+        for x in A:
+            if  x - diff in setB:
+                return [x, x-diff]
+```
+## 893. Groups of Special-Equivalent Strings
+```
+class Solution:
+    def numSpecialEquivGroups(self, A: List[str]) -> int:
+        groups = set()
+        for w in A:
+            d = {}
+            for i in range(len(w)):
+                if i%2==0: d[w[i].upper()] = d.get(w[i].upper(), 0) + 1
+                else: d[w[i]] = d.get(w[i], 0) + 1
+            rep = ''
+            for l in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ':
+                if l in d: rep += l+str(d[l])
+            groups.add(rep)
+        return len(groups)
+```
+## 896. Monotonic Array
+```
+class Solution:
+    def isMonotonic(self, A: List[int]) -> bool:
+        if len(A) < 3: return True
+        
+        if A[0] == A[-1]:
+            for i in range(1, len(A)):
+                if A[i] != A[0]: return False
+        elif A[0] > A[-1]:
+            for i in range(1, len(A)):
+                if A[i] > A[i-1]: return False
+        else:
+            for i in range(1, len(A)):
+                if A[i] < A[i-1]: return False
+        return True
+```
+## 897. Increasing Order Search Tree
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def increasingBST(self, root: TreeNode) -> TreeNode:
+        def inorder(root):
+            if not root: return []
+            return inorder(root.left)+[root]+inorder(root.right)
+        q = collections.deque(inorder(root))
+        if len(q) < 2: return root
+        
+        new_root = q.popleft()
+        prev = new_root
+        while q:
+            node = q.popleft()
+            node.left, node.right = None, None
+            prev.right = node
+            prev = node
+        return new_root
+```
+## 905. Sort Array By Parity
+```
+class Solution:
+    def sortArrayByParity(self, A: List[int]) -> List[int]:
+        return [x for x in A if x%2==0]+[x for x in A if x%2 == 1]
+```
+## 892. Surface Area of 3D Shapes
+```
+class Solution:
+    def surfaceArea(self, grid: List[List[int]]) -> int:
+        m, n, res = len(grid), len(grid[0]), 0
+        # xy-area
+        for i in range(m):
+            for j in range(n):
+                height = grid[i][j]
+                if grid[i][j] > 0: 
+                    res += 2 # twice for top and bot
+                    if i-1 >= 0 and grid[i-1][j] < height: 
+                        res += height - grid[i-1][j]
+                    elif i-1 < 0:
+                        res += height
+                    if i+1 >= m: res += height
+                    elif i+1 < m and grid[i+1][j] < height:
+                        res += height - grid[i+1][j]
+                    
+                    if j-1 >= 0 and grid[i][j-1] < height: 
+                        res += height - grid[i][j-1]
+                    elif j-1 < 0:
+                        res += height
+                    if j+1 >= n: res += height
+                    elif j+1 < n and grid[i][j+1] < height:
+                        res += height - grid[i][j+1]
+        return res
+```
+## 914. X of a Kind in a Deck of Cards
+```
+class Solution:
+    def hasGroupsSizeX(self, deck: List[int]) -> bool:
+        if len(deck)<2: return False
+        
+        d = collections.Counter(deck)
+        
+        GCD = 0
+        for x in d:
+            GCD = math.gcd(GCD, d[x])
+        return GCD > 1
+```
+## 917. Reverse Only Letters
+```
+class Solution:
+    def reverseOnlyLetters(self, S: str) -> str:
+        letters = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+        lst = [0]*len(S)
+        l, r = 0, len(S)-1
+        while l <= r:
+            if S[l] not in letters:
+                lst[l] = S[l]
+                l += 1
+            elif S[r] not in letters:
+                lst[r] = S[r]
+                r -= 1
+            elif S[l] in letters and S[r] in letters:
+                lst[l], lst[r] = S[r], S[l]
+                l += 1
+                r -= 1
+        return ''.join(lst)
+```
+## 933. Number of Recent Calls
+```
+class RecentCounter:
+
+    def __init__(self):
+        '''
+        Each record is of the form: [ping, output, index]
+        where ping is a ping appeared before, output is the return value of that ping,
+        index is the location of the smallest ping in self.record which is within
+        [ping-3000, ping]
+        '''
+        self.record = []
+
+    def ping(self, t: int) -> int:
+        if not self.record: 
+            self.record.append([t, 1, 0])
+            return 1
+        else:
+            last = self.record[-1]
+            if last[0] >= t-3000:
+                output = last[1]+1
+                index = last[2]
+                while self.record[index][0] < t-3000:
+                    index += 1
+                    output -= 1
+            else:
+                output, index = 1, len(self.record)
+            self.record.append([t, output, index])
+            return output
+
+# Your RecentCounter object will be instantiated and called as such:
+# obj = RecentCounter()
+# param_1 = obj.ping(t)
+```
+## 937. Reorder Data in Log Files
+```
+class Solution:
+    def reorderLogFiles(self, logs: List[str]) -> List[str]:
+        letters, digits = [], []
+        for log in logs:
+            i = log.find(' ')
+            if log[i+1].isdigit(): 
+                digits.append(log)
+            else:
+                letters.append(log)
+        letters = sorted(letters, key = lambda x: [x[x.find(' ')+1:], x[:x.find(' ')]])
+        return letters + digits
+```
+## 941. Valid Mountain Array
+```
+class Solution:
+    def validMountainArray(self, A: List[int]) -> bool:
+        if len(A) < 3 or A[0] >= A[1]: return False
+        i = 1
+        
+        while i < len(A)-1 and A[i] < A[i+1]: 
+            i += 1
+        if i == len(A)-1: return False
+        
+        while i < len(A)-1:
+            if A[i] <= A[i+1]: return False
+            i += 1
+        return True
+```
+## 965. Univalued Binary Tree
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def isUnivalTree(self, root: TreeNode) -> bool:
+        self.vals = set()
+        def getVals(root):
+            if not root: return 
+            self.vals.add(root.val)
+            getVals(root.left)
+            getVals(root.right)
+        getVals(root) 
+        return len(self.vals) == 1
+```
+## 949. Largest Time for Given Digits
+```
+class Solution:
+    def largestTimeFromDigits(self, A: List[int]) -> str:
+        self.combos= []
+        self.depth([str(x) for x in A],'')
+        res = '-1'
+        for x in self.combos:
+            if 2400 > int(x) > int(res) and int(x[2:])<60 :
+                res = x
+                
+        return res[:2]+':'+res[2:] if res!='-1' else ''
+    def depth(self, A, path):
+        if not A:  
+            self.combos.append(path)
+            return
+        for i in range(len(A)):
+            self.depth(A[:i]+A[i+1:], path+A[i])
+```
+## 976. Largest Perimeter Triangle
+```
+class Solution:
+    def largestPerimeter(self, A: List[int]) -> int:
+        A.sort()
+        for i in range(len(A)-1, 1, -1):
+            if A[i-1] + A[i-2] > A[i]:
+                return sum(A[i-2:i+1])
+        return 0
+```
