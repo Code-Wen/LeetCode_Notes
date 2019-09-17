@@ -11769,3 +11769,579 @@ class Solution:
                 return sum(A[i-2:i+1])
         return 0
 ```
+## 993. Cousins in Binary Tree
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def isCousins(self, root: TreeNode, x: int, y: int) -> bool:
+        
+        if not root or root.val in [x,y]: return False
+        
+        def getDepth_and_Parent(root, x):
+            deq, depth, cnt, next_cnt = collections.deque([root]), 1, 1, 0
+            while deq:
+                node = deq.popleft()
+                cnt -= 1
+                if node.left:
+                    if node.left.val == x:
+                        return node, depth
+                    next_cnt += 1
+                    deq.append(node.left)
+                if node.right:
+                    if node.right.val == x:
+                        return node, depth
+                    next_cnt += 1
+                    deq.append(node.right)
+                if cnt == 0:
+                    depth += 1
+                    cnt, next_cnt = next_cnt, cnt
+            
+        x_parent, x_depth = getDepth_and_Parent(root, x)
+        y_parent, y_depth = getDepth_and_Parent(root, y)
+        return x_depth == y_depth and x_parent != y_parent
+```
+## 997. Find the Town Judge
+```
+class Solution:
+    def findJudge(self, N: int, trust: List[List[int]]) -> int:
+        if N == 0: return -1
+        candidates = set([i for i in range(1, N+1)])
+        d = {}
+        for x, y in trust:
+            d[x] = d.get(x, set()).union(set([y]))
+            if x in candidates:
+                candidates.remove(x)
+        if len(candidates) != 1: return -1
+        x = candidates.pop()
+        return x if all([x in d[i] for i in d]) else -1
+```
+Another solution without using dictionary:
+```
+class Solution:
+    def findJudge(self, N: int, trust: List[List[int]]) -> int:
+        count = [0] * (N + 1)
+        for i, j in trust:
+            count[i] -= 1
+            count[j] += 1
+        for i in range(1, N + 1):
+            if count[i] == N - 1:
+                return i
+        return -1
+```
+## 999. Available Captures for Rook
+```
+class Solution:
+    def numRookCaptures(self, board: List[List[str]]) -> int:
+        found = False
+        for i in range(8):
+            if found: break
+            for j in range(8):
+                if board[i][j]=='R': 
+                    x, y, found = i, j, True
+                    break
+        res = 0
+        for i in range(1, 8):
+            x0 = x-i
+            if x0<0: break
+            elif board[x0][y] == 'B': break
+            elif board[x0][y] == '.': continue
+            else:
+                res += 1
+                break
+        for i in range(1,8):
+            x0 = x+i
+            if x0 > 7: break
+            elif board[x0][y] == 'B': break
+            elif board[x0][y] == '.': continue
+            else:
+                res += 1
+                break
+        for j in range(1,8):
+            y0 = y-j
+            if y0 < 0: break
+            elif board[x][y0] == 'B': break
+            elif board[x][y0] == '.': continue
+            else:
+                res += 1
+                break
+        for j in range(1,8):
+            y0 = y+j
+            if y0 > 7: break
+            elif board[x][y0] == 'B': break
+            elif board[x][y0] == '.': continue
+            else:
+                res += 1
+                break
+        return res
+```
+## 985. Sum of Even Numbers After Queries
+```
+class Solution:
+    def sumEvenAfterQueries(self, A: List[int], queries: List[List[int]]) -> List[int]:
+        even_sum = sum([x for x in A if x%2 == 0])
+        res = []
+        for i in range(len(queries)):
+            prev = A[queries[i][1]]
+            temp = prev + queries[i][0]
+            if prev%2 == 0 and temp%2 != 0:
+                even_sum -= prev
+            elif prev%2 == 0 and temp%2 == 0:
+                even_sum += queries[i][0]
+            elif prev%2 != 0 and temp%2 == 0:
+                even_sum += temp
+            A[queries[i][1]] = temp
+            res.append(even_sum)
+        return res
+```
+## 1009. Complement of Base 10 Integer
+```
+class Solution:
+    def bitwiseComplement(self, N: int) -> int:
+        res, power = 0, 1
+        q, r = N//2, N%2
+        res += (r+1)%2 * power
+        while q > 0:
+            power, q, r = power*2, q//2, q%2
+            res += (r+1)%2 * power
+        return res
+```
+## 1010. Pairs of Songs With Total Durations Divisible by 60
+```
+class Solution:
+    def numPairsDivisibleBy60(self, time: List[int]) -> int:
+        d = {}
+        for x in time:
+            d[x%60] = d.get(x%60, 0) + 1
+        res = 0
+        for i in range(1,30):
+            if i in d and 60-i in d:
+                res += d[i]*d[60-i]
+        
+        if 0 in d: res += d[0]*(d[0]-1)//2
+        if 30 in d: res += d[30]*(d[30]-1)//2
+        
+        return res
+```
+## 1013. Partition Array Into Three Parts With Equal Sum
+```
+class Solution:
+    def canThreePartsEqualSum(self, A: List[int]) -> bool:
+        
+        total = sum(A)
+        if total % 3 != 0: return False
+        left_sum, right_sum = A[0], A[-1]
+        l, r = 1, len(A)-2
+        while l<len(A) and left_sum != total//3:
+            left_sum += A[l]
+            l += 1
+        if l == len(A): return False
+        
+        while r > 0 and right_sum != total//3:
+            right_sum += A[r]
+            r -= 1
+        if r == 0: return False
+        
+        return l <= r
+```
+## 1037. Valid Boomerang
+```
+class Solution:
+    def isBoomerang(self, points: List[List[int]]) -> bool:
+        if points[0]==points[1] or points[0]==points[2] or points[1]==points[2]: return False
+        
+        v1x, v1y = points[1][0]-points[0][0], points[1][1]-points[0][1]
+        v2x, v2y = points[2][0]-points[0][0], points[2][1]-points[0][1]
+        return (v1x * v2y) != (v1y * v2x)
+```
+## 1018. Binary Prefix Divisible By 5
+```
+class Solution:
+    def prefixesDivBy5(self, A: List[int]) -> List[bool]:
+        res, temp = [False]*len(A), 0
+        for i in range(len(A)):
+            temp = 2*temp + A[i]
+            if temp%5 == 0: res[i] = True
+        return res
+```
+
+## 1022. Sum of Root To Leaf Binary Numbers
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def sumRootToLeaf(self, root: TreeNode) -> int:
+        if not root: return 0
+        stack, res = [[root, root.val]], 0
+        while stack:
+            node, path_sum = stack.pop()
+            if node.left:
+                stack.append([node.left, 2*path_sum+node.left.val])
+            if node.right:
+                stack.append([node.right, 2*path_sum+node.right.val])
+            if not node.right and not node.left:
+                res += path_sum
+        return res
+```
+## 1030. Matrix Cells in Distance Order
+```
+class Solution:
+    def allCellsDistOrder(self, R: int, C: int, r0: int, c0: int) -> List[List[int]]:
+        res = [[i,j] for i in range(R) for j in range(C)]
+        res = sorted(res, key = lambda x: abs(x[0]-r0)+abs(x[1]-c0))
+        return res
+```
+## 1033. Moving Stones Until Consecutive
+```
+class Solution:
+    def numMovesStones(self, a: int, b: int, c: int) -> List[int]:
+        l=[a,b,c]
+        l.sort()
+        m, M = min(l[2]-l[1],l[1]-l[0]), max(l[2]-l[1],l[1]-l[0])
+        if M == 1: return [0,0]
+        if M == 2 or m <= 2: return [1, l[2]-l[0]-2]
+        if M > 2: return [2, l[2]-l[0]-2]
+```
+## 1042. Flower Planting With No Adjacent
+```
+class Solution:
+    def gardenNoAdj(self, N: int, paths: List[List[int]]) -> List[int]:
+        res = [None]*(N+1)
+        d = {}
+        for i, j in paths:
+            d[i] = d.get(i, set()).union({j})
+            d[j] = d.get(j, set()).union({i})
+        for i in range(1, N+1):
+            if i not in d: res[i] = 1
+            else:
+                choices = set([1,2,3,4])
+                for x in d[i]: 
+                    if x < i: choices -= {res[x]}
+                res[i] = choices.pop()
+        return res[1:]
+```
+## 1051. Height Checker
+```
+class Solution:
+    def heightChecker(self, heights: List[int]) -> int:
+        h = heights.copy()
+        h.sort()
+        res = 0
+        for i in range(len(h)):
+            if h[i] != heights[i]: res += 1
+        return res
+```
+## 1056. Confusing Number
+```
+class Solution:
+    def confusingNumber(self, N: int) -> bool:
+        good, sym_pairs = {'0','1','8','6','9'}, {('6','9'),('0','0'),('1','1'),('8','8'), ('9','6')}
+        s, diff  = str(N), False
+        l, r = 0, len(s)-1
+        while l < r:
+            if s[l] not in good or s[r] not in good: return False
+            if  (s[l],s[r]) not in sym_pairs: diff = True
+            l += 1
+            r -= 1
+        if l == r:
+            if s[l] in '69': return True
+            if s[l] not in good: return False
+        return diff
+```
+## 1064. Fixed Point
+```
+class Solution:
+    def fixedPoint(self, A: List[int]) -> int:
+        for i in range(len(A)):
+            if A[i] == i: return i
+        return -1
+```
+## 1078. Occurrences After Bigram
+```
+class Solution:
+    def findOcurrences(self, text: str, first: str, second: str) -> List[str]:
+        l = text.split()
+        res = []
+        if len(l) < 3: return []
+        for i in range(len(l)-2):
+            if l[i:i+2] == [first, second]:
+                res.append(l[i+2])
+        return res
+```
+## 1085. Sum of Digits in the Minimum Number
+```
+class Solution:
+    def sumOfDigits(self, A: List[int]) -> int:
+        m = min(A)
+        digit_sum = 0
+        while m > 0:
+            m, r = m//10, m%10
+            digit_sum += r
+        return 0 if digit_sum % 2 != 0 else 1
+```
+## 1086. High Five
+```
+class Solution:
+    def highFive(self, items: List[List[int]]) -> List[List[int]]:
+        # Use a dictionary to store a student's top scores (at most 5). 
+        d = {}
+        for i in range(len(items)):
+            ID, score = items[i]
+            if ID not in d:
+                d[ID] = [score]
+            else:
+                if len(d[ID]) == 5 and score > min(d[ID]):
+                    ind = d[ID].index(min(d[ID]))
+                    d[ID][ind] = score
+                elif len(d[ID]) < 5:
+                    d[ID].append(score)
+        return [[ID, sum(d[ID])//5] for ID in d]
+```
+## 1099. Two Sum Less Than K
+```
+class Solution:
+    def twoSumLessThanK(self, A: List[int], K: int) -> int:
+        A.sort()
+        if len(A) < 2 or A[0]+A[1] >= K: return -1
+        l, r, res = 0, len(A)-1, -1
+        while l < r:
+            if A[l]+A[r] >= K: r -= 1
+            else:
+                res = max(A[l]+A[r],res)
+                l += 1
+        return res
+```
+## 1103. Distribute Candies to People
+```
+class Solution:
+    def distributeCandies(self, candies: int, num_people: int) -> List[int]:
+        n = num_people
+        s, k, res = n*(n+1)//2, 0, [0]*(n+1)
+        while candies >= (k+1)*s+n*n*k*(k+1)//2:
+            k += 1
+        temp, candies = n*k*(k-1)//2, candies - (k*s+n*n*k*(k-1)//2)
+        if k > 0:
+            for i in range(1, n+1):
+                res[i] = temp + k*i
+        
+        i = 1
+        while candies > 0:
+            given = min(candies, k*n+i)
+            res[i] += given
+            candies -= given
+            i += 1
+        return res[1:]
+```
+## 1118. Number of Days in a Month
+```
+class Solution:
+    def numberOfDays(self, Y: int, M: int) -> int:
+        if M in {1,3,5,7,8,10,12}: return 31
+        if M in {4,6,9,11}: return 30
+        if M == 2 and Y%400 == 0 or (Y%100 != 0 and Y%4 == 0): return 29
+        return 28
+```
+## 1119. Remove Vowels from a String
+```
+class Solution:
+    def removeVowels(self, S: str) -> str:
+        res, vowels = '', {'a','e','o','u','i'}
+        for l in S:
+            if l not in vowels: res += l
+        return res
+```
+## 1122. Relative Sort Array
+```
+class Solution:
+    def relativeSortArray(self, arr1: List[int], arr2: List[int]) -> List[int]:
+        in_arr2, extra, d = [0]*len(arr2), [], {arr2[i]:i for i in range(len(arr2))}
+        for x in arr1:
+            if x in d:
+                in_arr2[d[x]] += 1
+            else:
+                extra.append(x)
+        extra.sort()
+        return sum([[arr2[i]]*in_arr2[i] for i in range(len(arr2))],[])+extra
+```
+## 1128. Number of Equivalent Domino Pairs
+```
+class Solution:
+    def numEquivDominoPairs(self, dominoes: List[List[int]]) -> int:
+        d = {}
+        for x, y in dominoes:
+            if x > y: 
+                x, y = y, x
+            d[(x,y)] = d.get((x,y), 0) + 1
+        return sum([d[x]*(d[x]-1)//2 for x in d])
+```
+## 1133. Largest Unique Number
+```
+class Solution:
+    def largestUniqueNumber(self, A: List[int]) -> int:
+        d = collections.Counter(A)
+        unique = [x for x in d if d[x] == 1]
+        return max(unique) if unique else -1
+```
+
+One liner:
+```
+class Solution:
+    def largestUniqueNumber(self, A: List[int]) -> int:
+        
+        return max([x for x,v in collections.Counter(A).items() if v == 1]+[-1]) 
+```
+## 1134. Armstrong Number
+```
+class Solution:
+    def isArmstrong(self, N: int) -> bool:
+        k = len(str(N))
+        power_sum = 0
+        q = N
+        while q > 0:
+            q, r = q//10, q%10
+            power_sum += pow(r, k)
+        return power_sum == N
+```
+## 1137. N-th Tribonacci Number
+```
+class Solution:
+    def tribonacci(self, n: int) -> int:
+        if n == 0: return 0
+        if n in {1,2}: return 1
+        t0, t1, t2 = 0, 1, 1
+        while n >= 3:
+            t0, t1, t2 = t1, t2, t0+t1+t2
+            n -= 1
+        return t2
+```
+## 1150. Check If a Number Is Majority Element in a Sorted Array
+```
+class Solution:
+    def isMajorityElement(self, nums: List[int], target: int) -> bool:
+        net_cnt = 0
+        for x in nums:
+            if x == target: net_cnt += 1
+            else:
+                net_cnt -= 1
+        return net_cnt > 0
+```
+## 1154. Day of the Year
+```
+class Solution:
+    def dayOfYear(self, date: str) -> int:
+        Y, M, D = int(date[:4]), int(date[5:7]), int(date[8:])
+        for i in range(1, M):
+            if i in {1,3,5,7,8,10,12}: D += 31
+            elif i in {4,6,9,11}: D += 30
+            else:
+                if Y%4 != 0 or (Y%100 == 0 and Y%400 != 0): D += 28
+                else: D += 29
+        return D
+```
+## 1160. Find Words That Can Be Formed by Characters
+```
+class Solution:
+    def countCharacters(self, words: List[str], chars: str) -> int:
+        d = collections.Counter(chars)
+        return sum([len(w) for w in words if all([(x in d and v <= d[x]) for x, v in collections.Counter(w).items()])])
+```
+## 1165. Single-Row Keyboard
+```
+class Solution:
+    def calculateTime(self, keyboard: str, word: str) -> int:
+        d = {keyboard[i]:i for i in range(len(keyboard))}
+        res, prev = 0, 0
+        for x in word:
+            res += abs(d[x]-prev)
+            prev = d[x]
+        return res
+```
+## 1170. Compare Strings by Frequency of the Smallest Character
+```
+class Solution:
+    def numSmallerByFrequency(self, queries: List[str], words: List[str]) -> List[int]:
+        def smallFreq(w):
+            letter, cnt = 'z', 0
+        
+            for l in w:
+                if l < letter: 
+                    letter, cnt = l, 1
+                elif l == letter:
+                    cnt += 1
+            return cnt
+        
+        output = []
+        f_words = [smallFreq(w) for w in words]
+        for x in queries:
+            f_x = smallFreq(x)
+            output.append(len([a for a in f_words if a > f_x]))
+        return output
+```
+## 1175. Prime Arrangements
+```
+class Solution:
+    def numPrimeArrangements(self, n: int) -> int:
+        primes = {2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97}
+        prime_cnt = len([x for x in primes if x <= n])
+        non_prime = n - prime_cnt
+        res1, res2 = 1 , 1
+        for i in range(1, prime_cnt+1):
+            res1 *= i
+        for j in range(1, non_prime+1):
+            res2 *= j
+            
+        return (res1*res2)%(pow(10, 9)+7)
+```
+## 1180. Count Substrings with Only One Distinct Letter
+```
+class Solution:
+    def countLetters(self, S: str) -> int:
+        res, i = 0, 0
+        while i < len(S):
+            cnt = 1
+            while i+1 < len(S) and S[i+1] == S[i]:
+                cnt += 1
+                i += 1
+            res += cnt*(cnt+1)//2
+            i += 1            
+        return res
+```
+## 1189. Maximum Number of Balloons
+```
+class Solution:
+    def maxNumberOfBalloons(self, text: str) -> int:
+        d = collections.Counter(text)
+        d1 = collections.Counter('balloon')
+        res = float('inf')
+        for x in d1:
+            if x not in d: return 0
+            else: res = min(res, d[x]//d1[x])
+        return res
+```
+## 1176. Diet Plan Performance
+```
+class Solution:
+    def dietPlanPerformance(self, calories: List[int], k: int, lower: int, upper: int) -> int:
+        res, calories = 0, [0]+calories
+        start, Sum = 0, sum(calories[:k])
+        
+            
+        while start < len(calories)-k:
+            
+            Sum = Sum - calories[start] + calories[start+k]
+            if Sum < lower: res -= 1
+            elif Sum > upper: res += 1
+            start += 1
+        calories = calories[1:]
+        return res
+```
