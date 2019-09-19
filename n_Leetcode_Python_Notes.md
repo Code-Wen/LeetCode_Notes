@@ -12345,3 +12345,228 @@ class Solution:
         calories = calories[1:]
         return res
 ```
+## 1184. Distance Between Bus Stops
+```
+class Solution:
+    def distanceBetweenBusStops(self, distance: List[int], start: int, destination: int) -> int:
+        if start > destination:
+            start, destination = destination, start
+        
+        return min(sum(distance[start:destination]), sum(distance)-sum(distance[start:destination]))
+```
+## 1185. Day of the Week
+```
+class Solution:
+    def dayOfTheWeek(self, day: int, month: int, year: int) -> str:
+        d ={0:"Sunday", 1:"Monday", 2:"Tuesday", 3:"Wednesday", 4:"Thursday", 5:"Friday", 6:"Saturday"}
+        # we use Jan 1st, 1971 as start. It is a Friday
+        res = 4
+        for i in range(1971, year):
+            if i%4 != 0 or (i%100 == 0 and i%400 != 0):
+                res += 1
+            else: res += 2
+            
+        for i in range(1, month):
+            if i in {1,3,5,7,8,10,12}: res += 3
+            elif i in {4,6,9,11}: res += 2
+            else:
+                if year%4 != 0 or (year%100 == 0 and year%400 != 0): continue
+                else: res += 1
+        
+        res += day
+        return d[res%7]
+```
+## 286. Walls and Gates
+The idea is simple: for every location of 0 in `rooms`, we run BFS to update the distances. To do that, my first solution need to keep a set named `visited` to ensure the BFS will end. Apparently in many cases if we have more than one 0 in the same connected component, many nodes will be visited more than once, and this is the most wasteful part of our algorithm. To avoid that, before visiting a node and its subsequent nodes, we peak at the value of its current value and compare that with the to be updated value. If the previous value is smaller, we stop; else we update. 
+```
+class Solution:
+    def wallsAndGates(self, rooms: List[List[int]]) -> None:
+        """
+        Do not return anything, modify rooms in-place instead.
+        """
+        if not rooms or not rooms[0]: return rooms
+        m, n = len(rooms), len(rooms[0])
+        
+        def bfs(rooms, x, y):
+            m, n = len(rooms), len(rooms[0])
+            deq = collections.deque()
+            deq.append((x,y,0))
+            while deq:
+                i, j, dist = deq.popleft()
+                for I, J in [(i-1,j),(i+1,j),(i,j-1),(i,j+1)]:
+                    if 0<=I<m and 0<=J<n and rooms[I][J] > dist+1:
+                        rooms[I][J] = dist+1
+                        deq.append((I,J,dist+1))
+                    
+        for i in range(m):
+            for j in range(n):
+                if rooms[i][j] == 0: bfs(rooms, i, j)
+```
+## 261. Graph Valid Tree
+```
+class Solution:
+    def validTree(self, n: int, edges: List[List[int]]) -> bool:
+        if len(edges) != n-1: return False
+        d = {}
+        for i,j in edges:
+            d[j] = d.get(j,set()).union({i})
+            d[i] = d.get(i,set()).union({j})
+        connected, to_visit, visited = {0}, collections.deque([0]), {0}
+        while to_visit:
+            x = to_visit.popleft()
+            visited.add(x)
+            if x in d:
+                for i in d[x]:
+                    connected.add(i)
+                    if i not in visited:
+                        to_visit.append(i)
+        return len(connected) == n
+```
+## 281. Zigzag Iterator
+
+My solution can be easily generated to any number of vectors.
+```
+class ZigzagIterator(object):
+
+    def __init__(self, v1, v2):
+        """
+        Initialize your data structure here.
+        :type v1: List[int]
+        :type v2: List[int]
+        """
+        self.q1 = collections.deque(v1)
+        self.q2 = collections.deque(v2)
+        self.data = [self.q1, self.q2]
+        self.loc = 0 # current q to read
+        # number of non-empty queues
+        self.N = 0
+        for q in self.data:
+            if q: 
+                self.N += 1 
+        
+        
+
+    def next(self):
+        """
+        :rtype: int
+        """
+        if not self.data[self.loc]:
+            self.loc = (self.loc+1)%2
+        res = self.data[self.loc].popleft()
+        if not self.data[self.loc]: 
+            self.N -= 1
+        self.loc = (self.loc+1)%2
+        return res
+            
+
+    def hasNext(self):
+        """
+        :rtype: bool
+        """
+        return self.N > 0
+        
+
+# Your ZigzagIterator object will be instantiated and called as such:
+# i, v = ZigzagIterator(v1, v2), []
+# while i.hasNext(): v.append(i.next())
+```
+
+## 285. Inorder Successor in BST
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def inorderSuccessor(self, root: 'TreeNode', p: 'TreeNode') -> 'TreeNode':
+        if not root: return None
+        if p.val == root.val: return self.smallest(root.right)
+        elif p.val > root.val: return self.inorderSuccessor(root.right, p)
+        else:
+            if p.val == root.left.val:
+                return root if not root.left.right else self.smallest(root.left.right)
+            elif p.val > root.left.val:
+                return root if not self.inorderSuccessor(root.left.right, p) else self.inorderSuccessor(root.left.right, p)
+            else:
+                return self.inorderSuccessor(root.left, p)
+    
+    def smallest(self, root):
+        if not root: return root
+        node = root
+        while node.left:
+            node = node.left
+        return node
+```
+## 510. Inorder Successor in BST II
+```
+"""
+# Definition for a Node.
+class Node(object):
+    def __init__(self, val, left, right, parent):
+        self.val = val
+        self.left = left
+        self.right = right
+        self.parent = parent
+"""
+class Solution(object):
+    def inorderSuccessor(self, node):
+        """
+        :type node: Node
+        :rtype: Node
+        """
+        if not node: return node
+        if node.right: return self.smallest(node.right)
+        else:
+            if not node.parent: return None
+            
+            res = node.parent
+            while res:
+                if res.val > node.val: return res
+                else:
+                    res = res.parent
+            return res
+    
+    def smallest(self, root):
+        if not root: return root
+        node = root
+        while node.left:
+            node = node.left
+        return node
+```
+## 298. Binary Tree Longest Consecutive Sequence
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def longestConsecutive(self, root: TreeNode) -> int:
+        if not root: return 0
+        temp, stack = collections.deque([root]), []
+        while temp:
+            node = temp.popleft()
+            stack.append(node)
+            if node.left: temp.append(node.left)
+            if node.right: temp.append(node.right)
+        
+        d,res = {}, 0
+        while stack:
+            node = stack.pop()
+            if node.left and node.left.val == node.val+1:
+                l = d[node.left] + 1
+            else: 
+                l = 1
+            if node.right and node.right.val == node.val + 1:
+                r = d[node.right] + 1
+            else: 
+                r = 1
+            d[node] = max(l,r)
+            res = max(res, d[node])
+        return res
+```
