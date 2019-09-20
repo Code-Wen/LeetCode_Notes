@@ -12570,3 +12570,93 @@ class Solution:
             res = max(res, d[node])
         return res
 ```
+## 314. Binary Tree Vertical Order Traversal
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+class Link:
+    def __init__(self, x):
+        self.node = x
+        self.next = None
+        
+class Solution:
+    def verticalOrder(self, root: TreeNode) -> List[List[int]]:
+        if not root: return []
+        cnt, next_cnt, d = 1, 0, {}
+        cur, future = Link(1), Link(1)
+        link = Link((root, 0))
+        cur.next = link
+        link.next = future
+        
+        while cnt > 0:
+            node, loc = cur.next.node
+            cur = cur.next
+            cnt -= 1
+            d[loc] = d.get(loc, [])+[node.val]
+            if node.left:
+                temp = Link((node.left, loc-1))
+                future.next = temp
+                future = temp
+                next_cnt += 1
+            if node.right:
+                temp = Link((node.right, loc+1))
+                future.next = temp
+                future = temp
+                next_cnt += 1
+            if cnt == 0:
+                cnt, next_cnt = next_cnt, 0
+                cur, future.next = cur.next, Link(1)
+                future = future.next
+                
+        return [d[key] for key in sorted(d.keys())]
+```
+## 288. Unique Word Abbreviation
+```
+class ValidWordAbbr(object):
+
+    def __init__(self, dictionary):
+        self.dic = collections.defaultdict(set)
+        for s in dictionary:
+            val = s
+            if len(s) > 2:
+                s = s[0]+str(len(s)-2)+s[-1]
+            self.dic[s].add(val)
+
+    def isUnique(self, word):
+        val = word 
+        if len(word) > 2:
+            word = word[0]+str(len(word)-2)+word[-1]
+        # if word abbreviation not in the dictionary, or word itself in the dictionary (word itself may 
+        # appear multiple times in the dictionary, so it's better using set instead of list)
+        return len(self.dic[word]) == 0 or (len(self.dic[word]) == 1 and val == list(self.dic[word])[0])
+
+
+# Your ValidWordAbbr object will be instantiated and called as such:
+# obj = ValidWordAbbr(dictionary)
+# param_1 = obj.isUnique(word)
+```
+## 320. Generalized Abbreviation
+```
+class Solution(object):
+    def generateAbbreviations(self, word):
+        """
+        :type word: str
+        :rtype: List[str]
+        """
+        res = []
+        
+        def helper(word, pos, cnt, cur):
+            if len(word) == pos:
+                res.append((cur+str(cnt) if cnt>0 else cur))
+            else:
+                # Abbreviating the current letter
+                helper(word, pos+1, cnt+1, cur)
+                # Keeping the current letter, reset cnt
+                helper(word, pos+1, 0, cur+(str(cnt) if cnt > 0 else '')+word[pos])
+        helper(word, 0, 0, '')
+        return res
+```
