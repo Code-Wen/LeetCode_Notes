@@ -12660,3 +12660,433 @@ class Solution(object):
         helper(word, 0, 0, '')
         return res
 ```
+## 325. Maximum Size Subarray Sum Equals k
+```
+class Solution:
+    def maxSubArrayLen(self, nums: List[int], k: int) -> int:
+        d, left_sum, res = {}, 0, 0
+        for i in range(len(nums)):
+            
+            left_sum += nums[i]
+            if left_sum == k:
+                res = max(res, i+1)
+            if left_sum - k in d:
+                res = max(res, i-d[left_sum-k])
+            if left_sum not in d:
+                d[left_sum] = i
+        return res
+```
+## 331. Verify Preorder Serialization of a Binary Tree
+```
+class Solution:
+    def isValidSerialization(self, preorder: str) -> bool:
+        empty = 1
+        l = preorder.split(',')
+        for i in l:
+            # if no empty slot to put the current node:
+            if empty == 0:
+                return False
+            # if the current node is null:
+            if i == '#':
+                empty -= 1
+            # if the current node is not null, the net effect is to add an additional empty slot
+            if i != '#':
+                empty += 1
+        # no empty slots are allowed after we go through
+        return empty == 0
+```
+## 254. Factor Combinations
+```
+class Solution:
+    def getFactors(self, n: int) -> List[List[int]]:
+        todo, combos = [(n, 2, [])], []
+        while todo:
+            n, i, combo = todo.pop()
+            while i * i <= n:
+                if n%i == 0:
+                    todo += [(n//i, i, combo+[i])]
+                    combos += [combo+[i, n//i]]
+                i += 1
+        return combos
+```
+## 347. Top K Frequent Elements
+
+An O(nlgn) solution:
+```
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        d = collections.Counter(nums)
+        l = sorted(d.keys(), key = lambda x:d[x])[::-1]
+        return l[:k]
+```
+An O(n) solutions:
+```
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        d = collections.Counter(nums)
+        freq = {}
+        for key, val in d.items():
+            freq[val] = freq.get(val, [])+[key]
+        
+        res = []
+        for i in range(len(nums), 0, -1):
+            if i in freq:
+                res += freq[i]
+                if len(res) >= k:
+                    return res[:k]
+```
+
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def largestBSTSubtree(self, root: TreeNode) -> int:
+        self.d = {}
+        def traverse(node):
+            """
+            Given a binary tree, we traverse it and record for each node the following info:
+            self.d[node] = [cnt, valid, min, max], where cnt is the number of nodes in the subtree rooted at node, valid is whether or not this subtree is BST, min/max is the minimal/maximal value in this subtree
+            """
+            if not node: return
+            
+            validBST(node.left)
+            validBST(node.right)
+            valid, cnt, m, M = True, 1, node.val, node.val
+            if (node.left and ((not self.d[node.left][1]) or self.d[node.left][-1] >= node.val)) or (node.right and ((not self.d[node.right][1]) or self.d[node.right][-2] <= node.val)):
+                valid = False
+
+            if node.left: 
+                cnt += self.d[node.left][0]
+                m, M = min(m, self.d[node.left][-2]), max(M, self.d[node.left][-1])
+            if node.right: 
+                cnt += self.d[node.right][0]
+                m, M = min(m, self.d[node.right][-2]), max(M, self.d[node.right][-1])
+            self.d[node] = [cnt, valid, m, M]
+        
+        traverse(root)
+        
+        size = 0
+        for node in self.d:
+            if self.d[node][1] == True:
+                size = max(self.d[node][0], size)
+        return size
+```
+
+## 323. Number of Connected Components in an Undirected Graph
+```
+class Solution:
+    def countComponents(self, n: int, edges: List[List[int]]) -> int:
+        d = {i:[] for i in range(n)}
+        for i,j in edges:
+            d[i] += [j]
+            d[j] += [i]
+        stack, visited, res = [], set(), 0
+        for i in range(n):
+            if i not in visited: 
+                stack.append(i)
+                res += 1
+            while stack:
+                k = stack.pop()
+                for j in d[k]:
+                    if j not in visited:
+                        stack.append(j)
+                visited.add(k)
+        return res
+```
+## 255. Verify Preorder Sequence in Binary Search Tree
+```
+class Solution:
+    def verifyPreorder(self, preorder: List[int]) -> bool:
+        stack, low = [], float('-inf')
+        for x in preorder:
+            if x < low:
+                return False
+            while stack and x > stack[-1]:
+                low = stack.pop()
+            stack.append(x)
+        return True
+```
+## 267. Palindrome Permutation II
+```
+class Solution:
+    def generatePalindromes(self, s: str) -> List[str]:
+        d = collections.Counter(s)
+        n_odds, odd_letter = 0, ''
+        for l in d:
+            if d[l]%2 != 0: 
+                n_odds += 1
+                odd_letter = l
+        
+        if n_odds > 1: return []
+        if n_odds == 1: 
+            mid = odd_letter
+            d[odd_letter] -= 1
+            if d[odd_letter] == 0:
+                del d[odd_letter]
+        else:
+            mid = ''
+        self.res = []
+        def DFS(d, path):
+            if not d: self.res.append(path)
+            
+            for l in d:
+                temp = d.copy()
+                temp[l] -= 2
+                if temp[l] == 0: del temp[l]
+                DFS(temp, l+path+l)
+        DFS(d,mid)
+        return self.res
+```
+## 370. Range Addition
+
+An nice application of the left_sum technique.
+```
+class Solution:
+    def getModifiedArray(self, length: int, updates: List[List[int]]) -> List[int]:
+        res = [0 for _ in range(length+1)]
+        for start, end, inc in updates:
+            res[start] += inc
+            res[end+1] -= inc
+        
+        left_sum = 0
+        for i in range(len(res)):
+            left_sum += res[i]
+            res[i] = left_sum
+        
+        return res[:length]
+```
+## 369. Plus One Linked List
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def plusOne(self, head: ListNode) -> ListNode:
+        n0, node = 0, head
+        while node:
+            n0, node = n0 * 10 + node.val,  node.next
+        
+        n0, n1 = str(n0), str(n0+1)
+        if len(n1) > len(n0):
+            new_head = ListNode(int(n1[0]))
+            new_head.next = head
+            head = new_head
+        
+        node, i = head, 0
+        while node:
+            node.val = int(n1[i])
+            i, node = i+1, node.next
+        return head
+```
+## 366. Find Leaves of Binary Tree
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def findLeaves(self, root: TreeNode) -> List[List[int]]:
+        if not root: return []
+        self.d = {}
+        def traverse(node):
+            if not node: return
+            traverse(node.left)
+            traverse(node.right)
+            height = 1
+            if node.left:
+                height = max(height, 1+self.d[node.left])
+            if node.right:
+                height = max(height, 1+self.d[node.right])
+            self.d[node] = height
+        
+        traverse(root)
+        temp = {}
+        for node, val in self.d.items():
+            temp[val] = temp.get(val, [])+[node.val]
+        return [temp[k] for k in range(1, max(temp.keys())+1)]
+```
+## 365. Water and Jug Problem
+
+One just need to prove that any z with `0 <= z <= x+y` and z a multiple of the GCD of x and y, will be reachable.
+```
+class Solution:
+    def canMeasureWater(self, x: int, y: int, z: int) -> bool:
+        return z == 0 or (x+y >= z and z% math.gcd(x,y) == 0)
+```
+## 348. Design Tic-Tac-Toe
+```
+class TicTacToe:
+
+    def __init__(self, n: int):
+        """
+        Initialize your data structure here.
+        """
+        # self.row[i] = [# of slots to be filled, last seen player on this row], if we see two different players on the same row/col/diagonal, we change it to False, meaning no one can win from this row/col/diag
+        self.row = [[n,0] for i in range(n)]
+        self.col = [[n,0] for i in range(n)]
+        self.diag = [[n,0] for i in range(2)]
+        
+        
+
+    def move(self, row: int, col: int, player: int) -> int:
+        """
+        Player {player} makes a move at ({row}, {col}).
+        @param row The row of the board.
+        @param col The column of the board.
+        @param player The player, can be either 1 or 2.
+        @return The current winning condition, can be either:
+                0: No one wins.
+                1: Player 1 wins.
+                2: Player 2 wins.
+        """
+        n = len(self.row)
+        if self.row[row] and self.row[row][1] in [0, player]:
+            self.row[row][1] = player
+            self.row[row][0] -= 1
+            if self.row[row][0] == 0: return player
+        else:
+            self.row[row] = False
+            
+        
+        if self.col[col] and self.col[col][1] in [0, player]:
+            self.col[col][1] = player
+            self.col[col][0] -= 1
+            if self.col[col][0] == 0: return player
+        else:
+            self.col[col] = False
+        
+        if col == row:
+            if self.diag[0] and self.diag[0][1] in [0,player]:
+                self.diag[0][1] = player
+                self.diag[0][0] -= 1
+                if self.diag[0][0] == 0: return player
+        if col+row == n-1:
+            if self.diag[1] and self.diag[1][1] in [0,player]:
+                self.diag[1][1] = player
+                self.diag[1][0] -= 1
+                if self.diag[1][0] == 0: return player
+        return 0
+            
+        
+
+
+# Your TicTacToe object will be instantiated and called as such:
+# obj = TicTacToe(n)
+# param_1 = obj.move(row,col,player)
+```
+## 356. Line Reflection
+```
+class Solution:
+    def isReflected(self, points: List[List[int]]) -> bool:
+        if not points: return True
+        d = {}
+        for i, j in points:
+            d[j] = d.get(j, set()).union({i})
+        average = {}
+        for y in d:
+            average[y] = (min(d[y])+max(d[y])) / 2.0
+            for x in d[y]:
+                if 2*average[y]-x not in d[y]: return False
+        temp = [average[y] for y in d]
+        return min(temp) == max(temp)
+```
+## 361. Bomb Enemy
+```
+class Solution:
+    def maxKilledEnemies(self, grid: List[List[str]]) -> int:
+        if not grid or not grid[0]: return 0
+        
+        m, n = len(grid), len(grid[0])
+        row, col = {}, {}
+        for i in range(m):
+            enemy, loc = 0, []
+            for j in range(n):
+                if grid[i][j] == 'E':
+                    enemy += 1
+                elif grid[i][j] == '0':
+                    loc.append(j)
+                else:
+                    for y in loc:
+                        row[(i, y)] = enemy
+                    enemy, loc = 0, []
+            for y in loc:
+                        row[(i, y)] = enemy
+        
+        for j in range(n):
+            enemy, loc = 0, []
+            for i in range(m):
+                if grid[i][j] == 'E':
+                    enemy += 1
+                elif grid[i][j] == '0':
+                    loc.append(i)
+                else:
+                    for x in loc:
+                        col[(x, j)] = enemy
+                    enemy, loc = 0, []
+            for x in loc:
+                        col[(x, j)] = enemy
+        return max([row[k]+col[k] for k in row]) if row else 0
+```
+## 360. Sort Transformed Array
+```
+class Solution:
+    def sortTransformedArray(self, nums: List[int], a: int, b: int, c: int) -> List[int]:
+        if not nums: return []
+        
+        if a == 0:
+            if b >= 0:
+                return [self.quad(x, a, b, c) for x in nums]
+            else:
+                return [self.quad(x,a,b,c) for x in nums[::-1]]
+            
+        axis = -b/(2.0*a)
+        if a > 0:
+            inputs, i = [], 0
+            while i+1<len(nums) and abs(nums[i]-axis) >= abs(nums[i+1]-axis):
+                i += 1
+            L, R = i, i+1
+            while L >= 0 and R < len(nums):
+                if abs(axis - nums[L]) < abs(axis - nums[R]):
+                    inputs.append(nums[L])
+                    L -= 1
+                else:
+                    inputs.append(nums[R])
+                    R += 1
+            if L < 0 :
+                inputs += nums[R:]
+            if R >= len(nums):
+                inputs += nums[:L+1][::-1]
+                
+        elif a < 0:
+            inputs, i = [], 0
+            while i+1<len(nums) and abs(nums[i]-axis) >= abs(nums[i+1]-axis):
+                i += 1
+            L, R = 0, len(nums)-1
+            while L <= i and R > i:
+                if abs(axis - nums[L]) < abs(axis - nums[R]):
+                    inputs.append(nums[R])
+                    R -= 1
+                else:
+                    inputs.append(nums[L])
+                    L += 1
+            if L > i :
+                inputs += nums[i+1:R+1][::-1]
+            if R <= i:
+                inputs += nums[L:i+1]
+        
+        return [self.quad(x, a,b,c) for x in inputs]
+    
+    def quad(self, x, a,b,c):
+        return a*x*x+b*x+c
+```
