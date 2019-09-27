@@ -13090,3 +13090,579 @@ class Solution:
     def quad(self, x, a,b,c):
         return a*x*x+b*x+c
 ```
+## 362. Design Hit Counter
+```
+class HitCounter:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.records = {}
+        
+
+    def hit(self, timestamp: int) -> None:
+        """
+        Record a hit.
+        @param timestamp - The current timestamp (in seconds granularity).
+        """
+        self.records[timestamp] = self.records.get(timestamp,0)+1
+        
+
+    def getHits(self, timestamp: int) -> int:
+        """
+        Return the number of hits in the past 5 minutes.
+        @param timestamp - The current timestamp (in seconds granularity).
+        """
+        res = 0
+        for i in range(max(1,timestamp-299), timestamp+1):
+            if i in self.records:
+                res += self.records[i]
+        return res
+        
+# Your HitCounter object will be instantiated and called as such:
+# obj = HitCounter()
+# obj.hit(timestamp)
+# param_2 = obj.getHits(timestamp)
+```
+## 364. Nested List Weight Sum II
+```
+class Solution:
+    def depthSumInverse(self, nestedList: List[NestedInteger]) -> int:
+        nums = [0]
+        while nestedList:
+            nums += [sum([x.getInteger() for x in nestedList if x.isInteger()])]
+            nestedList = sum([x.getList() for x in nestedList if not x.isInteger()],[])
+        l, res = len(nums)-1, 0
+        for i in range(l+1):
+            res += nums[i]*(l+1-i)
+            
+        return res
+```
+## 271. Encode and Decode Strings
+```
+class Codec:
+
+    def encode(self, strs):
+        """Encodes a list of strings to a single string.
+        
+        :type strs: List[str]
+        :rtype: str
+        """
+        res = ''
+        for s in strs:
+            res += str(len(s))+':'+s
+        return res
+        
+    def decode(self, s):
+        """Decodes a single string to a list of strings.
+        
+        :type s: str
+        :rtype: List[str]
+        """
+        strs, i, length = [], 0, ''
+        while i < len(s):
+            while s[i].isdigit(): 
+                length += s[i]
+                i += 1
+            if s[i] == ':':
+                length = int(length)
+                i += 1
+                strs.append(s[i:i+length])
+                i = i+length
+                length = ''
+        return strs
+```
+## 469. Convex Polygon
+```
+class Solution:
+    def isConvex(self, points: List[List[int]]) -> bool:
+        # Given three points A,B,C in the plane, the sign of the determinant of the 3 by 3 matrix as [[A, 1],[B,1], [C,1]] is the direction of the rotation from A to B to C: positive if clockwise, negetive if counterclockwise, 0 if on a straight line.
+        # We just need to check that the points are all rotating in the same direction or not.
+
+        def Direction(a,b,c):
+            return (b[0]-a[0])*(c[1]-a[1]) - (c[0]-a[0]) * (b[1]-a[1])
+        
+        size = len(points)
+        direction = None
+        for i in range(size):
+            temp = Direction( points[i], points[(i+1)%size], points[(i+2)%size])
+            if temp:
+                if not direction:
+                    direction = temp
+                elif direction * temp < 0:
+                    return False
+        return True
+```
+## 468. Validate IP Address
+```class Solution:
+    def validIPAddress(self, IP: str) -> str:
+        
+        def checkIPv4(S):
+            l = S.split('.')
+            if len(l) != 4: return 'Neither'
+            for s in l:
+                if len(s) > 1 and s[0] =='0': return 'Neither'
+                elif not s.isdigit(): return 'Neither'
+                elif not s or int(s) > 255 or int(s) < 0: return 'Neither'
+            return 'IPv4'
+        
+        def checkIPv6(S):
+            l = S.split(':')
+            if len(l) != 8: return 'Neither'
+            for s in l:
+                if not s or len(s) > 4: return 'Neither'
+                else:
+                    for i in s:
+                        if i not in '0123456789abcdefABCDEF': return 'Neither'
+            return 'IPv6'
+        
+        if '.' in IP:
+            return checkIPv4(IP)
+        else:
+            return checkIPv6(IP)
+```
+## 353. Design Snake Game
+```
+class SnakeGame:
+
+    def __init__(self, width: int, height: int, food: List[List[int]]):
+        """
+        Initialize your data structure here.
+        @param width - screen width
+        @param height - screen height 
+        @param food - A list of food positions
+        E.g food = [[1,1], [1,0]] means the first food is positioned at [1,1], the second is at [1,0].
+        """
+        self.w = width
+        self.h = height
+        self.food = collections.deque(food)
+        self.snake = collections.deque()
+        self.occupancy = {(0,0)}
+        self.target =  self.food.popleft() if self.food else None
+    
+        self.snake.append((0,0))
+        
+
+    def move(self, direction: str) -> int:
+        """
+        Moves the snake.
+        @param direction - 'U' = Up, 'L' = Left, 'R' = Right, 'D' = Down 
+        @return The game's score after the move. Return -1 if game over. 
+        Game over when snake crosses the screen boundary or bites its body.
+        """
+        # get the head of the snake
+        x, y = self.snake[-1]
+        if direction == 'U':
+            x -= 1
+        elif direction == 'L':
+            y -= 1
+        elif direction == 'D':
+            x += 1
+        else:
+            y += 1
+        if x < 0 or x >= self.h or y < 0 or y >= self.w: return -1
+        elif [x,y] == self.target:
+            self.snake.append((x,y))
+            self.occupancy.add((x,y))
+            self.target = self.food.popleft() if self.food else None
+        else:
+            tail = self.snake.popleft()
+            self.occupancy.remove(tail)
+            if (x,y) in self.occupancy: return -1
+            self.snake.append((x,y))
+            self.occupancy.add((x,y))
+            
+        return len(self.snake)-1
+
+
+# Your SnakeGame object will be instantiated and called as such:
+# obj = SnakeGame(width, height, food)
+# param_1 = obj.move(direction)
+```
+## 355. Design Twitter
+
+The difficult part is how to get newsfeed efficiently
+```
+class Twitter:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.following = {}
+        self.posts = {}
+        self.time = 0
+        
+
+    def postTweet(self, userId: int, tweetId: int) -> None:
+        """
+        Compose a new tweet.
+        """
+        if userId in self.posts:
+            if len(self.posts[userId]) == 10:
+                self.posts[userId] = self.posts[userId][1:]
+            self.posts[userId].append((tweetId, self.time))
+        else:
+            self.posts[userId] = [(tweetId, self.time)]
+        self.time += 1
+
+    def getNewsFeed(self, userId: int) -> List[int]:
+        """
+        Retrieve the 10 most recent tweet ids in the user's news feed. Each item in the news feed must be posted by users who the user followed or by the user herself. Tweets must be ordered from most recent to least recent.
+        """
+        res = set(self.posts[userId][-10:]) if userId in self.posts else set()
+        if userId in self.following:
+            for k in self.following[userId]:
+                if k in self.posts:
+                    for i in range(len(self.posts[k])-1,-1,-1):
+                        m = min(res, key = lambda x: x[1]) if res else None
+                        if len(res) < 10:
+                            res.add(self.posts[k][i])
+                        elif self.posts[k][i][1] > m[1] and len(res) == 10:
+                            res.remove(m)
+                            res.add(self.posts[k][i])
+                        elif len(res) == 10 and self.posts[k][i][1] <= m[1]:
+                            break
+        res = sorted(list(res), key = lambda x: x[1])[::-1]
+        return [x[0] for x in res]
+    
+    def follow(self, followerId: int, followeeId: int) -> None:
+        """
+        Follower follows a followee. If the operation is invalid, it should be a no-op.
+        """
+        self.following[followerId] = self.following.get(followerId, set()).union({followeeId})
+
+    def unfollow(self, followerId: int, followeeId: int) -> None:
+        """
+        Follower unfollows a followee. If the operation is invalid, it should be a no-op.
+        """
+        if followerId in self.following and followeeId in self.following[followerId]:
+            self.following[followerId].remove(followeeId)
+            
+
+
+# Your Twitter object will be instantiated and called as such:
+# obj = Twitter()
+# obj.postTweet(userId,tweetId)
+# param_2 = obj.getNewsFeed(userId)
+# obj.follow(followerId,followeeId)
+# obj.unfollow(followerId,followeeId)
+```
+## 332. Reconstruct Itinerary
+```
+class Solution:
+    def findItinerary(self, tickets: List[List[str]]) -> List[str]:
+        routes = collections.defaultdict(list)
+        for start, end in tickets:
+            routes[start].append(end)
+        
+        for start in routes:
+            routes[start] = sorted(routes[start])[::-1]
+        
+        res = []
+        def visit(start):
+            while routes[start]:
+                visit(routes[start].pop())
+            res.append(start)
+        
+        visit('JFK')
+        return res[::-1]
+```
+## 351. Android Unlock Patterns
+
+The problem is not well described and examples can be improved to showcase the '2->8' is allowed.
+
+Nonetheless, the use of skip in the solution is very clever. However when the numbers are large, maybe a dictionary can be quicker.
+```
+class Solution:
+    def numberOfPatterns(self, m: int, n: int) -> int:
+        skip = {(1,3):2, (1,9):5, (1,7):4, (2,8):5, (3,9):6, (3,7):5, (4,6):5, (7,9):8}
+        
+        self.res = 0
+        def dfs(path, lower, upper):
+            if len(path) == upper:
+                self.res += 1
+                return
+            else:
+                if len(path) >= lower:
+                    self.res += 1
+                for j in range(1, 10):
+                    if j in path: continue
+                    edge = (min(path[-1],j), max(path[-1],j))
+                    if edge not in skip or skip[edge] in path:
+                        dfs(path+[j], lower, upper)
+        
+        for i in range(1,10):
+            dfs([i], m, n)
+        return self.res
+```
+## 379. Design Phone Directory
+```
+class PhoneDirectory:
+
+    def __init__(self, maxNumbers: int):
+        """
+        Initialize your data structure here
+        @param maxNumbers - The maximum numbers that can be stored in the phone directory.
+        """
+        self.available = {i for i in range(maxNumbers)}
+        self.used = set()
+
+    def get(self) -> int:
+        """
+        Provide a number which is not assigned to anyone.
+        @return - Return an available number. Return -1 if none is available.
+        """
+        if not self.available:
+            return -1
+        
+        res = self.available.pop()
+        self.used.add(res)
+        return res
+        
+
+    def check(self, number: int) -> bool:
+        """
+        Check if a number is available or not.
+        """
+        return number in self.available
+
+    def release(self, number: int) -> None:
+        """
+        Recycle or release a number.
+        """
+        if number in self.used:
+            self.used.remove(number)
+            self.available.add(number)
+
+
+# Your PhoneDirectory object will be instantiated and called as such:
+# obj = PhoneDirectory(maxNumbers)
+# param_1 = obj.get()
+# param_2 = obj.check(number)
+# obj.release(number)
+```
+## 380. Insert Delete GetRandom O(1)
+```
+class RandomizedSet:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.nums = []
+        self.pos = {}
+
+    def insert(self, val: int) -> bool:
+        """
+        Inserts a value to the set. Returns true if the set did not already contain the specified element.
+        """
+        if val not in self.pos:
+            
+            self.nums.append(val)
+            self.pos[val] = len(self.nums)-1
+            return True
+        return False
+        
+
+    def remove(self, val: int) -> bool:
+        """
+        Removes a value from the set. Returns true if the set contained the specified element.
+        """
+        if val in self.pos:
+            pos, last = self.pos[val], self.nums[-1]
+            self.nums[pos] = last
+            self.pos[last] = pos
+            self.nums.pop()
+            del self.pos[val]
+            return True
+        return False
+```
+## 382. Linked List Random Node
+This one is about the Reservior Sampling, which works for dynamical set size. Here is a pretty good [explanation](https://leetcode.com/problems/linked-list-random-node/discuss/85659/Brief-explanation-for-Reservoir-Sampling). This method is time O(n), space O(1).
+
+If the size of the sample is static, then we can simply use `random.randinx` repeatedly.
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+
+    def __init__(self, head: ListNode):
+        """
+        @param head The linked list's head.
+        Note that the head is guaranteed to be not null, so it contains at least one node.
+        """
+        self.head = head
+
+    def getRandom(self) -> int:
+        """
+        Returns a random node's value.
+        """
+        res, cur, index = self.head, self.head.next, 1
+        while cur:
+            if random.randint(0, index) == 0:
+                res = cur
+            cur = cur.next
+            index += 1
+        return res.val
+        
+
+
+# Your Solution object will be instantiated and called as such:
+# obj = Solution(head)
+# param_1 = obj.getRandom()
+```
+## 384. Shuffle an Array
+```
+class Solution:
+
+    def __init__(self, nums: List[int]):
+        self.nums = nums
+
+    def reset(self) -> List[int]:
+        """
+        Resets the array to its original configuration and return it.
+        """
+        return self.nums
+
+    def shuffle(self) -> List[int]:
+        """
+        Returns a random shuffling of the array.
+        """
+        res = self.nums[:]
+        for i in range(len(res)):
+            j = random.randint(i, len(res)-1)
+            res[i], res[j] = res[j], res[i]
+        return res
+        
+# Your Solution object will be instantiated and called as such:
+# obj = Solution(nums)
+# param_1 = obj.reset()
+# param_2 = obj.shuffle()
+```
+## 386. Lexicographical Numbers
+```
+class Solution:
+    def lexicalOrder(self, n: int) -> List[int]:
+        return [int(x) for x in sorted([str(i) for i in range(1,n+1)])]
+```
+## 1196. How Many Apples Can You Put into the Basket
+```
+class Solution:
+    def maxNumberOfApples(self, arr: List[int]) -> int:
+        arr.sort()
+        cnt, total = 0, 0
+        for x in arr:
+            if x+total <= 5000: 
+                cnt += 1
+                total += x
+            else:
+                break
+        return cnt
+```
+## 1200. Minimum Absolute Difference
+```
+class Solution:
+    def minimumAbsDifference(self, arr: List[int]) -> List[List[int]]:
+        arr.sort()
+        abs_diff, res = float('inf'), []
+        for i in range(len(arr)-1):
+            diff = arr[i+1] - arr[i]
+            if abs_diff == diff:
+                res.append([arr[i],arr[i+1]])
+            elif abs_diff > diff:
+                abs_diff, res = diff, [[arr[i], arr[i+1]]]
+            else:
+                continue
+        return res
+```
+## 394. Decode String
+```
+class Solution:
+    def decodeString(self, s: str) -> str:
+        stack, to_multiply, i, non_letters = [], 0, 0, set(list('0123456789[]'))
+        while i < len(s):
+            if s[i].isdigit():
+                if stack and stack[-1].isdigit():
+                    stack[-1] += s[i]
+                else:
+                    stack.append(s[i])
+                
+            elif s[i] == '[':
+                to_multiply += 1
+                stack.append('[')
+                
+            elif s[i] == ']':
+                word = ''
+                while stack[-1] != '[':
+                    word = stack.pop() + word
+                stack.pop()
+                num = int(stack.pop())
+                stack.append(word * num)
+                to_multiply -= 1
+                
+            else:
+                stack.append(s[i])
+            i += 1
+        return ''.join(stack)
+```
+## 395. Longest Substring with At Least K Repeating Characters
+```
+class Solution:
+    def longestSubstring(self, s: str, k: int) -> int:
+            if len(s) < k:
+                return 0
+            c = min(set(s), key=s.count)
+            if s.count(c) >= k:
+                return len(s)
+            return max(self.longestSubstring(t, k) for t in s.split(c))
+```
+## 396. Rotate Function
+```
+class Solution:
+    def maxRotateFunction(self, A: List[int]) -> int:
+        total, n = sum(A), len(A)
+        F0 = sum([i*A[i] for i in range(len(A))])
+        Max, cur = F0, F0
+        for i in range(1, n):
+            cur = cur + total - n * A[n-i]
+            Max = max(cur, Max)
+        return Max
+```
+## 397. Integer Replacement
+
+O(n) method, typical DP.
+```
+class Solution:
+    def integerReplacement(self, n: int) -> int:
+        dp = [0] * (n+3)
+        dp[0], dp[1], dp[2] = -1, 0, 1
+        for i in range(3, n+1):
+            if i%2 == 0:
+                dp[i] = 1 + dp[i//2]
+            else:
+                dp[i] = 2 + min(dp[(i-1)//2], dp[(i+1)//2])
+        return dp[n]
+```
+
+O(lg n), using cache:
+```
+class Solution:
+    def integerReplacement(self, n: int) -> int:
+        self.cache = {1:0, 2:1}
+        def helper(x):
+            if x in self.cache:
+                return self.cache[x]
+            if x%2 == 0:
+                self.cache[x] = 1 + helper(x//2)
+                return self.cache[x]
+            if x%2 != 0:
+                self.cache[x] = 2 + min(helper((x+1)//2), helper((x-1)//2))
+                return self.cache[x]
+        return helper(n)
+```
