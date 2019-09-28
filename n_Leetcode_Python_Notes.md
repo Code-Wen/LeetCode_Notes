@@ -13666,3 +13666,181 @@ class Solution:
                 return self.cache[x]
         return helper(n)
 ```
+## 302. Smallest Rectangle Enclosing Black Pixels
+```
+class Solution:
+    def minArea(self, image: List[List[str]], x: int, y: int) -> int:
+        visited = set()
+        def dfs(x,y):
+            visited.add((x,y))
+            for i, j in [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]:
+                if 0 <= i < len(image) and 0 <= j < len(image[0]) and (i,j) not in visited and image[i][j] == '1':
+                    dfs(i,j)
+        dfs(x,y)
+        
+        X, Y = [p[0] for p in visited], [p[1] for p in visited]
+        return (max(Y) - min(Y) + 1) * (max(X) - min(X) + 1)
+```
+## 402. Remove K Digits
+```
+class Solution:
+    def removeKdigits(self, num: str, k: int) -> str:
+        if len(num) <= k or len(num) == 0: return '0'
+        if k == 0: return num
+        else:
+            if num[1] == '0':
+                i = 1
+                while i < len(num) and num[i] == '0': i += 1
+                return self.removeKdigits(num[i:], k-1)
+            elif int(num[1]) < int(num[0]):
+                return self.removeKdigits(num[1:], k-1)
+            else:
+                i = 0
+                while i+1 < len(num) and int(num[i+1]) >= int(num[i]):
+                    i += 1
+                return self.removeKdigits(num[:i]+num[i+1:], k-1)
+```
+## 418. Sentence Screen Fitting
+
+Almost brute-force: still very slow
+```
+class Solution:
+    def wordsTyping(self, sentence: List[str], rows: int, cols: int) -> int:
+        l, n = [len(w) for w in sentence], len(sentence)
+        if max(l) > cols: return 0
+        step, cur_row, remaining = 0, 1, cols
+        while cur_row <= rows and (remaining != cols or step <= 0 or step % n != 0):
+            if remaining >= l[step % n]:
+                remaining -= (l[step % n]+1)
+                step += 1
+            else:
+                cur_row += 1
+                remaining = cols
+        if cur_row > rows: return step//n
+        else:
+            res = (step//n) * (rows//(cur_row - 1))
+            rows = rows % (cur_row-1)
+            step, cur_row, remaining = 0, 1, cols
+            while cur_row <= rows:
+                if remaining >= l[step % n]:
+                    remaining -= (l[step % n]+1)
+                    step += 1
+                else:
+                    cur_row += 1
+                    remaining = cols
+            return res + step//n
+```
+First compute for each `i in range(len(sentence))`, if we start with `sentence[i]` at the beginning of a fresh row, how many words we can put in that row. Then just go through row by row and accumulating on words count.
+```
+class Solution:
+    def wordsTyping(self, sentence: List[str], rows: int, cols: int) -> int:
+        n, lengths = len(sentence), [len(w) for w in sentence]
+        total_length = sum(lengths) + n
+        # A list to store how many words can one fit into one row if starting with sentence[i]
+        counts = [0] * n
+        num_sentence, remaining = cols//total_length, cols%total_length
+        # Careful about the case that we can just fit in the sentence without an extra empty space in the end.
+        if remaining == total_length - 1:
+            num_sentence += 1
+            remaining = 0
+        for i in range(n):
+            index, extra, space = i, 0, remaining
+            while lengths[index % n] <= space:
+                space -= (lengths[index % n]+1)
+                index += 1
+                extra += 1
+            counts[i] = num_sentence * n + extra
+        
+        cur_row, cnt = 1, 0
+        while cur_row <= rows:
+            cnt += counts[cnt % n]
+            cur_row += 1
+        return cnt // n
+
+```
+
+Use the unique letters in those words to quickly pick them up.
+```
+class Solution:
+    def originalDigits(self, s: str) -> str:
+        d = collections.Counter(s)
+        digit_counts = [0] * 10
+        digit_rep = [['z','zero', 0], ['w','two', 2], ['u','four',4], ['x','six', 6], ['g','eight', 8], ['o', 'one', 1], ['t','three', 3],['f','five', 5],['s','seven', 7],['e','nine', 9 ]]
+        for rep in digit_rep:
+            cnt = d[rep[0]] if rep[0] in d else 0
+            if cnt == 0: continue
+            
+            digit_counts[rep[-1]] = cnt
+            for l in rep[1]:
+                d[l] -= cnt
+        return ''.join([str(i) * digit_counts[i] for i in range(10)])
+```
+## 435. Non-overlapping Intervals
+```
+class Solution:
+    def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:
+        intervals = sorted(intervals, key = lambda x: (x[1], -x[0]))
+        x0, y0, cnt = float('-inf'), float('-inf'), 0
+        for x,y in intervals:
+            if x >= y0:
+                cnt += 1
+                x0, y0 = x, y
+        return len(intervals)-cnt
+```
+## 436. Find Right Interval
+```
+class Solution:
+    def findRightInterval(self, intervals: List[List[int]]) -> List[int]:
+        if not intervals: return []
+        if len(intervals) == 1: return [-1]
+        
+        d = {intervals[i][0]:i for i in range(len(intervals))}
+        starts = sorted([x[0] for x in intervals])
+        
+        res = [-1]*len(intervals)
+        for i in range(len(d)):
+            l, r = intervals[i][0], intervals[i][1]
+            right_start = self.binarySearch(starts, r)
+            if right_start == None:
+                res[i] = -1
+            else:
+                res[i] = d[right_start]
+        return res
+        
+    def binarySearch(self, A, t):
+        """
+        In a sorted list A with distinct numbers, find the smallest number in A which is no less than the given number t. If no such number, return None.
+        """
+        if A[-1] < t: return None
+        
+        l, r = 0, len(A)-1
+        while l < r:
+            if A[l] >= t: return A[l]
+            mid = (l+r)//2
+            if A[mid] == t: return t
+            elif A[mid] < t:
+                l = mid + 1
+            else:
+                r = mid
+        return A[l]
+```
+## 424. Longest Repeating Character Replacement
+
+O(n) solution using sliding window technique:
+```
+class Solution:
+    def characterReplacement(self, s: str, k: int) -> int:
+        # Sliding window technique: go from left to right, keep the longest interval such that between L and R there is a letter whose frequency satisfies:
+        # R+1-L + freq <= k
+        
+        l, res = 0, 0
+        d = collections.defaultdict(int)
+        for r in range(len(s)):
+            d[s[r]] += 1
+            
+            while r - l + 1 - max(d.values()) > k:
+                d[s[l]] -= 1
+                l += 1
+            res = max(res, r-l+1)
+        return res
+```
