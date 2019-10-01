@@ -13350,6 +13350,8 @@ class Twitter:
 # obj.unfollow(followerId,followeeId)
 ```
 ## 332. Reconstruct Itinerary
+
+Backtracking, need to practice more of this.
 ```
 class Solution:
     def findItinerary(self, tickets: List[List[str]]) -> List[str]:
@@ -13842,5 +13844,412 @@ class Solution:
                 d[s[l]] -= 1
                 l += 1
             res = max(res, r-l+1)
+        return res
+```
+## 426. Convert Binary Search Tree to Sorted Doubly Linked List
+```
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val, left, right):
+        self.val = val
+        self.left = left
+        self.right = right
+"""
+class Solution:
+    def treeToDoublyList(self, root: 'Node') -> 'Node':
+        if not root: return None
+        
+        stack = []
+        def inorder(root):
+            if not root: return
+            else:
+                inorder(root.left)
+                stack.append(root)
+                inorder(root.right)
+        
+        inorder(root)
+        
+        for i in range(len(stack)):
+            stack[i % len(stack)].right = stack[(i+1)%len(stack)]
+            stack[i % len(stack)].left = stack[(i-1)%len(stack)]
+        return stack[0]
+```
+## 430. Flatten a Multilevel Doubly Linked List
+```
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val, prev, next, child):
+        self.val = val
+        self.prev = prev
+        self.next = next
+        self.child = child
+"""
+class Solution:
+    def flatten(self, head: 'Node') -> 'Node':
+        sentinel = Node(0, None, head, None)
+        stack, prev, cur = [], sentinel, head
+        while cur or stack:
+            if cur:
+                if cur.child and cur.next:
+                    temp, child = cur.next, cur.child
+                    temp.prev, cur.child = None, None
+                    cur.next, child.prev = child, cur
+                    stack.append(temp)
+                elif cur.child and not cur.next:
+                    child = cur.child
+                    cur.child, cur.next, child.prev = None, child, cur
+
+                prev, cur = cur, cur.next
+            else:
+                cur = stack.pop()
+                prev.next = cur
+                cur.prev = prev
+        return head
+```
+## 433. Minimum Genetic Mutation
+```
+class Solution:
+    def minMutation(self, start: str, end: str, bank: List[str]) -> int:
+        useful = {w for w in bank if len(w) == len(start)}
+        if end not in useful: return -1
+        
+        def dist(w1, w2):
+            res = 0
+            for i in range(len(w1)):
+                if w1[i] != w2[i]: res += 1
+            return res
+        
+        self.res = float('inf')
+        def dfs(cur, goal, path):
+            if cur == goal: 
+                self.res = min(self.res, len(path) - 1)
+                return
+            else:
+                for w in useful:
+                    if dist(cur, w) == 1 and w not in path:
+                        dfs(w, goal, path.union({w}))
+        
+        dfs(start, end, {start})
+        
+        return self.res if self.res < float('inf') else -1
+```
+## 417. Pacific Atlantic Water Flow
+```
+class Solution:
+    def pacificAtlantic(self, matrix: List[List[int]]) -> List[List[int]]:
+        if not matrix or not matrix[0]: return []
+        
+        self.m, self.n = len(matrix), len(matrix[0])
+        res = {(self.m-1, 0), (0, self.n-1)}
+        no_go = set()
+        
+        
+        def dfs(x,y):
+            """
+            Check whether the point (x,y) can reach both oceans. If so, add it to the list `res`.
+            """
+            if (x,y) in res or (x,y) in no_go:
+                return 
+            
+            x_min, x_max, y_min, y_max = x, x, y, y
+            to_visit, visited = [(x,y)], set()
+            
+            while to_visit:
+                x0, y0 = to_visit.pop()
+                visited.add((x0,y0))
+                x_max, x_min, y_max, y_min = max(x_max, x0), min(x_min, x0), max(y_max, y0), min(y_min, y0)
+                if (y_max == self.n - 1 or x_max == self.m - 1) and (y_min == 0 or x_min == 0):
+                    res.add((x, y))
+                    return
+                for i, j in [(x0+1, y0), (x0-1,y0), (x0, y0+1), (x0, y0-1)]:
+                    if 0 <= i < self.m and 0 <= j < self.n and matrix[x0][y0] >= matrix[i][j] and (i,j) not in visited and (i,j) not in no_go:
+                        if (i,j) in res:
+                            res.add((x,y))
+                            return 
+                        to_visit.append((i,j))
+            no_go.union(visited)
+            return
+        
+        for x in range(self.m):
+            for y in range(self.n):
+                dfs(x,y)
+        return res
+```
+## 399. Evaluate Division
+```
+class Solution:
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+        quot = collections.defaultdict(dict)
+        for (num, den), val in zip(equations, values):
+            quot[num][num] = quot[den][den] = 1.0
+            quot[num][den] = val
+            quot[den][num] = 1 / val
+        for k, i, j in itertools.permutations(quot, 3):
+            if k in quot[i] and j in quot[k]:
+                quot[i][j] = quot[i][k] * quot[k][j]
+        return [quot[num].get(den, -1.0) for num, den in queries]
+```
+Another solution using DFS:
+```
+class Solution:
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+        def dfs(start, end, path, paths):
+            if start == end and start in G:
+                paths[0] = path
+                return
+            if start in vis: 
+                return
+            vis.add(start)
+            for node in G[start]:
+                dfs(node, end, path * W[start, node], paths)
+        
+        
+        G, W = collections.defaultdict(set), collections.defaultdict(float)
+        for (A, B), V in zip(equations, values):
+            G[A], G[B] = G[A] | {B}, G[B] | {A}
+            W[A, B], W[B, A] = V, 1.0 / V
+            
+        res = []
+        for X, Y in queries:
+            paths, vis = [-1.0], set()
+            dfs(X, Y, 1.0, paths)
+            res += paths[0],
+        return res
+```
+## 393. UTF-8 Validation
+```
+class Solution:
+    def validUtf8(self, data: List[int]) -> bool:
+        i = 0
+        while i < len(data):
+            s = self.binary(data[i])
+            if len(s) != 8: return False
+            
+            if s[0] == '0': i += 1
+            else:
+                j = 1
+                while j < 8 and s[j] == '1':
+                    j += 1
+                if j == 1 or j > 4  or len(data) - i < j: return False
+                for k in range(i+1, i+j):
+                    temp = self.binary(data[k])
+                    if len(temp) != 8 or temp[:2] != '10':
+                        return False
+                i += j
+        return True
+        
+        
+        
+    def binary(self, num):
+        res = bin(num)[2:]
+        if len(res) < 8:
+            return '0'*(8-len(res))+res
+        else:
+            return res
+```
+## 385. Mini Parser
+
+This parser problem seems quite difficult for me to do. I have the ideas but not able to come up with a very detailed strategy.
+```
+# """
+# This is the interface that allows for creating nested lists.
+# You should not implement it, or speculate about its implementation
+# """
+#class NestedInteger:
+#    def __init__(self, value=None):
+#        """
+#        If value is not specified, initializes an empty list.
+#        Otherwise initializes a single integer equal to value.
+#        """
+#
+#    def isInteger(self):
+#        """
+#        @return True if this NestedInteger holds a single integer, rather than a nested list.
+#        :rtype bool
+#        """
+#
+#    def add(self, elem):
+#        """
+#        Set this NestedInteger to hold a nested list and adds a nested integer elem to it.
+#        :rtype void
+#        """
+#
+#    def setInteger(self, value):
+#        """
+#        Set this NestedInteger to hold a single integer equal to value.
+#        :rtype void
+#        """
+#
+#    def getInteger(self):
+#        """
+#        @return the single integer that this NestedInteger holds, if it holds a single integer
+#        Return None if this NestedInteger holds a nested list
+#        :rtype int
+#        """
+#
+#    def getList(self):
+#        """
+#        @return the nested list that this NestedInteger holds, if it holds a nested list
+#        Return None if this NestedInteger holds a single integer
+#        :rtype List[NestedInteger]
+#        """
+
+class Solution:
+    def deserialize(self, s: str) -> NestedInteger:
+        # Adding a sentinel in the beginning of the list from the reversed string is to make sure the while loop ends properly in the very end.
+        s = list(' ' + s[::-1])
+        def nestedInteger():
+            num = ''
+            while s[-1] in '1234567890-':
+                num += s.pop()
+            if num:
+                return NestedInteger(int(num))
+            s.pop()
+            lst = NestedInteger()
+            while s[-1] != ']':
+                lst.add(nestedInteger())
+                if s[-1] == ',':
+                    s.pop()
+            s.pop()
+            return lst
+```
+## 1110. Delete Nodes And Return Forest
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def delNodes(self, root: TreeNode, to_delete: List[int]) -> List[TreeNode]:
+        if not root: return []
+        to_delete = set(to_delete)
+        res, to_visit = [], [root]
+        
+        def delete(root):
+            if root.val not in to_delete:
+                res.append(root)
+            node = root
+            stack = [root]
+            while stack:
+                node = stack.pop()
+                if node.val in to_delete:
+                    if node.left:
+                        to_visit.append(node.left)
+                    if node.right:
+                        to_visit.append(node.right)
+                else:
+                    if node.left:
+                        if node.left.val in to_delete:
+                            to_visit.append(node.left)
+                            node.left = None
+                        else:
+                            stack.append(node.left)
+                    if node.right:
+                        if node.right.val in to_delete:
+                            to_visit.append(node.right)
+                            node.right = None
+                        else:
+                            stack.append(node.right)
+        
+        while to_visit:
+            head = to_visit.pop()
+            delete(head)
+        
+        return res
+```
+## 701. Insert into a Binary Search Tree
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
+        if not root: return TreeNode(val)
+        if root.val > val:
+            root.left = self.insertIntoBST(root.left, val)
+        else:
+            root.right = self.insertIntoBST(root.right, val)
+        return root
+```
+## 547. Friend Circles
+```
+class Solution:
+    def findCircleNum(self, M: List[List[int]]) -> int:
+        d = collections.defaultdict(set)
+        for i in range(len(M)):
+            for j in range(len(M)):
+                if M[i][j] == 1:
+                    d[i] = d[i].union({j})
+            
+        def dfs(k):
+            stack = [k]
+            while stack:
+                t = stack.pop()
+                visited.add(t)
+                for i in d[t]:
+                    if i not in visited:
+                        stack.append(i)
+                
+        visited, res = set(), 0
+        for i in range(len(M)):
+            if i not in visited:
+                res += 1
+                dfs(i)
+        return res
+```
+
+## 647. Palindromic Substrings
+```
+class Solution:
+    def countSubstrings(self, s: str) -> int:
+        res = 0
+        for center in range(len(s)):
+            # Even case:
+            L, R = center, center + 1
+            while 0 <= L and R < len(s) and s[L] == s[R]:
+                res += 1
+                L, R = L-1, R+1
+            # Odd case:
+            L = R = center
+            while 0 <= L and R < len(s) and s[L] == s[R]:
+                res += 1
+                L, R = L-1, R+1
+        return res
+```
+## 1007. Minimum Domino Rotations For Equal Row
+```
+class Solution:
+    def minDominoRotations(self, A: List[int], B: List[int]) -> int:
+        d = collections.defaultdict(int)
+        for i in range(len(A)):
+            for l in set([A[i],B[i]]):
+                d[l] += 1
+        
+        candidate, most_freq = max([(k, d[k]) for k in d], key = lambda x: x[1])
+        if most_freq == len(A):
+            d_A, d_B = collections.Counter(A), collections.Counter(B)
+            return len(A) - max(d_A[candidate], d_B[candidate])
+        else:
+            return -1
+```
+## 560. Subarray Sum Equals K
+```
+class Solution:
+    def subarraySum(self, nums: List[int], k: int) -> int:
+        d, left_sum, res = collections.defaultdict(int), 0, 0
+        d[0] = 1
+        for i in range(len(nums)):
+            left_sum += nums[i]
+            res += d[left_sum-k]
+            d[left_sum] += 1
         return res
 ```
