@@ -14247,9 +14247,563 @@ class Solution:
     def subarraySum(self, nums: List[int], k: int) -> int:
         d, left_sum, res = collections.defaultdict(int), 0, 0
         d[0] = 1
-        for i in range(len(nums)):
-            left_sum += nums[i]
+        for x in nums:
+            left_sum += x
             res += d[left_sum-k]
             d[left_sum] += 1
         return res
+```
+## 55. Jump Game
+```
+class Solution:
+    def canJump(self, nums: List[int]) -> bool:
+        farthest, goal = 0, len(nums)-1
+        for i in range(goal+1):
+            if farthest >= i:
+                farthest = max(farthest, i+nums[i])
+                if farthest >= goal:
+                    return True
+            else:
+                return False
+```
+## 539. Minimum Time Difference
+```
+class Solution:
+    def findMinDifference(self, timePoints: List[str]) -> int:
+        minutes = []
+        for x in timePoints:
+            temp = x.split(':')
+            minutes.append(int(temp[1])+int(temp[0])*60)
+        minutes.sort()
+        return min([minutes[i+1]-minutes[i] for i in range(len(minutes)-1)]+[1440+minutes[0]-minutes[-1]])
+```
+## 981. Time Based Key-Value Store
+```
+class TimeMap:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.values = collections.defaultdict(list)
+        self.time = collections.defaultdict(list)
+    def set(self, key: str, value: str, timestamp: int) -> None:
+        self.values[key].append(value)
+        self.time[key].append(timestamp)
+        
+
+    def get(self, key: str, timestamp: int) -> str:
+        if key not in self.values:
+            return ''
+        index = self.binarySearch(self.time[key], timestamp)
+        return self.values[key][index] if index != None else ''
+    
+    def binarySearch(self, nums, t):
+        if t < nums[0]: return None
+        l, r = 0, len(nums)-1
+        if nums[r] <= t:
+            return r
+        while l < r-1:
+            if nums[r] <= t:
+                return nums[r]
+            mid = (l+r)//2
+            if nums[mid] < t:
+                l = mid
+            elif nums[mid] == t:
+                return mid
+            else:
+                r = mid
+        return l
+
+
+# Your TimeMap object will be instantiated and called as such:
+# obj = TimeMap()
+# obj.set(key,value,timestamp)
+# param_2 = obj.get(key,timestamp)
+```
+## 1048. Longest String Chain
+```
+class Solution:
+    def longestStrChain(self, words: List[str]) -> int:
+        dp = {}
+        for w in sorted(words, key=len):
+            dp[w] = max(dp.get(w[:i] + w[i + 1:], 0) + 1 for i in range(len(w)))
+        return max(dp.values())
+```
+## 1057. Campus Bikes
+```
+class Solution:
+    def assignBikes(self, workers: List[List[int]], bikes: List[List[int]]) -> List[int]:
+        
+        def dist(arr1, arr2):
+            return abs(arr1[0]-arr2[0])+abs(arr1[1]-arr2[1])
+
+        pairs = [(dist(workers[i], bikes[j]), i, j) for i in range(len(workers))
+            for j in range(len(bikes))]
+        pairs.sort()
+        
+        workers_with_bikes, used_bikes, res = set(), set(), [-1]*len(workers)
+        
+        for dist, worker, bike in pairs:
+            if len(workers_with_bikes) == len(workers): break
+            if worker not in workers_with_bikes and bike not in used_bikes:
+                res[worker] = bike
+                used_bikes.add(bike)
+                workers_with_bikes.add(worker)
+        return res
+```
+## 1130. Minimum Cost Tree From Leaf Values
+```
+class Solution:
+    def mctFromLeafValues(self, arr: List[int]) -> int:
+        # dp[i][j] = minimum cost tree from arr[i:j+1]
+        # note that i <= j
+        # We want to compute dp[0][len(arr)-1]
+        n = len(arr)
+        dp = [[0] * n for _ in range(n)]
+          
+        for j in range(1, n):
+            for i in range(n-j):
+                dp[i][i+j] = min([dp[i][k]+max(arr[i:k+1]) * max(arr[k+1:i+j+1])+dp[k+1][i+j] for k in range(i, i+j)])
+        return dp[0][-1]
+```
+## 513. Find Bottom Left Tree Value
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def findBottomLeftValue(self, root: TreeNode) -> int:
+        q, level = collections.deque(), []
+        q.append(root)
+        cur, nxt = 1, 0
+        while q:
+            node = q.popleft()
+            cur -= 1
+            level.append(node.val)
+            if node.left:
+                q.append(node.left)
+                nxt += 1
+            if node.right:
+                q.append(node.right)
+                nxt += 1
+            if cur == 0:
+                if nxt == 0:
+                    return level[0]
+                else:
+                    cur, nxt, level = nxt, 0, []
+```
+## 529. Minesweeper
+```
+class Solution:
+    def updateBoard(self, board: List[List[str]], click: List[int]) -> List[List[str]]:
+        def dfs(i, j):
+            bombs = 0
+            for x, y in [(i+1,j),(i-1,j),(i,j-1),(i,j+1),(i-1,j-1),(i+1,j-1),(i-1,j+1),(i+1,j+1)]:
+                if 0 <= x < len(board) and 0 <= y < len(board[0]) and board[x][y] in 'ME':
+                    if board[x][y] == 'M':
+                        bombs += 1
+                    
+            board[i][j] = 'B' if not bombs else str(bombs)
+            if board[i][j] == 'B':
+                for x, y in [(i+1,j),(i-1,j),(i,j-1),(i,j+1),(i-1,j-1),(i+1,j-1),(i-1,j+1),(i+1,j+1)]:
+                    if 0 <= x < len(board) and 0 <= y < len(board[0]) and board[x][y] in 'ME':
+                        dfs(x, y)
+                
+        x, y = click[0], click[1]
+        if board[x][y] == 'M':
+            board[x][y] = 'X'
+        else:
+            dfs(x,y)
+        return board
+```
+## 695. Max Area of Island
+```
+class Solution:
+    def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
+        if not grid or not grid[0]: return 0
+        
+        visited, max_area = set(), 0
+        def dfs(r,c):
+            res = 0
+            stack = {(r,c)}
+            while stack:
+                i,j = stack.pop()
+                res += 1
+                for x,y in [(i+1,j),(i-1,j),(i,j+1),(i,j-1)]:
+                    if 0<=x<len(grid) and 0<=y<len(grid[0]) and (x,y) not in visited:
+                        if grid[x][y] == 1:
+                            stack.add((x,y))
+                visited.add((i,j))
+            return res
+        
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if grid[i][j] == 1 and (i,j) not in visited:
+                    max_area = max(dfs(i,j), max_area)
+        return max_area
+```
+## 739. Daily Temperatures
+```
+class Solution:
+    def dailyTemperatures(self, T: List[int]) -> List[int]:
+        n, right_max = len(T), float('-inf')
+        res = [0] * n
+        for i in range(n-1, -1, -1):
+            t = T[i]
+            if right_max <= t:
+                right_max = t
+            else:
+                temp = 1
+                while T[i+temp] <= t:
+                    temp += res[i+temp]
+                res[i] = temp
+        return res
+```
+## 973. K Closest Points to Origin
+```
+class Solution:
+    def kClosest(self, points: List[List[int]], K: int) -> List[List[int]]:
+        return sorted(points, key = lambda x: x[0]*x[0]+x[1]*x[1])[:K]
+```
+## 609. Find Duplicate File in System
+```
+class Solution:
+    def findDuplicate(self, paths: List[str]) -> List[List[str]]:
+        d = collections.defaultdict(list)
+        for path in paths:
+            temp = path.split(' ')
+            prefix = temp[0]
+            for file in temp[1:]:
+                left_parenth = file.find('(')
+                file_name, content = file[:left_parenth], file[left_parenth+1:len(file)-1]
+                d[content].append(prefix+'/'+file_name)
+        
+        return [d[key] for key in d if len(d[key]) > 1]
+```
+## 449. Serialize and Deserialize BST
+```
+# Definition for a binary tree node.
+# class TreeNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Codec:
+
+    def serialize(self, root):
+        """Encodes a tree to a single string.
+        
+        :type root: TreeNode
+        :rtype: str
+        """
+        lst = []
+        def preorder(node):
+            if node:
+                lst.append(str(node.val))
+                preorder(node.left)
+                preorder(node.right)
+        
+        preorder(root)
+        return ' '.join(lst)
+        
+
+    def deserialize(self, data):
+        """Decodes your encoded data to tree.
+        
+        :type data: str
+        :rtype: TreeNode
+        """
+        preorder = map(int, data.split())
+        inorder = sorted(preorder)
+        preorder.reverse()
+        return self.buildBST(preorder, inorder)
+    
+    def buildBST(self,preorder,inorder):
+        if inorder:
+            index = inorder.index(preorder.pop())
+            root = TreeNode(inorder[index])
+            root.left = self.buildBST(preorder,inorder[:index])
+            root.right = self.buildBST(preorder,inorder[index+1:])
+            return root
+            
+        
+        
+
+# Your Codec object will be instantiated and called as such:
+# codec = Codec()
+# codec.deserialize(codec.serialize(root))
+```
+## 1161. Maximum Level Sum of a Binary Tree
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def maxLevelSum(self, root: TreeNode) -> int:
+        
+        level_sums = collections.defaultdict(int)
+        stack = [[root, 1]]
+        while stack:
+            node, level = stack.pop()
+            level_sums[level] += node.val
+            if node.left:
+                stack.append([node.left, level+1])
+            if node.right:
+                stack.append([node.right, level+1])
+        return max([level for level in level_sums], key = lambda k: level_sums[k])
+```
+## 807. Max Increase to Keep City Skyline
+```
+class Solution:
+    def maxIncreaseKeepingSkyline(self, grid: List[List[int]]) -> int:
+        n = len(grid)
+        col_max = [max([grid[i][j] for j in range(n)]) for i in range(n)]
+        row_max = [max([grid[i][j] for i in range(n)]) for j in range(n)]
+        res = 0
+        for i in range(n):
+            for j in range(n):
+                res += min(row_max[i], col_max[j]) - grid[i][j]
+        
+        return res
+```
+## 1027. Longest Arithmetic Sequence
+```
+class Solution:
+    def longestArithSeqLength(self, A: List[int]) -> int:
+        dp = {}
+        for i in range(len(A)):
+            for j in range(i + 1, len(A)):
+                dp[j, A[j] - A[i]] = dp.get((i, A[j] - A[i]), 1) + 1
+        return max(dp.values())
+```
+## 763. Partition Labels
+```
+class Solution:
+    def partitionLabels(self, S: str) -> List[int]:
+        d = {}
+        for i in range(len(S)):
+            if S[i] in d:
+                d[S[i]][1] = i
+            else:
+                d[S[i]] = [i,i]
+        lst = sorted([d[k] for k in d], reverse = True)
+        res, start = [], 0
+        while lst:
+            start, end = lst.pop()
+            while lst:
+                l, r = lst.pop()
+                if l < end:
+                    if r > end:
+                        end = r
+                else:
+                    lst.append([l,r])
+                    break
+            res.append(end-start+1)
+        return res
+```
+## 735. Asteroid Collision
+```
+class Solution:
+    def asteroidCollision(self, asteroids: List[int]) -> List[int]:
+        res = [0]
+        for x in asteroids:
+            if res[-1] > 0 and x < 0:
+                abs_x = abs(x)
+                if res[-1] == abs_x:
+                    res.pop()
+                elif res[-1] < abs_x:
+                    while res[-1] > 0 and res[-1] < abs_x:
+                        res.pop()
+                    if res[-1] > 0 and res[-1] == abs_x:
+                        res.pop()
+                    elif res[-1] <= 0:
+                        res.append(x)
+            else:
+                res.append(x)
+        return res[1:]
+```
+## 556. Next Greater Element III
+```
+class Solution:
+    def nextGreaterElement(self, n: int) -> int:
+        if n <= 11: return -1
+        
+        digits = []
+        k = n
+        while k > 0:
+            k, remainder = k//10, k%10
+            digits.append(remainder)
+        
+        max_digit, i = -1, 0
+        while i < len(digits) and digits[i] >= max_digit:
+            max_digit = digits[i]
+            i += 1
+        if i == len(digits): return -1
+        else:
+            j = min([x for x in digits[:i] if x > digits[i]])
+            index = digits.index(j)
+            digits[index], digits[i] = digits[i], digits[index]
+            temp = sorted(digits[:i], reverse = True) + digits[i:]
+            res = 0
+            while temp:
+                res = res*10 + temp.pop()
+            return res if res < 2**31 else -1
+```
+## 797. All Paths From Source to Target
+```
+class Solution:
+    def allPathsSourceTarget(self, graph: List[List[int]]) -> List[List[int]]:
+        d = {i:set(graph[i]) for i in range(len(graph))}
+        res = []
+        def dfs(path, end):
+            if path[-1] == end:
+                res.append(path)
+                return
+            for x in d[path[-1]]:
+                dfs(path+[x], end)
+        
+        dfs([0], len(graph)-1)
+        return res
+```
+## 785. Is Graph Bipartite?
+```
+class Solution:
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+        d = {i: set(graph[i]) for i in range(len(graph))}
+        undecided, visited = set([i for i in range(len(graph))]), set()
+        A, B = set(), set()
+        
+        while undecided:
+            s = undecided.pop()
+            A_stack, B_stack = [s], []
+            A.add(s)
+            while A_stack or B_stack:
+                while A_stack:
+                    node = A_stack.pop()
+                    for x in d[node]:
+                        if x in A: return False
+                        elif x not in visited:
+                            B_stack.append(x)
+                            B.add(x)
+                            if x in undecided:
+                                undecided.remove(x)
+                    visited.add(node)
+                while B_stack:
+                    node = B_stack.pop()
+                    for x in d[node]:
+                        if x in B: return False
+                        elif x not in visited:
+                            A_stack.append(x)
+                            A.add(x)
+                            if x in undecided:
+                                undecided.remove(x)
+                    visited.add(node)
+        return True
+```
+## 957. Prison Cells After N Days
+```
+class Solution:
+    def prisonAfterNDays(self, cells: List[int], N: int) -> List[int]:
+        if N == 0: return cells
+        # 1. cells[0] and cells[7] will always be 0 if N >= 1
+        # 2. Assuming N >= 1, there can be at most 2**6 different cells so there must be periodic behaviors. The key part is how to find the cycle
+        # 3. To find the cycle, we record the seen cells. Once repetition appears, we stop. Note that the beginning of the seen cells may be outside the cycle, so we need to carefully mark down where the cycle starts
+        
+        temp = [0]*8
+        for i in range(1, 7):
+            temp[i] = (cells[i-1] + cells[i+1] + 1) % 2
+        N -= 1
+        seen, cnt = {}, 0
+        while tuple(temp) not in seen:
+            seen[tuple(temp)] = cnt
+            cnt += 1
+            prev, temp = temp, [0]*8
+            for i in range(1, 7):
+                temp[i] = (prev[i-1] + prev[i+1] + 1) % 2
+        start = seen[tuple(temp)]
+        period = len(seen) - start
+        cycle = {seen[k]-start:k for k in seen}
+        N = (N-start) % period
+        return list(cycle[N])
+```
+## 166. Fraction to Recurring Decimal
+```
+class Solution:
+    def fractionToDecimal(self, numerator: int, denominator: int) -> str:
+        num, den = numerator, denominator
+        if (num > 0 and den < 0) or (num < 0 and den > 0):
+            sign = '-'
+        else:
+            sign = ''
+        num, den = abs(num), abs(den)
+        integer = num//den
+        num, seen, frac, ind = (num % den) *10, {}, [], 0
+        while num > 0 and num not in seen:
+            seen[num] = ind
+            frac.append(num // den)
+            num = (num % den) * 10
+            ind += 1
+        if num not in seen:
+            return sign + str(integer) + '.' + ''.join([str(x) for x in frac]) if seen else sign + str(integer)
+        else:
+            non_period, period = frac[:seen[num]], frac[seen[num]:]
+            frac1 = ''.join([str(x) for x in non_period])
+            frac2 = '(' + ''.join([str(x) for x in period]) + ')'
+            
+            return sign + str(integer) + '.' + frac1 + frac2
+```
+## 986. Interval List Intersections
+```
+class Solution:
+    def intervalIntersection(self, A: List[List[int]], B: List[List[int]]) -> List[List[int]]:
+        A.reverse()
+        B.reverse()
+        res = []
+        def findIntersection(start1, end1, start2, end2):
+            if end1 < start2 or end2 < start1:
+                return
+            else:
+                res.append([max(start1, start2), min(end1, end2)])
+                
+        while A and B:
+            s1, e1 = A.pop()
+            s2, e2 = B.pop()
+            findIntersection(s1, e1, s2, e2)
+            if e1 > e2:
+                A.append([s1, e1])
+            elif e2 > e1:
+                B.append([s2, e2])
+        return res
+```
+## 1008. Construct Binary Search Tree from Preorder Traversal
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def bstFromPreorder(self, preorder: List[int]) -> TreeNode:
+        if not preorder: return None
+        
+        val = preorder[0]
+        i = 1
+        while i < len(preorder) and preorder[i] < val:
+            i += 1
+        root = TreeNode(val)
+        root.left = self.bstFromPreorder(preorder[1:i])
+        root.right = self.bstFromPreorder(preorder[i:])
+        return root
 ```
