@@ -14807,3 +14807,67 @@ class Solution:
         root.right = self.bstFromPreorder(preorder[i:])
         return root
 ```
+## 535. Encode and Decode TinyUR
+```
+class Codec:
+    def __init__(self):
+        self.num_to_str = {i:str(i) for i in range(10)}
+        
+        start = ord('a')
+        for i in range(10, 36):
+            self.num_to_str[i] = chr(start-10+i)
+        start = ord('A')
+        for i in range(36, 62):
+            self.num_to_str[i] = chr(start-36+i)
+        
+        self.str_to_num = {self.num_to_str[i]:i for i in range(62)}
+        self.data = {}
+
+    def encode(self, longUrl):
+        """Encodes a URL to a shortened URL.
+        
+        :type longUrl: str
+        :rtype: str
+        """
+        k = len(self.data)
+        res = ''
+        res += self.num_to_str[k%62]
+        k = k//62
+        while k > 0:
+            res += self.num_to_str[k%62]
+            k = k//62
+        self.data[res[::-1]] = longUrl
+        return res[::-1]
+        
+
+    def decode(self, shortUrl):
+        """Decodes a shortened URL to its original URL.
+        
+        :type shortUrl: str
+        :rtype: str
+        """
+        return self.data[shortUrl]
+        
+
+# Your Codec object will be instantiated and called as such:
+# codec = Codec()
+# codec.decode(codec.encode(url))
+```
+## 1004. Max Consecutive Ones III
+```
+class Solution(object):
+    def longestOnes(self, A, K):
+        """
+        :type A: List[int]
+        :type K: int
+        :rtype: int
+        """
+        # sliding window method
+        i = 0
+        for j in range(len(A)):
+            K -= 1 - A[j]
+            if K < 0:
+                K += 1 - A[i]
+                i += 1
+        return j - i + 1
+```
