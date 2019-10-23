@@ -14871,3 +14871,299 @@ class Solution(object):
                 i += 1
         return j - i + 1
 ```
+## 1217. Play with Chips
+```
+class Solution:
+    def minCostToMoveChips(self, chips: List[int]) -> int:
+        odd, even = 0 , 0
+        for i in range(len(chips)):
+            if (chips[i]%2 == 0):
+                even += 1
+            else:
+                odd += 1
+        return min(odd, even)
+```
+## 1221. Split a String in Balanced Strings
+```
+class Solution:
+    def balancedStringSplit(self, s: str) -> int:
+        res, balance = 0, 0
+        for l in s:
+            if l == 'L':
+                balance -= 1
+            else:
+                balance += 1
+            if balance == 0:
+                res += 1
+        return res
+```
+## 1228. Missing Number In Arithmetic Progression
+```
+class Solution:
+    def missingNumber(self, arr: List[int]) -> int:
+        diff = (arr[-1] - arr[0])//len(arr)
+        if diff == 0: return arr[0]
+        for i in range(1, len(arr)):
+            if arr[i]-arr[i-1] != diff:
+                return arr[i-1] + diff
+```
+## 1232. Check If It Is a Straight Line
+```
+class Solution:
+    def checkStraightLine(self, coordinates: List[List[int]]) -> bool:
+        if len(coordinates) == 2: return True
+        
+        if coordinates[1][0] == coordinates[0][0]:
+            x = coordinates[0][0]
+            return all([coord[0] == x for coord in coordinates])
+        
+        slope = (coordinates[1][1] - coordinates[0][1])/(coordinates[1][0]-coordinates[0][0])
+        for i in range(2, len(coordinates)):
+            if coordinates[i][0] == coordinates[i-1][0]: return False
+            elif (coordinates[i][1] - coordinates[i-1][1])/(coordinates[i][0]-coordinates[i-1][0]) != slope:
+                return False
+        return True
+```
+## 1227. Airplane Seat Assignment Probability
+
+Note that one can then observe that in fact the probability is always 1/2 if n >= 2.
+```
+class Solution:
+    def nthPersonGetsNthSeat(self, n: int) -> float:
+        if n == 1: return float(1)
+        if n == 2: return float(0.5)
+        
+        p2 = float(0.5)
+        # if the first person picks his own seat, then the rest will be able to sit where they should, this happens with probability 1/n; If the first person does not pick his own seat, neither the nth person seat, then the rest will resume the game of picking and sitting, the probability is (n-2)/n * P_(n-1) 
+        for i in range(3, n):
+            p2 = 1/i+(i-2)/i*p2
+        return p2
+```
+
+
+
+## 1214. Two Sum BSTs
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def twoSumBSTs(self, root1: TreeNode, root2: TreeNode, target: int) -> bool:
+        set1 = set()
+        def dfs(root):
+            if not root:
+                return
+            set1.add(root.val)
+            dfs(root.left)
+            dfs(root.right)
+        
+        dfs(root1)
+        
+        def search(root, nums, t):
+            if not root:
+                return False
+            if t - root.val in nums:
+                return True
+            else:
+                return search(root.left, nums, t) or search(root.right, nums, t)
+        
+        return search(root2, set1, target)
+```
+## 1143. Longest Common Subsequence
+```
+class Solution:
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        if not text1 or not text2: return 0
+        
+        m, n = len(text1), len(text2)
+        dp = [[0]*n for _ in range(m)]
+        
+        for j in range(n):
+            if text1[0] in text2[:j+1]:
+                dp[0][j] = 1
+        
+        for i in range(m):
+            if text2[0] in text1[:i+1]:
+                dp[i][0] = 1
+        
+        for k in range(2, m+n-1):
+            for i in range(1, min(k, m)):
+                j = k - i
+                if j < n:
+                    if text1[i] == text2[j]:
+                        dp[i][j] = max(dp[i-1][j-1]+1, dp[i-1][j], dp[i][j-1])
+                    else:
+                        dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+        return dp[-1][-1]
+```
+## 1213. Intersection of Three Sorted Arrays
+Two line solution:
+```
+class Solution:
+    def arraysIntersection(self, arr1: List[int], arr2: List[int], arr3: List[int]) -> List[int]:
+        s2, s3 = set(arr2), set(arr3)
+        return [x for x in arr1 if x in s2 and x in s3]
+```
+
+## 1218. Longest Arithmetic Subsequence of Given Difference
+```
+class Solution:
+    def longestSubsequence(self, arr: List[int], difference: int) -> int:
+        d = {}
+        for x in arr:
+            if x-difference in d:
+                length = d[x-difference]
+                del d[x-difference]
+                d[x] = length + 1
+            elif x not in d:
+                d[x] = 1
+            
+        return max([v for v in d.values()])
+```
+## 1198. Find Smallest Common Element in All Rows
+```
+class Solution:
+    def smallestCommonElement(self, mat: List[List[int]]) -> int:
+        if not mat or not mat[0]: return -1
+        m, n = len(mat), len(mat[0])
+        idx = [0] * m
+        while max(idx) < n:
+            cur = [mat[i][idx[i]] for i in range(m)]
+            MAX = max(cur)
+            if all([x == MAX for x in cur]): return MAX
+            for i in range(m):
+                if cur[i] < MAX:
+                    idx[i] += 1
+        return -1
+```
+## 528. Random Pick with Weight
+```
+class Solution:
+
+    def __init__(self, w: List[int]):
+        self.intervals = [0] * len(w)
+        self.sum = 0
+        for i in range(len(w)):
+            self.sum += w[i]
+            self.intervals[i] = self.sum
+        
+
+    def pickIndex(self) -> int:
+        roll = random.randint(1, self.sum)
+        return self.binarySearch(roll)
+    
+    def binarySearch(self, x):
+        left, right = 0, len(self.intervals)-1
+        while left < right:
+            if self.intervals[left] >= x:
+                return left
+            mid = (left+right)//2
+            if self.intervals[mid] < x:
+                left = mid + 1
+            else:
+                right = mid
+        return left
+
+# Your Solution object will be instantiated and called as such:
+# obj = Solution(w)
+# param_1 = obj.pickIndex()
+```
+## 974. Subarray Sums Divisible by K
+```
+class Solution:
+    def subarraysDivByK(self, A: List[int], K: int) -> int:
+        d, left_sum, res = {i:0 for i in range(K)}, 0, 0
+        for x in A:
+            left_sum = (left_sum + x) % K
+            d[left_sum] += 1
+        # add pairs of left sum with the same remainder when divided by K
+        for cnt in d.values():
+            res += cnt*(cnt-1)//2
+        # for the left sums which already can be divided by K, each one forms contribute a single sum (from the left to that position)
+        res += d[0]
+        return res
+```
+## 523. Continuous Subarray Sum
+
+One has to be very careful about the conditions in order to ensure that the subarray has AT LEAST 2 elements.
+```
+class Solution:
+    def checkSubarraySum(self, nums: List[int], k: int) -> bool:
+        if len(nums) < 2: return False
+        
+        if k == 0:
+            for i in range(len(nums)-1):
+                if nums[i] == 0 and nums[i+1] == 0:
+                    return True
+            return False
+        else:
+            k = abs(k)
+            SUM, left_sums = nums[0]%k, {}
+            left_sums[SUM] = 1
+            for i in range(1, len(nums)):
+                num = nums[i]
+                SUM = (SUM+num) % k
+                left_sums[SUM] = left_sums.get(SUM, 0) + 1
+                if (num%k != 0 and left_sums[SUM] >= 2) or (nums[i-1]%k == 0 and num%k == 0) or SUM == 0: return True
+
+            return False
+```
+## 814. Binary Tree Pruning
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def pruneTree(self, root: TreeNode) -> TreeNode:
+        reserve = set()
+        
+        def traverse(node):
+            if not node: return
+            traverse(node.left)
+            traverse(node.right)
+            if node.left in reserve or node.right in reserve or node.val==1:
+                reserve.add(node)
+        
+        traverse(root)
+        if not root: return None
+        stack = [root]
+        while stack:
+            node = stack.pop()
+            if node.left:
+                if node.left in reserve:
+                    stack.append(node.left)
+                else:
+                    node.left = None
+            if node.right:
+                if node.right in reserve:
+                    stack.append(node.right)
+                else:
+                    node.right = None
+        return root
+```
+## 1230. Toss Strange Coins
+```
+class Solution:
+    def probabilityOfHeads(self, prob: List[float], target: int) -> float:
+        # dp[i][j] = prob of getting j faces up after tossing the first i coins
+        # 0 <= i <= len(prob), 0 <= j <= target
+        dp = [[0]*(target+1) for _ in range(len(prob)+1)]
+        dp[0][0] = 1
+        for i in range(1, len(prob)+1):
+            dp[i][0] = dp[i-1][0] * (1-prob[i-1])
+        
+        # dp[i][j] = dp[i-1][j] * (1-prob[i-1]) + dp[i-1][j-1] * prob[i-1]
+        for i in range(1, len(prob)+1):
+            for j in range(1, min(i,target)+1):
+                p = prob[i-1]
+                dp[i][j] = dp[i-1][j] * (1-p) + dp[i-1][j-1] * p
+        return dp[-1][-1]
+```
