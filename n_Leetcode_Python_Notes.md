@@ -15167,3 +15167,226 @@ class Solution:
                 dp[i][j] = dp[i-1][j] * (1-p) + dp[i-1][j-1] * p
         return dp[-1][-1]
 ```
+## 487. Max Consecutive Ones II
+```
+class Solution:
+    def findMaxConsecutiveOnes(self, nums: List[int]) -> int:
+        # note that we start with prev_streak = -1 to correctly initiate
+        res, prev_num, prev_streak, cur_streak = 0, 1, -1, 0
+        for x in nums:
+            if x == 1:
+                cur_streak += 1
+            else:
+                if prev_num == 0:
+                    prev_streak, cur_streak = 0, 0
+                else:
+                    prev_streak, cur_streak = cur_streak, 0
+            prev_num, res = x, max(res, prev_streak + 1 + cur_streak)
+        return res
+```
+## 525. Contiguous Array
+```
+class Solution:
+    def findMaxLength(self, nums: List[int]) -> int:
+        if len(nums) < 2: return 0
+        
+        d, res, Sum = {}, 0, 1 if nums[0] == 1 else -1
+        d[Sum] = 0
+        for i in range(1, len(nums)):
+            Sum = Sum+1 if nums[i] == 1 else Sum-1
+            if Sum == 0:
+                res = max(res, i+1)
+            else:
+                if Sum in d:
+                    res = max(res, i-d[Sum])
+                else:
+                    d[Sum] = i
+        return res
+```
+## 1031. Maximum Sum of Two Non-Overlapping Subarrays
+```
+class Solution:
+    def maxSumTwoNoOverlap(self, A: List[int], L: int, M: int) -> int:
+        for i in range(1, len(A)):
+            A[i] += A[i-1]
+        res, Lmax, Mmax = A[L+M-1], A[L-1], A[M-1]
+        for i in range(M+L, len(A)):
+            Lmax = max(Lmax, A[i-M] - A[i-M-L])
+            Mmax = max(Mmax, A[i-L] - A[i-M-L])
+            res = max(res, Lmax + A[i]-A[i-M], Mmax + A[i]-A[i-L])
+        return res
+```
+## 1087. Brace Expansion
+```
+class Solution:
+    def expand(self, S: str) -> List[str]:
+        #idea is to first split by '{', then by '}', lastly by ',' to get all the options
+        lst = S.split('{')
+        options = []
+        for s in lst:
+            options += s.split('}')
+        options = [sorted(x.split(',')) for x in options][::-1]
+        res = [x for x in options.pop()]
+        while options:
+            option = options.pop()
+            res = [x+y for x in res for y in option]
+        return res
+```
+## 1151. Minimum Swaps to Group All 1's Together
+
+Sliding window method strikes again!
+```
+class Solution:
+    def minSwaps(self, data: List[int]) -> int:
+        Sum = sum(data)
+        windowSum = sum(data[:Sum])
+        res = Sum - windowSum
+        for i in range(Sum, len(data)):
+            windowSum += data[i] - data[i-Sum]
+            res = min(res, Sum - windowSum)
+        return res
+```
+## 1038. Binary Search Tree to Greater Sum Tree
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def bstToGst(self, root: TreeNode) -> TreeNode:
+        lst = []
+        def reversedInOrder(node):
+            if not node: return
+            reversedInOrder(node.right)
+            lst.append(node)
+            reversedInOrder(node.left)
+        reversedInOrder(root)
+        
+        for i in range(1, len(lst)):
+            lst[i].val += lst[i-1].val
+        return root
+```
+## 841. Keys and Rooms
+
+```
+class Solution:
+    def canVisitAllRooms(self, rooms: List[List[int]]) -> bool:
+        to_visit, visited, toOpen = {0}, set(), {i for i in range(1, len(rooms))}
+        while to_visit:
+            room = to_visit.pop()
+            keys = rooms[room]
+            for i in keys:
+                if i in toOpen and i not in visited:
+                    to_visit.add(i)
+                    toOpen.remove(i)
+            visited.add(room)
+        return len(toOpen) == 0
+```
+## 856. Score of Parentheses
+```
+class Solution:
+    def scoreOfParentheses(self, S: str) -> int:
+        stack = []
+        for l in S:
+            if l == '(':
+                stack.append(l)
+            else:
+                temp, prev = 0, stack.pop()
+                while prev != "(":
+                    temp += prev
+                    prev = stack.pop()
+                temp = 2*temp if temp > 0 else 1
+                stack.append(temp)
+        return sum(stack)
+```
+## 846. Hand of Straights
+```
+class Solution:
+    def isNStraightHand(self, hand: List[int], W: int) -> bool:
+        if len(hand)%W != 0: return False
+        d = collections.Counter(hand)
+        d = sorted([[k, v] for k,v in d.items()])
+        while d:
+            k, v = d.pop()
+            if len(d) < W-1: return False
+            
+            for i in range(1, W):
+                temp = d[-i]
+                if temp[0]!= k-i or temp[1] < v: return False
+                else:
+                    temp[1] -= v
+            while d and d[-1][1] == 0:
+                d.pop()
+        return True
+```
+## 869. Reordered Power of 2
+```
+class Solution:
+    def reorderedPowerOf2(self, N: int) -> bool:
+        power, possibilities = 1, set()
+        while len(str(power)) <= 10:
+            possibilities.add(tuple(sorted(list(str(power)))))
+            power *= 2
+        
+        return tuple(sorted(list(str(N)))) in possibilities
+```
+
+## 926. Flip String to Monotone Increasing
+- We start with assuming "111.." section occupies all string, s.
+- Then we update "000.." section as s[:i + 1] and "111.." section as s[i + 1:] during iteration as well as the result
+- "zeros" variable counts all misplaced "0"s and "ones" variable counts all misplaced "1"s
+```
+class Solution:
+    def minFlipsMonoIncr(self, S: str) -> int:
+        ones = 0
+        zeros = res = S.count('0')
+        for l in S:
+            ones, zeros = (ones + 1, zeros) if l == '1' else (ones, zeros - 1)
+            res = min(res, zeros + ones)
+        return res
+```
+
+## 939. Minimum Area Rectangle
+
+Find all y-coordinates for a given x, then for each pair of distint x1, x2, check whether rectangles can be formed.
+```
+class Solution:
+    def minAreaRect(self, points: List[List[int]]) -> int:
+        d, res = {}, float('inf')
+        for x, y in points:
+            d[x] = d.get(x,set()).union({y})
+        lst = sorted([[k,d[k]] for k in d if len(d[k]) > 1], key = lambda x: x[0])
+        for i in range(len(lst)):
+            temp1 = lst[i]
+            for j in range(i+1, len(lst)):
+                temp2 = lst[j]
+                width = temp2[0]-temp1[0]
+                heights = temp1[1].intersection(temp2[1])
+                if len(heights) >= 2: 
+                    heights = sorted(list(heights))
+                    res = min(res, width * min([heights[i]-heights[i-1] for i in range(1, len(heights))]))
+        
+        return 0 if res == float('inf') else res
+```
+## 979. Distribute Coins in Binary Tree
+
+Note the use of the `parent` variable.
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def distributeCoins(self, root: TreeNode, parent = None) -> int:
+        if not root: return 0
+        res  = self.distributeCoins(root.left, root) + self.distributeCoins(root.right, root)
+        if parent:
+            parent.val += root.val - 1
+        return res + abs(root.val-1)
+```
