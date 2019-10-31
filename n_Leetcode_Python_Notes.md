@@ -15390,3 +15390,96 @@ class Solution:
             parent.val += root.val - 1
         return res + abs(root.val-1)
 ```
+## 1011. Capacity To Ship Packages Within D Days
+
+The key idea is to binary search the capability using a function `ableToShip` which returns whether or not can be done using the given capability within the given days.
+```
+class Solution:
+    def shipWithinDays(self, weights: List[int], D: int) -> int:
+        def ableToShip(weights, cap, days):
+            cnt, total = 0, 0
+            for x in weights:
+                temp =  total + x
+                if temp <= cap:
+                    total = temp
+                else:
+                    cnt += 1
+                    total = x
+                    if cnt > days: return False
+            if total >= weights[-1]: cnt += 1
+            return cnt <= days
+        
+        left, right = max(weights), sum(weights)
+        while left < right:
+            if ableToShip(weights, left, D): return left
+            mid = (left+right)//2
+            if ableToShip(weights, mid, D):
+                right = mid
+                left += 1
+            else:
+                left = mid + 1
+        return left
+```
+## 791. Custom Sort String
+```
+class Solution:
+    def customSortString(self, S: str, T: str) -> str:
+        d, res = collections.Counter(T), ''
+        for l in S:
+            if l in d:
+                res += l*d[l]
+        
+        for l in d:
+            if l not in S:
+                res += l*d[l]
+        return res
+```
+## 835. Image Overlap
+```
+class Solution:
+    def largestOverlap(self, A: List[List[int]], B: List[List[int]]) -> int:
+        dA, dB = set(), set()
+        for i in range(len(A)):
+            for j in range(len(A)):
+                if A[i][j] == 1:
+                    dA.add((i,j))
+                if B[i][j] == 1:
+                    dB.add((i,j))
+        res = 0
+        for x in range(-len(A), len(A)):
+            for y in range(-len(A), len(A)):
+                temp = 0
+                for a,b in dA:
+                    if (a+x, b+y) in dB:
+                        temp += 1
+                res = max(res, temp)
+        return res
+```
+## 1167. Minimum Cost to Connect Sticks
+```
+class Solution:
+    def connectSticks(self, sticks: List[int]) -> int:
+        
+        heapq.heapify(sticks)
+        res = 0
+        while len(sticks) > 1:
+            x, y = heapq.heappop(sticks), heapq.heappop(sticks)
+            res += x + y
+            heapq.heappush(sticks, x + y)
+        return res
+```
+
+## 1072. Flip Columns For Maximum Number of Equal Rows
+```
+class Solution:
+    def maxEqualRowsAfterFlips(self, matrix: List[List[int]]) -> int:
+        d = collections.defaultdict(int)
+        for row in matrix:
+            if row[0] == 1:
+                d[tuple(row)] += 1
+            else:
+                trans = [(1-x)%2 for x in row]
+                d[tuple(trans)] += 1
+            
+        return max(max(d.values()),1-min(d.values()))
+```
