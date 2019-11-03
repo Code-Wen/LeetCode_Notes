@@ -15483,3 +15483,313 @@ class Solution:
             
         return max(max(d.values()),1-min(d.values()))
 ```
+## 1181. Before and After Puzzle
+```
+class Solution:
+    def beforeAndAfterPuzzles(self, phrases: List[str]) -> List[str]:
+        d = collections.defaultdict(list)
+        res = []
+        for i in range(len(phrases)):
+            lst = phrases[i].split(' ')
+            first, last = lst[0], lst[-1]
+            d[last] += [[lst, i]]
+        for j in range(len(phrases)):
+            lst = phrases[j].split(' ')
+            first, last = lst[0], lst[-1]
+            if first in d:
+                res += [w[0]+lst[1:] for w in d[first] if w[1] != j]
+        return sorted(list({' '.join(lst) for lst in res}))
+```
+## 861. Score After Flipping Matrix
+```
+class Solution:
+    def matrixScore(self, A: List[List[int]]) -> int:
+        m, n = len(A), len(A[0])
+        for i in range(m):
+            if A[i][0] == 0:
+                A[i] = [(1+x)%2 for x in A[i]]
+        power, res = 2**(n-1), 0
+        res += power * m
+        for i in range(1, n):
+            power, total = power//2, 0
+            for j in range(m):
+                total += A[j][i]
+            res += power * max(total, m-total)
+        return res
+```
+## 1243. Array Transformation
+```
+class Solution:
+    def transformArray(self, arr: List[int]) -> List[int]:
+        if len(arr) < 3: return arr
+        prev, cur = [], arr
+        while prev != cur:
+            prev, cur = cur, cur.copy()
+            for i in range(1, len(arr)-1):
+                if prev[i] < prev[i-1] and prev[i] < prev[i+1]:
+                    cur[i] = prev[i]+1
+                elif prev[i] > prev[i-1] and prev[i] > prev[i+1]:
+                    cur[i] = prev[i]-1
+                else: cur[i] = prev[i]
+        return prev
+```
+## 518. Coin Change 2
+```
+class Solution:
+    def change(self, amount: int, coins: List[int]) -> int:
+        if not coins and amount > 0: return 0
+        coins.sort(reverse = True)
+        cache = {}
+        def helper(amount, ind):
+            if amount == 0: return 1
+            if (amount, ind) in cache: return cache[(amount, ind)]
+            if ind == len(coins)-1:
+                cache[(amount, ind)] = 1 if amount%coins[-1] == 0 else 0
+            else:
+                cache[(amount, ind)] = sum([helper(amount-coins[ind]*i, ind + 1) for i in range(amount//coins[ind]+1)])
+            return cache[(amount, ind)]
+        return helper(amount, 0)
+```
+## 467. Unique Substrings in Wraparound String
+
+Brute-force: O(n^2)
+```
+class Solution:
+    def findSubstringInWraproundString(self, p: str) -> int:
+        s, level, length = "abcdefghijklmnopqrstuvwxyz", set(p), 1
+        d, res = {s[i]:i for i in range(26)}, len(level)
+        while level:
+            next_level = set()
+            length += 1
+            for i in range(len(p)-length+1):
+                word = p[i:i+length]
+                if word[:-1] in level and s[(d[word[-2]]+1)%26] == word[-1] and word not in next_level:
+                    res += 1
+                    next_level.add(word)
+            level = next_level
+        return res
+```
+
+O(n) method
+```
+class Solution:
+    def findSubstringInWraproundString(self, p: str) -> int:
+        if len(p) < 2: return len(p)
+        # d[l] is the max_length of 'good' substrings of p which ends in letter l
+        d = collections.defaultdict(int)
+        d[p[0]], max_length, match = 1, 1, 'zabcdefghijklmnopqrstuvwxyz'
+        for i in range(1, len(p)):
+            max_length = max_length+1 if p[i-1:i+1] in match else 1
+            d[p[i]] = max(d[p[i]], max_length)
+        return sum(d.values())
+```
+
+## 474. Ones and Zeroes
+```
+class Solution:
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        costs = [[s.count('0'), s.count('1')] for s in strs if s.count('0') <= m and s.count("1") <= n ]
+        if not costs: return 0
+        dp = {}
+        def helper(k, zeros, ones):
+            if k < 0: return 0
+            
+            if (k, zeros, ones) in dp: return dp[(k, zeros, ones)]
+            
+            res = 1 if costs[k][0] <= zeros and costs[k][1] <= ones else 0
+            if res == 1:
+                dp[(k,zeros, ones)] = max(res + helper(k-1, zeros-costs[k][0], ones-costs[k][1]), helper(k-1, zeros, ones))
+            else:
+                dp[(k, zeros, ones)] = helper(k-1, zeros, ones)
+            return dp[(k, zeros, ones)]
+        return helper(len(costs)-1, m, n)
+```
+## 1247. Minimum Swaps to Make Strings Equal
+```
+class Solution:
+    def minimumSwap(self, s1: str, s2: str) -> int:
+        # Edge case: strings with different lengths
+        if len(s1) != len(s2): return -1 
+        d1, d2 = {'x':0, 'y':0}, {'x':0, 'y':0}
+        # Only record the counts where s1 and s2 differs
+        for i in range(len(s1)):
+            if s1[i] != s2[i]:
+                d1[s1[i]] += 1
+                d2[s2[i]] += 1
+        # If the total number of 'x' in s1 and s2 is odd, not possible
+        if (d1['x']+d2['x'])%2 == 1: return -1
+        res = 0
+        # If there are at least two 'x' in s1 that needs to be changed, we can do it with 1 swap as in Example 1. Similarly for 'y'
+        while d1['x'] >= 2:
+            res += 1
+            d1['x'] -= 2
+        while d1['y'] >= 2:
+            res += 1
+            d1['y'] -= 2
+        # If there are still 'x' remaining in s1, then it must come with a 'y'. So we are in Example2, 2 swaps will suffice.
+        if d1['x'] == 1:
+            res += 2
+        return res
+```
+## 1182. Shortest Distance to Target Color
+Using binary search:
+```
+class Solution:
+    def shortestDistanceColor(self, colors: List[int], queries: List[List[int]]) -> List[int]:
+        locations, res = {1:[], 2:[], 3:[]}, []
+        for i in range(len(colors)):
+            locations[colors[i]].append(i)
+            
+        def binarySearch(loc, c):
+            if c == colors[loc]: return 0
+            
+            lst = locations[c]
+            if not lst: return -1
+            l, r = 0, len(lst)-1
+            while l < r-1:
+                if lst[l] > loc: return lst[l]-loc
+                if lst[r] < loc: return loc - lst[r]
+                mid = (l+r)//2
+                if lst[mid] > loc: r = mid
+                else:
+                    l = mid
+            return min(abs(lst[l]-loc), abs(lst[r]-loc))
+            
+        for loc, c in queries:
+            res.append(binarySearch(loc, c))
+        return res
+```
+## 1155. Number of Dice Rolls With Target Sum
+```
+class Solution:
+    def numRollsToTarget(self, d: int, f: int, target: int) -> int:
+        res = {}
+        def helper(d, f, target):
+            if d==0:
+                return 1 if target == 0 else 0
+            if (d, f, target) in res: return res[(d, f, target)]
+            
+            temp = 0
+            for i in range(1, f+1):
+                temp += helper(d-1, f, target-i)
+            res[(d, f, target)] = temp
+            return temp
+        return helper(d, f, target)%(10**9+7)
+```
+## 1245. Tree Diameter
+Finding the diameter of a tree:
+
+We choose an arbitrary node (x) and find the farthest node from (x), let it be (y) , then we do another traversal to find the farthest node from (y) , let it be (z).
+
+Then diameter is the distance between (y) and (z).
+
+Proof for this Algorithm - [here](http://courses.csail.mit.edu/6.046/fall01/handouts/ps9sol.pdf) (Exercise 9-1).
+```
+class Solution:
+    def treeDiameter(self, edges: List[List[int]]) -> int:
+        d = collections.defaultdict(list)
+        for i, j in edges:
+            d[i].append(j)
+            d[j].append(i)
+        
+        def BFS(n):
+            visited = set()
+            que = collections.deque([[n,0]])
+            while que:
+                node, dist = que.popleft()
+                for i in d[node]:
+                    if i not in visited:
+                        que.append([i,dist+1])
+                visited.add(node)
+            return [node, dist]
+        node = BFS(0)[0]
+        return BFS(node)[1]
+```
+## 1249. Minimum Remove to Make Valid Parentheses
+```
+class Solution:
+    def minRemoveToMakeValid(self, s: str) -> str:
+        que = collections.deque()
+        temp = []
+        for l in s:
+            if l == '(':
+                que.append(len(temp))
+                temp.append('(')
+            elif l == ')':
+                if que:
+                    que.popleft()
+                    temp.append(')')
+            else:
+                temp.append(l)
+        while que:
+            index = que.pop()
+            temp = temp[:index] + temp[index+1:]
+        return ''.join(temp)
+```
+## 484. Find Permutation
+
+I might have chosen a bad approach. The difficult part is too figure out correctly how to generate each block.
+```
+class Solution:
+    def findPermutation(self, s: str) -> List[int]:
+        blocks, cnt_I,cnt_D, prev = collections.deque(), 0, 0, 'I'
+        for l in s:
+            if l == 'I' and prev == 'I': 
+                cnt_I += 1
+            elif l == 'D' and prev == 'D': 
+                cnt_D += 1
+            elif l == 'I' and prev == 'D':
+                blocks.append([cnt_I, cnt_D])
+                cnt_I, cnt_D, prev = 1, 0, 'I'
+            elif l == 'D' and prev == 'I':
+                cnt_D += 1
+                prev = 'D'
+        
+        blocks.append([cnt_I, cnt_D])
+        def generateBlock(start, I, D):
+            # we assume I > 0. start will not be included in the output
+            res1 = [start+1+i for i in range(I-1)]+[start+I+D]
+            peak = res1[-1]
+            res2 = [peak-i-1 for i in range(D)]
+            return res1 + res2
+        I, D = blocks.popleft()
+        if I == 0:
+            res, start = [D+1-i for i in range(D+1)], D+1
+        else:
+            res, start = [1]+generateBlock(1, I, D), 1+I+D
+        while blocks:
+            I, D = blocks.popleft()
+            res += generateBlock(start, I, D)
+            start += I+D
+        return res
+```
+## 950. Reveal Cards In Increasing Order
+```
+class Node:
+    def __init__(self, x):
+        self.val = x
+        self.next = None
+        self.prev = None
+class Solution:
+    def deckRevealedIncreasing(self, deck: List[int]) -> List[int]:
+        deck.sort(reverse = True)
+        # form a circle
+        head = tail = Node(deck[0])
+        head.next = head
+        head.prev = head
+        # push in new elements into the circle
+        for x in deck[1:]:
+            new_head = Node(x)
+            new_tail = tail.prev
+            new_tail.next = new_head
+            new_head.next, new_head.prev = tail, new_tail
+            tail.prev = new_head
+            head, tail = new_head, new_tail
+        tail.next = None # break the circle
+        res = []
+        while head:
+            res.append(head.val)
+            head=head.next
+        return res
+    
+```
