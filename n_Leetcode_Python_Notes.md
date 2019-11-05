@@ -15791,5 +15791,185 @@ class Solution:
             res.append(head.val)
             head=head.next
         return res
-    
+```
+## 544. Output Contest Matches
+```
+class Solution:
+    def findContestMatch(self, n: int) -> str:
+        def reduceOneRound(queue):
+            res = collections.deque()
+            while queue:
+                team1 = queue.popleft()
+                team2 = queue.pop()
+                res.append('('+team1 +','+team2+')')
+            return res
+        queue = collections.deque([str(i) for i in range(1, n+1)])
+        while len(queue) > 1:
+            queue = reduceOneRound(queue)
+        return list(queue)[0]
+```
+
+## 478. Generate Random Point in a Circle
+
+How to randomly and uniformly sample points in a disk with radius R: use polar coordinates. 
+However it is vital to use `R * math.sqrt(random.uniform(0,1))` when deciding the radius.
+```
+class Solution:
+
+    def __init__(self, radius: float, x_center: float, y_center: float):
+        self.R = radius
+        self.x = x_center
+        self.y = y_center
+
+    def randPoint(self) -> List[float]:
+        r, theta = self.R * math.sqrt(random.uniform(0,1)), 2*math.pi * random.uniform(0,1)
+        return [self.x+r*math.cos(theta), self.y+ r*math.sin(theta)]
+
+
+# Your Solution object will be instantiated and called as such:
+# obj = Solution(radius, x_center, y_center)
+# param_1 = obj.randPoint()
+```
+## 1053. Previous Permutation With One Swap
+```
+class Solution:
+    def prevPermOpt1(self, A: List[int]) -> List[int]:
+        left = len(A)-2
+        while left >= 0:
+            if A[left] > A[left+1]:
+                break
+            left -= 1
+        if left < 0: return A
+        right = left + 1
+        while right < len(A)-1 and A[right] < A[right+1] < A[left]:
+            right += 1
+        A[left], A[right] = A[right], A[left]
+        return A
+```
+## 650. 2 Keys Keyboard
+```
+class Solution:
+    def minSteps(self, n: int) -> int:
+        if n == 1: return 0
+        res = 0
+        while n > 1:
+            k = self.findSmallestFactor(n)
+            res += k
+            n //= k
+        return res
+            
+    def findSmallestFactor(self, n):
+        for i in range(2, math.floor(math.sqrt(n))+1):
+            if n%i == 0:
+                return i
+        return n
+```
+## 508. Most Frequent Subtree Sum
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def findFrequentTreeSum(self, root: TreeNode) -> List[int]:
+        subTreeSums = {}
+        def getSums(root):
+            if not root: return
+            getSums(root.left)
+            getSums(root.right)
+            leftSum = subTreeSums[root.left] if root.left else 0
+            rightSum = subTreeSums[root.right] if root.right else 0
+            subTreeSums[root] = leftSum + rightSum + root.val
+        
+        getSums(root)
+
+        counts, maxFreq = collections.defaultdict(int), 0
+        for x in subTreeSums.values():
+            counts[x] += 1
+            maxFreq = max(maxFreq, counts[x])
+        return [s for s in counts if counts[s] == maxFreq]
+```
+## 651. 4 Keys Keyboard
+```
+class Solution:
+    def maxA(self, N: int) -> int:
+        dp = {i:i for i in range(1, 7)}
+        for i in range(7, N+1):
+            dp[i] = max(dp[i-3]*2, dp[i-4]*3, dp[i-5]*4)
+        return dp[N]
+```
+## 721. Accounts Merge
+```
+class Solution:
+    def accountsMerge(self, accounts: List[List[str]]) -> List[List[str]]:
+        d = collections.defaultdict(list)
+        for account in accounts:
+            name, emails = account[0], set(account[1:])
+            no_merge = []
+            for e in d[name]:
+                if len(e.intersection(emails)) > 0:
+                    emails = emails.union(e)
+                else:
+                    no_merge.append(e)
+            d[name] = no_merge + [emails]
+        res = []
+        for name in d:
+            for e in d[name]:
+                res += [[name]+sorted(list(e))]
+        return res
+```
+## 526. Beautiful Arrangement
+```
+class Solution:
+    def countArrangement(self, N: int) -> int:
+        def count(i, X):
+            if i == 1: return 1
+            return sum([count(i-1, X-{x}) for x in X if x%i == 0 or i%x == 0])
+        return count(N, set(range(1, N+1)))
+```
+## 527. Beautiful Arrangement II
+Start with the numbers sorted, e.g., `1 2 3 4 5 6 7 8 9 10`. Then we only have difference 1, many times. We can create the largest possible difference by making the smallest and largest number neighbors. In the example, let's bring 10 next to 1. If we do this by reversing the whole subarray from 2 to 10, then no other neighborships in 2 to 10 are affected: `1 10 9 8 7 6 5 4 3 2`. To create the next larger possible difference, we can bring 2 next to 10 by reversing the subarray from 9 to 2: `1 10 2 3 4 5 6 7 8 9`. And so on, reversing shorter and shorter suffixes. Just create as many differences as requested.
+
+```
+class Solution:
+    def constructArray(self, n: int, k: int) -> List[int]:
+        res = list(range(1, n+1))
+        for i in range(1, k):
+            res[i:] = res[:i-1:-1]
+        return res
+```
+## 932. Beautiful Array
+
+Another form of divide and conquer: divide the odds and evens.
+
+A summary of the properties of a Beautiful Array:
+I. Given a beautiful array `A`, the following properties holds:
+(1) `A' = A*c` is a Beautiful array
+(2) `A' = A + c` is a Beautiful array
+(3) if `A'` is an array obtained by deleting some element in `A`, then `A'` is still Beautiful.
+
+II. Given two Beautiful array `A` and `B`, whose elements are odd and even respectively, then concatenation array `A + B` is still Beautiful.
+```
+class Solution:
+    def beautifulArray(self, N: int) -> List[int]:
+        res = [1]
+        while len(res) < N:
+            res = [i*2-1 for i in res] + [2*i for i in res]
+        return [i for i in res if i <= N]
+```
+
+## 1109. Corporate Flight Bookings
+```
+class Solution:
+    def corpFlightBookings(self, bookings: List[List[int]], n: int) -> List[int]:
+        res, d = [0]*(n+2), collections.defaultdict(int)
+        for i, j, k in bookings:
+            d[i] += k
+            d[j+1] -= k
+        for i in range(1, len(res)):
+            res[i] = res[i-1]+d[i]
+        return res[1:n+1]
 ```
