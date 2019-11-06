@@ -15973,3 +15973,64 @@ class Solution:
             res[i] = res[i-1]+d[i]
         return res[1:n+1]
 ```
+## 915. Partition Array into Disjoint Intervals
+```
+class Solution:
+    def partitionDisjoint(self, A: List[int]) -> int:
+        left_max, right_min = [A[0]]*len(A), [float('inf')]*len(A)
+        for i in range(1, len(A)):
+            left_max[i] = max(left_max[i-1], A[i])
+            right_min[-i-1] = min(right_min[-i], A[-i])
+        i = 0
+        while left_max[i] > right_min[i]:
+            i += 1
+        return i+1
+```
+## 794. Valid Tic-Tac-Toe State
+```
+class Solution:
+    def validTicTacToe(self, board: List[str]) -> bool:
+        matrix, X, O = self.getMatrix(board)
+        if X < O or X-O > 1: return False
+        sums = []
+        for i in range(3):
+            sums.append(sum(matrix[i]))
+            sums.append(sum([matrix[j][i] for j in range(3)]))
+        sums.append(sum([matrix[i][i] for i in range(3)]))
+        sums.append(sum([matrix[1][1], matrix[0][2], matrix[2][0]]))
+        if 3 in sums and (-3 in sums or X==O): return False
+        if -3 in sums and X > O: return False
+        return True
+        
+        
+    def getMatrix(self, board):
+        res, X, O = [], 0 , 0
+        for s in board:
+            row = [0]*3
+            for i in range(3):
+                if s[i] == 'X':
+                    row[i] = 1
+                    X += 1
+                elif s[i] == 'O':
+                    row[i] = -1
+                    O += 1
+            res.append(row)
+        return (res, X, O)
+```
+
+## 537. Complex Number Multiplication
+```
+class Solution:
+    def complexNumberMultiply(self, a: str, b: str) -> str:
+        temp = self.product(self.strToPair(a), self.strToPair(b))
+        return str(temp[0])+'+'+str(temp[1])+'i'
+        
+    def strToPair(self, s):
+        res = s.split('+')
+        res[0] = int(res[0])
+        res[1] = int(res[1][:-1])
+        return res
+    
+    def product(self, l1, l2):
+        return [l1[0]*l2[0]-l1[1]*l2[1], l1[0]*l2[1]+l1[1]*l2[0]]
+```
