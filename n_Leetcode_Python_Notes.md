@@ -16034,3 +16034,110 @@ class Solution:
     def product(self, l1, l2):
         return [l1[0]*l2[0]-l1[1]*l2[1], l1[0]*l2[1]+l1[1]*l2[0]]
 ```
+## 654. Maximum Binary Tree
+
+Brute-Force using recursion:
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def constructMaximumBinaryTree(self, nums: List[int]) -> TreeNode:
+        if not nums: return None
+        M = max(nums)
+        i = nums.index(M)
+        root = TreeNode(M)
+        root.left = self.constructMaximumBinaryTree(nums[:i])
+        root.right = self.constructMaximumBinaryTree(nums[i+1:])
+        return root
+```
+
+O(n) method using stack: 
+We keep track of a stack, and make sure the numbers in stack is in decreasing order.
+
+For each new num, we make it into a TreeNode first.
+Then:
+
+- If stack is empty, we push the node into stack and continue
+- If new value is smaller than the node value on top of the stack, we append TreeNode as the right node of top of stack.
+- If new value is larger, we keep poping from the stack until the stack is empty OR top of stack node value is greater than the new value. During the pop, we keep track of the last node being poped.
+- After step 2, we either in the situation of 0, or 1, either way, we append last node as left node of the new node.
+- After traversing, the bottom of stack is the root node because the bottom is always the largest value we have seen so far (during the traversing of list).
+```
+class Solution:
+    def constructMaximumBinaryTree(self, nums: List[int]) -> TreeNode:
+        stack, last = [], None
+        for num in nums:
+            node = TreeNode(num)
+            while stack and stack[-1].val < num:
+                last = stack.pop()
+            if stack:
+                stack[-1].right = node
+            if last:
+                node.left = last
+            stack.append(node)
+            last = None
+        return stack[0]
+
+```
+
+## 1100. Find K-Length Substrings With No Repeated Characters
+```
+class Solution:
+    def numKLenSubstrNoRepeats(self, S: str, K: int) -> int:
+        if len(S) < K or K > 26: return 0
+        res = 0
+        for i in range(len(S)-K+1):
+            if len(set(S[i:i+K]))==K:
+                res += 1
+        return res
+```
+## 1248. Count Number of Nice Subarrays
+```
+class Solution:
+    def numberOfSubarrays(self, nums: List[int], k: int) -> int:
+        odd, res = [-1]+[i for i in range(len(nums)) if nums[i]%2 == 1]+[len(nums)], 0
+        for i in range(len(odd)-k-1):
+            res += (odd[i+1] - odd[i]) * (odd[i+k+1] - odd[i+k])
+        return res
+```
+## 877. Stone Game
+```
+class Solution:
+    def stoneGame(self, piles: List[int]) -> bool:
+        # dp[i][j] means the biggest number of stones you can get more than opponent picking piles in piles[i] ~ piles[j] inclusive
+        dp = [[0]*len(piles) for _ in range(len(piles))]
+        for i in range(len(piles)):
+            dp[i][i] = piles[i]
+        for j in range(1, len(piles)):
+            for i in range(j-1, -1, -1):
+                dp[i][j] = max(piles[i]-dp[i+1][j], piles[j]-dp[i][j-1])
+        return dp[0][-1] > 0
+```
+## 1250. Check If It Is a Good Array
+```
+class Solution:
+    def isGoodArray(self, nums: List[int]) -> bool:
+        if len(nums) == 1: return abs(nums[0]) == 1
+        common_divisor = abs(nums[0])
+        for x in nums[1:]:
+            if common_divisor == 1: 
+                break
+            else:
+                common_divisor = self.commonDivisor(common_divisor, abs(x))
+        return common_divisor == 1
+        
+    def commonDivisor(self,a,b):
+        """
+        Assuming a, b > 0,find the greatest common divisor of a and b.
+        """
+        if a > b: 
+            a, b = b, a
+        while a > 0:
+            a, b = b%a, a
+        return b
+```
