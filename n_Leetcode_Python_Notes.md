@@ -16141,3 +16141,276 @@ class Solution:
             a, b = b%a, a
         return b
 ```
+## 1236. Web Crawler
+```
+# """
+# This is HtmlParser's API interface.
+# You should not implement it, or speculate about its implementation
+# """
+#class HtmlParser(object):
+#    def getUrls(self, url):
+#        """
+#        :type url: str
+#        :rtype List[str]
+#        """
+
+class Solution:
+    def crawl(self, startUrl: str, htmlParser: 'HtmlParser') -> List[str]:
+        res, stack = set(), [startUrl]
+        start_host = self.getHostname(startUrl)
+        while stack:
+            url = stack.pop()
+            if start_host == self.getHostname(url) and url not in res:
+                res.add(url)
+                stack += htmlParser.getUrls(url)
+        return res
+            
+    def getHostname(self, s):
+        return s[:(s+'/').find('/', s.find('://')+3)]
+```
+## 1140. Stone Game II
+
+cache[(i, m)] = maximum stones the current player can get from piles[i:] with M
+A[i]= total stones of piles[i:]
+```
+class Solution:
+    def stoneGameII(self, piles: List[int]) -> int:
+        N, A = len(piles), piles[:]
+        for i in range(N-2, -1, -1):
+            A[i] += A[i+1]
+        cache = {}
+        
+        def helper(i, M):
+            """
+            Compute the maximal stones if start with index i (inclusive) and M
+            """
+            if (i, M) in cache: return cache[(i,M)]
+            if i + 2*M >= N: 
+                cache[(i, M)] = A[i]
+            else:
+                cache[(i, M)] = A[i] - min(helper(i+x, max(x, M)) for x in range(1, 2*M+1))
+            return cache[(i, M)]
+        
+        return helper(0, 1)
+```
+
+## 1079. Letter Tile Possibilities
+```
+class Solution:
+    def numTilePossibilities(self, tiles: str) -> int:
+        #Get the frequencies of different characters [f_0, f_1, ..., f_n].
+        #For each possible choice of frequency [i_0, i_1, ..., i_n] (0 <= i_k <= f_k, k = 0, 1, ..., n), the number of distinct sequences is (i_0 + i_1 + ... + i_n)! / ( i_0! * i_1! * ... * i_n!).
+        d, res = collections.Counter(tiles), 0
+        prod = 1
+        for x in d.values():
+            prod *= x+1
+        # line 8-12 generates all the possible [i_0, ..., i_n] sequence. Note that we do not let i == prod, which corresponds to [0,...,0]
+        for i in range(1, prod): 
+            nums = []
+            for x in d.values():
+                nums.append(i % (x+1))
+                i = i//(x+1)
+            temp = math.factorial(sum(nums))
+            for n in nums:
+                temp //= math.factorial(n)
+            res += temp
+        return res
+```
+## 1123. Lowest Common Ancestor of Deepest Leaves
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def lcaDeepestLeaves(self, root: TreeNode) -> TreeNode:
+        prev = {} # prev[child] = parent
+        que = collections.deque([root])
+        cur, nxt = 1, 0
+        layers = [[]]
+        while que:
+            node = que.popleft()
+            if node.left:
+                prev[node.left] = node
+                que.append(node.left)
+                nxt += 1
+            if node.right:
+                prev[node.right] = node
+                que.append(node.right)
+                nxt += 1
+            layers[-1].append(node)
+            cur -= 1
+            if cur == 0:
+                cur, nxt = nxt, 0
+                layers += [[]]
+        # Get the last non-empty layer with largest depth, layers[-1] is always []
+        last_layer, prev_layer = layers[-2], set()
+        while len(last_layer) != 1: # not a common parent yet
+            while last_layer:
+                prev_layer.add(prev[last_layer.pop()]) 
+            last_layer, prev_layer = list(prev_layer), set() # move one layer up
+        return last_layer[0]
+```
+## 713. Subarray Product Less Than K
+```
+class Solution:
+    def numSubarrayProductLessThanK(self, nums: List[int], k: int) -> int:
+        left = 0
+        res, prod = 0, 1
+        for right in range(len(nums)):
+            prod *= nums[right]
+            while prod >= k and left <= right:
+                prod /= nums[left]
+                left += 1
+            res += right - left + 1
+        return res
+```
+## 1052. Grumpy Bookstore Owner
+```
+class Solution:
+    def maxSatisfied(self, customers: List[int], grumpy: List[int], X: int) -> int:
+        unaffected = sum([customers[i] for i in range(len(grumpy)) if grumpy[i]==0])
+        temp = extra = sum([customers[i] for i in range(X) if grumpy[i]==1])
+        for start in range(1, len(grumpy)-X+1):
+            to_drop = customers[start-1] if grumpy[start-1] == 1 else 0
+            to_add = customers[start+X-1] if grumpy[start+X-1] == 1 else 0
+            temp = temp - to_drop + to_add
+            extra = max(extra, temp)
+        return unaffected + extra
+```
+## 1049. Last Stone Weight II
+
+The key insight is that it is equavalent to the question of finding a partition of the list into two sublists such that the absolute difference of the sums of two parts is minimal.
+```
+class Solution:
+    def lastStoneWeightII(self, stones: List[int]) -> int:
+        total = sum(stones)
+        sums = {0}
+        for x in stones:
+            sums |= {x+y for y in sums}
+        return min(abs(total-2*x) for x in sums)
+```
+## 723. Candy Crush
+```
+class Solution:
+    def candyCrush(self, board: List[List[int]]) -> List[List[int]]:
+        to_crash = self.check(board)
+        while to_crash:
+            self.crash(board, to_crash)
+            self.drop(board)
+            to_crash = self.check(board)
+        return board
+    
+    def drop(self, board):
+        """
+        Update board by dropping.
+        """
+        for j in range(len(board[0])):
+            non_zeros = [board[i][j] for i in range(len(board)) if board[i][j]!=0]
+            i = len(board)-1
+            while non_zeros:
+                board[i][j] = non_zeros.pop()
+                i -= 1
+            while i > -1:
+                board[i][j] = 0
+                i -= 1
+                
+    def check(self, board):
+        to_crash = set()
+        for i in range(len(board)):
+            for j in range(len(board[0])):
+                if board[i][j] != 0:
+                    if self.checkVertical(board, i, j) or self.checkHorizontal(board, i,j):
+                        to_crash.add((i,j))
+        return to_crash
+    
+    def crash(self, board, to_crash):
+        """
+        Crashing without dropping
+        """
+        for (i,j) in to_crash: 
+            board[i][j] = 0
+        
+    
+    def checkVertical(self, B, i, j):
+        num = B[i][j]
+        v1 = (num == B[i-1][j] and num == B[i-2][j]) if i>=2 else False
+        if v1: return True
+        v2 = (num == B[i-1][j] and num == B[i+1][j]) if 0<i<len(B)-1 else False
+        if v2: return True
+        return (num == B[i+1][j] and num == B[i+2][j]) if i < len(B)-2 else False
+        
+    
+    def checkHorizontal(self, B, i, j):
+        num = B[i][j]
+        v1 = (num == B[i][j-1] and num == B[i][j-2]) if j>=2 else False
+        if v1: return True
+        v2 = (num == B[i][j-1] and num == B[i][j+1]) if 0<j<len(B[0])-1 else False
+        if v2: return True
+        v3 = (num == B[i][j+1] and num == B[i][j+2]) if j < len(B[0])-2 else False
+        return v3
+```
+## 863. All Nodes Distance K in Binary Tree
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def distanceK(self, root: TreeNode, target: TreeNode, K: int) -> List[int]:
+        edges = collections.defaultdict(set)
+        stack = [root]
+        while stack:
+            node = stack.pop()
+            if node.left:
+                edges[node].add(node.left)
+                edges[node.left].add(node)
+                stack.append(node.left)
+            if node.right:
+                edges[node].add(node.right)
+                edges[node.right].add(node)
+                stack.append(node.right)
+        return self.BFS(edges, target, K)
+    
+    def BFS(self, graph, start, K):
+        """
+        Return list of node values which are of distance K to the start
+        """
+        que, levels, seen = collections.deque(), collections.defaultdict(set), set()
+        que.append([start, 0])
+        while que:
+            node, depth = que.popleft()
+            levels[depth].add(node)
+            seen.add(node)
+            for j in graph[node]:
+                if j not in seen:
+                    que.append([j, depth+1])
+                    seen.add(j)
+        return list([x.val for x in levels[K]])
+```
+## 698. Partition to K Equal Sum Subsets
+```
+class Solution:
+    def canPartitionKSubsets(self, nums: List[int], k: int) -> bool:
+        total = sum(nums)
+        average, sums = total // k, [0]*k
+        if total%k != 0 or max(nums) > average: return False
+        nums.sort(reverse = True)
+        def dfs(i):
+            if i == len(nums): return len(set(sums)) == 1
+            for j in range(k):
+                sums[j] += nums[i]
+                if sums[j] <= average and dfs(i+1): return True
+                sums[j] -= nums[i]
+                if sums[j] == 0:
+                    break
+            return False
+        
+        return dfs(0)
+```
