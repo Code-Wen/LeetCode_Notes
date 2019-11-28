@@ -16414,3 +16414,754 @@ class Solution:
         
         return dfs(0)
 ```
+## 621. Task Scheduler
+```
+class Solution:
+    def leastInterval(self, tasks: List[str], n: int) -> int:
+        cnt = list(collections.Counter(tasks).values())
+        M = max(cnt)
+        Mcnt = cnt.count(M)
+        return max(len(tasks), (M-1)*(n+1)+Mcnt)
+```
+## 755. Pour Water
+```
+class Solution:
+    def pourWater(self, heights: List[int], V: int, K: int) -> List[int]:
+        for _ in range(V):
+            for d in (-1, 1):
+                i = best = K
+                while 0 <= i+d < len(heights) and heights[i+d] <= heights[i]:
+                    if heights[i+d] < heights[i]: best = i+d
+                    i += d
+                if best != K:
+                    heights[best] += 1
+                    break
+            else:
+                heights[K] += 1
+        return heights
+```
+## 692. Top K Frequent Words
+```
+class Solution:
+    def topKFrequent(self, words: List[str], k: int) -> List[str]:
+        freq = collections.Counter(words)
+        heap = list({-x for x in freq.values()})
+        heapq.heapify(heap)
+        
+        look_up = collections.defaultdict(list)
+        for key, val in freq.items():
+            look_up[val].append(key)
+        for f in look_up:
+            look_up[f] = sorted(look_up[f])
+        res = []
+        while k > 0:
+            f = -1 * heapq.heappop(heap)
+            lst = look_up[f]
+            if len(lst) <= k:
+                res += lst
+                k -= len(lst)
+            else:
+                res += lst[:k]
+                k = 0
+        return res
+```
+## 635. Design Log Storage System
+```
+class LogSystem:
+
+    def __init__(self):
+        temp = 'Year:Month:Day:Hour:Minute:Second'.split(':')
+        self.depths = {temp[i]:i+1 for i in range(len(temp))}
+        self.data = []
+        
+
+    def put(self, id: int, timestamp: str) -> None:
+        time = [int(s) for s in timestamp.split(':')]
+        self.data.append([time, id])
+        
+
+    def retrieve(self, s: str, e: str, gra: str) -> List[int]:
+        depth = self.depths[gra]
+        start, end = [int(x) for x in s.split(':')[:depth]], [int(y) for y in e.split(':')[:depth]]
+        res = []
+        for time, id in self.data:
+            temp = time[:depth]
+            if start <= temp <= end:
+                res.append(id)
+        return res
+
+
+# Your LogSystem object will be instantiated and called as such:
+# obj = LogSystem()
+# obj.put(id,timestamp)
+# param_2 = obj.retrieve(s,e,gra)
+```
+## 767. Reorganize String
+```
+class Solution:
+    def reorganizeString(self, S: str) -> str:
+        d = collections.Counter(S)
+        M = max(d.values())
+        if M - 1 > len(S)-M:
+            return ''
+        if M == 1: return S
+        
+        # put the less frequent letters to the odd indices, and the more frequent letters to even indices
+        a = sorted(sorted(S), key = S.count)
+        mid = len(a)//2
+        a[1::2], a[::2] = a[:mid], a[mid:]
+        return ''.join(a)
+```
+## 935. Knight Dialer
+```
+class Solution:
+    def knightDialer(self, N: int) -> int:
+        edges = {1:{6,8}, 2:{7,9}, 3:{4,8}, 4:{0,3,9},5:{},6:{0,1,7}, 7:{2,6}, 8:{1,3},9:{2,4}, 0:{4,6}}
+        symmetries = {(1,3),(4,6),(7,9)}
+        cache ={(i,0): 1 for i in range(10)}
+        
+        def helper(start, hops):
+            if start == 5 and hops > 0:
+                return 0
+            if (start, hops) in cache:
+                return cache[(start, hops)]
+            res = 0
+            for i in edges[start]:
+                res += helper(i, hops-1)
+            res %=  10**9+7
+            for c in symmetries:
+                if start in c:
+                    for i in c:
+                        cache[(i, hops)] = res
+                    return res
+            cache[(start, hops)] = res
+            return res
+        
+        res = 0
+        for i in range(10):
+            res += helper(i, N-1)
+        return res % (10**9+7)
+```
+## 875. Koko Eating Bananas
+```
+class Solution:
+    def minEatingSpeed(self, piles: List[int], H: int) -> int:
+        hi = max(piles)
+        average_time = H//len(piles)
+        if hi%average_time == 0:
+            hi = hi//average_time
+        else:
+            hi = hi//average_time + 1
+    
+        def check(K, H):
+            res = 0
+            for x in piles:
+                if x%K == 0:
+                    res += x//K
+                else:
+                    res += x//K + 1
+            return res <= H
+        
+        def binarySearch(low, hi):
+            while low < hi:
+                if check(low, H):
+                    return low
+                mid = (low+hi)//2
+                if check(mid, H):
+                    hi = mid
+                else:
+                    low = mid + 1
+            return hi
+        return binarySearch(1, hi)
+```
+## 969. Pancake Sorting
+```
+class Solution:
+    def pancakeSort(self, A: List[int]) -> List[int]:
+        copy = A[:]
+        res = []
+        
+        def flipLargestToLast(nums, i):
+            """
+            With the largest element of nums located at ith, we use pancake flips to move the largest number to the end 
+            """
+            if i == len(nums)-1: return nums
+            nums[:i+1] = nums[:i+1][::-1] # flip to start of the array
+            res.append(i+1)
+            nums = nums[::-1] # flip to the end
+            res.append(len(nums))
+            return nums
+            
+        while copy:
+            m = max(copy)
+            idx = copy.index(m)
+            copy = flipLargestToLast(copy, idx)
+            copy.pop()
+        return res
+```
+## 340. Longest Substring with At Most K Distinct Characters
+
+Sliding windows, O(n)
+```
+class Solution:
+    def lengthOfLongestSubstringKDistinct(self, s: str, k: int) -> int:
+        if k >= len(s): return len(s)
+        res, freq = k, collections.defaultdict(int)
+        for i in range(k):
+            freq[s[i]] += 1
+        left, right = 0, k
+        while right < len(s):
+            freq[s[right]] += 1
+            if len(freq) <= k:
+                res = max(res, right-left+1)
+            else:
+                while len(freq) > k:
+                    freq[s[left]] -= 1
+                    if freq[s[left]] == 0:
+                        del freq[s[left]]
+                    left += 1
+            right += 1
+        return res
+```
+
+## 540. Single Element in a Sorted Array
+
+A variant of binary search. However note that we should always keep that the length between `left` and `right` is odd.
+```
+class Solution:
+    def singleNonDuplicate(self, nums: List[int]) -> int:
+        if len(nums) == 1: return nums[0]
+        left, right = 0, len(nums)-1
+        while right - left >= 2:
+            mid = (left+right)//2
+            if (mid-left+1) % 2 == 0: mid += 1
+            if nums[mid] == nums[mid-1]:
+                right = mid - 2
+            elif mid+1 < len(nums) and nums[mid] == nums[mid+1]:
+                left = mid + 2
+            else:
+                return nums[mid]
+        return nums[right]
+```
+## 1252. Cells with Odd Values in a Matrix
+```
+class Solution:
+    def oddCells(self, n: int, m: int, indices: List[List[int]]) -> int:
+        rows, cols = collections.defaultdict(int), collections.defaultdict(int)
+        for row, col in indices:
+            rows[row] += 1
+            cols[col] += 1
+        matrix = [[0]*m for _ in range(n)]
+        for i in rows:
+            matrix[i] = [rows[i]]*m
+        for j in cols:
+            increment = cols[j]
+            for i in range(n): 
+                matrix[i][j] += increment
+        return sum([sum([x%2 for x in row]) for row in matrix])
+```
+Slightly more efficient:
+```
+class Solution:
+    def oddCells(self, n: int, m: int, indices: List[List[int]]) -> int:
+        rows, cols = collections.defaultdict(int), collections.defaultdict(int)
+        for row, col in indices:
+            rows[row] += 1
+            cols[col] += 1
+        odd_rows = sum([x%2 for x in rows.values()])
+        odd_cols = sum([x%2 for x in cols.values()])
+        return odd_rows * m - odd_cols * odd_rows + odd_cols*(n-odd_rows)
+```
+## 1253. Reconstruct a 2-Row Binary Matrix
+```
+class Solution:
+    def reconstructMatrix(self, upper: int, lower: int, colsum: List[int]) -> List[List[int]]:
+        if upper+lower != sum(colsum): return []
+        
+        res = [[0]*len(colsum) for _ in range(2)]
+        single_ones_upper = upper - sum([1 for x in colsum if x == 2])
+        cur_single_ones_upper = 0
+        for j in range(len(colsum)):
+            if colsum[j] == 2:
+                res[0][j] = 1
+                res[1][j] = 1
+            elif colsum[j] == 1:
+                if cur_single_ones_upper < single_ones_upper:
+                    res[0][j] = 1
+                    cur_single_ones_upper += 1
+                else:
+                    res[1][j] = 1
+        return res if sum(res[0])==upper else []
+```
+## 1254. Number of Closed Islands
+```
+class Solution:
+    def closedIsland(self, grid: List[List[int]]) -> int:
+        seen, res = set(), 0
+        if len(grid) <= 2 or len(grid[0]) <= 2: return 0
+        
+        def DFS(x, y):
+            closed = True
+            to_check = [(x,y)]
+            seen.add((x,y))
+            while to_check:
+                x0,y0 = to_check.pop()
+                for i,j in [(x0+1,y0),(x0-1,y0),(x0,y0-1),(x0,y0+1)]:
+                    if 0<=i<len(grid) and 0<=j<len(grid[0]) and grid[i][j]==0 and (i,j) not in seen:
+                        to_check.append((i,j))
+                        seen.add((i,j))
+                        if i in [0, len(grid)-1] or j in [0, len(grid[0])-1]:
+                            closed = False
+            return closed
+                        
+        for i in range(1, len(grid)-1):
+            for j in range(1, len(grid[0])-1):
+                if grid[i][j] == 0 and (i,j) not in seen:
+                    closed = DFS(i,j)
+                    if closed: res += 1
+        return res
+```
+## 740. Delete and Earn
+```
+class Solution:
+    def deleteAndEarn(self, nums: List[int]) -> int:
+        if not nums: return 0
+        d = collections.defaultdict(int)
+        for x in nums:
+            d[x] += x
+        choices = sorted([x for x in d], reverse = True)
+        if len(choices) == 1: return d[choices[0]]
+        
+        dp = [0]*len(choices)
+        dp[0] = d[choices[0]]
+        dp[1] = dp[0]+d[choices[1]] if choices[1]!=choices[0]-1 else max(dp[0], d[choices[1]])
+        
+        for i in range(2, len(dp)):
+            if choices[i] == choices[i-1]-1:
+                dp[i] = max(dp[i-2]+d[choices[i]], dp[i-1])
+            else:
+                dp[i] = dp[i-1]+d[choices[i]]
+        return dp[-1]
+```
+
+## 655. Print Binary Tree
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def printTree(self, root: TreeNode) -> List[List[str]]:
+        def get_height(node):
+            return 0 if not node else 1 + max(get_height(node.left), get_height(node.right))
+        
+        def update_output(node, row, left, right):
+            if not node:
+                return
+            mid = (left + right) // 2
+            self.output[row][mid] = str(node.val)
+            update_output(node.left, row + 1 , left, mid - 1)
+            update_output(node.right, row + 1 , mid + 1, right)
+            
+        height = get_height(root)
+        width = 2 ** height - 1
+        self.output = [[''] * width for i in range(height)]
+        update_output(root, 0, 0, width - 1)
+        return self.output
+```
+
+## 1055. Shortest Way to Form String
+Very good problem and very good [solution](https://leetcode.com/problems/shortest-way-to-form-string/discuss/330938/Accept-is-not-enough-to-get-a-hire.-Interviewee-4-follow-up): 
+```
+class Solution:
+    def shortestWay(self, source: str, target: str) -> int:
+        vocab_t, vocab_s = set(target), set(source)
+        if len(vocab_t - vocab_s)>0: return -1
+        d = {x:[0]*len(source) for x in vocab_s}
+        for i in range(len(source)):
+            d[source[i]][i] = i
+        for x in d:
+            pre = len(source)
+            for j in range(len(source)-1, -1, -1):
+                if d[x][j] == 0:
+                    d[x][j] = pre
+                else:
+                    pre = d[x][j]
+        d[source[0]][0] = 0
+        
+        res, i, j = 1, 0, 0
+        while i < len(target):
+            if j >= len(source):
+                res += 1
+                j = 0
+            j = d[target[i]][j]+1
+            if j <= len(source):
+                i += 1
+            
+        return res
+```
+
+## 1015. Smallest Integer Divisible by K
+
+Pigeonhole principle. This is rather a brainteaser.
+```
+class Solution:
+    def smallestRepunitDivByK(self, K: int) -> int:
+        if K%2==0 or K%5==0: return -1
+        r = 0
+        for N in range(1, K+1):
+            r = (r*10+1)%K
+            if r==0: return N
+        return -1
+```
+## 1043. Partition Array for Maximum Sum
+```
+class Solution:
+    def maxSumAfterPartitioning(self, A: List[int], K: int) -> int:
+        if len(A) <= K: return len(A)*max(A)
+        dp = [0]*len(A)
+        for i in range(K):
+            dp[i] = max(A[:i+1])*(i+1)
+        for i in range(K, len(A)):
+            dp[i] = max([dp[j]+max(A[j+1:i+1])*(i-j) for j in range(i-K,i)])
+        return dp[-1]
+```
+## 1260. Shift 2D Grid
+```
+class Solution:
+    def shiftGrid(self, grid: List[List[int]], k: int) -> List[List[int]]:
+        n,m = len(grid), len(grid[0])
+        res = [[0]*m for _ in range(n)]
+        for j in range(m):
+            y, vertical_shifts = (j+k)%m, (j+k)//m
+            for i in range(n):
+                res[(i+vertical_shifts)%n][y] = grid[i][j]
+        return res
+```
+## 1261. Find Elements in a Contaminated Binary Tree
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class FindElements:
+
+    def __init__(self, root: TreeNode):
+        root.val = 0
+        self.root = root
+        self.vals = set()
+        def recover(node):
+            if not node: return
+            self.vals.add(node.val)
+            if node.left:
+                node.left.val = node.val * 2 + 1
+                recover(node.left)
+            if node.right:
+                node.right.val = node.val * 2 + 2
+                recover(node.right)
+        recover(root)
+        
+
+    def find(self, target: int) -> bool:
+        return target in self.vals
+        
+# Your FindElements object will be instantiated and called as such:
+# obj = FindElements(root)
+# param_1 = obj.find(target)
+```
+
+## 1222. Queens That Can Attack the King
+```
+class Solution:
+    def queensAttacktheKing(self, queens: List[List[int]], king: List[int]) -> List[List[int]]:
+        queens = {(x,y) for x,y in queens}
+        res, x0, y0 = [], king[0], king[1]
+        for i in [-1,0,1]:
+            for j in [-1,0,1]:
+                for k in range(1,8):
+                    x, y = x0+i*k, y0+j*k
+                    if (x,y) in queens:
+                        res.append([x,y])
+                        break
+        return res
+```
+## 1219. Path with Maximum Gold
+```
+class Solution:
+    def getMaximumGold(self, grid: List[List[int]]) -> int:
+        def dfs(x, y, seen, total):
+            if grid[x][y] == 0 or (x,y) in seen: return total
+            
+            seen.add((x,y))
+            temp = total
+            for i, j in [(x-1,y),(x+1,y),(x,y-1),(x,y+1)]:
+                if 0<=i<len(grid) and 0<=j<len(grid[0]) and (i,j) not in seen:
+                    temp = max(dfs(i,j, seen, total+grid[i][j]), temp)
+            seen.discard((x,y))
+            return temp
+        
+        res = 0
+        for x in range(len(grid)):
+            for y in range(len(grid[0])):
+                if grid[x][y] != 0:
+                    res = max(res, dfs(x,y,set(), grid[x][y]))
+        return res
+```
+## 1066. Campus Bikes II
+```
+class Solution:
+    def assignBikes(self, workers: List[List[int]], bikes: List[List[int]]) -> List[int]:
+        if workers and bikes:
+            W = len(workers)
+            B = len(bikes)
+            distances = [[self.manhattanDistance(w, b) for b in bikes] for w in workers]
+            min_assignment_total_distance = self.findBestAssignments(distances, W, B, 0, [True for b in range(B)], {})
+            return min_assignment_total_distance
+        return []
+
+    def manhattanDistance(self, p1, p2):
+        return abs(p1[0]-p2[0])+abs(p1[1]-p2[1])     
+
+    def findBestAssignments(self, distances, W, B, w, available_bikes, dp):
+        if w == W:
+            return 0
+        
+        dictTuple = tuple(available_bikes)
+        
+        if dictTuple in dp:
+            return dp[dictTuple]
+        
+        bestAssignment = float("inf")
+        
+        for b in range(B):
+            if available_bikes[b]: 
+                available_bikes_copy = available_bikes[:]
+                available_bikes_copy[b] = False
+                bestAssignment = min(bestAssignment, distances[w][b] + self.findBestAssignments(distances, W, B, w+1, available_bikes_copy, dp))
+           
+        dp[dictTuple] = bestAssignment
+        return bestAssignment
+```
+## 1074. Number of Submatrices That Sum to Target
+
+Using a 2D prefix sum, we can query the sum of any submatrix in O(1) time. Now for each (r1, r2), we can find the largest sum of a submatrix that uses every row in [r1, r2] in linear time using a sliding window.
+```
+class Solution:
+    def numSubmatrixSumTarget(self, matrix: List[List[int]], target: int) -> int:
+        m, n = len(matrix), len(matrix[0])
+        prefix_sum = [[0]*n for _ in range(m)]
+        for i in range(m):
+            prefix_sum[i][0] = matrix[i][0]
+        for j in range(1,n):
+            prefix_sum[0][j] = prefix_sum[0][j-1]+matrix[0][j]
+        for i in range(1, m):
+            for j in range(1, n):
+                prefix_sum[i][j] = prefix_sum[i][j-1]+matrix[i][j]
+            for j in range(n-1, 0, -1):
+                prefix_sum[i][j] += prefix_sum[i-1][j]
+        for i in range(1, m):
+            prefix_sum[i][0] += prefix_sum[i-1][0]
+        res = 0
+        for r1 in range(m):
+            for r2 in range(r1, m):
+                counts = collections.defaultdict(int)
+                counts[0] = 1 
+                for col in range(n):
+                    top_sum = prefix_sum[r1-1][col] if r1>0 else 0
+                    partial_sum = prefix_sum[r2][col] - top_sum
+                    res += counts[partial_sum-target]
+                    counts[partial_sum] += 1
+        
+        return res
+```
+## 1266. Minimum Time Visiting All Points
+```
+class Solution:
+    def minTimeToVisitAllPoints(self, points: List[List[int]]) -> int:
+        res = 0
+        for i in range(len(points)-1):
+            res += self.slidingDistance(points[i], points[i+1])
+        return res
+        
+    def slidingDistance(self, p1, p2):
+        return  max([abs(p1[i]-p2[i]) for i in range(2)])
+```
+## 1265. Print Immutable Linked List in Reverse
+
+This solution use linear space.
+```
+# """
+# This is the ImmutableListNode's API interface.
+# You should not implement it, or speculate about its implementation.
+# """
+# class ImmutableListNode:
+#     def printValue(self) -> None: # print the value of this node.
+#     def getNext(self) -> 'ImmutableListNode': # return the next node.
+
+class Solution:
+    def printLinkedListInReverse(self, head: 'ImmutableListNode') -> None:
+        if head:
+            self.printLinkedListInReverse(head.getNext())
+            head.printValue()
+```
+## 1020. Number of Enclaves
+DFS directly:
+```
+class Solution:
+    def numEnclaves(self, A: List[List[int]]) -> int:
+        seen, res = set(), 0
+        
+        def dfs(x, y):
+            cnt, enclosed = 0, True
+            seen.add((x,y))
+            stack = [(x,y)]
+            while stack:
+                x0,y0 = stack.pop()
+                cnt += 1
+                if x0 in [0,len(A)-1] or y0 in [0, len(A[0])-1]:
+                    enclosed = False
+                for i,j in [(x0+1,y0),(x0-1,y0),(x0,y0+1),(x0,y0-1)]:
+                    if 0<=i<len(A) and 0<=j<len(A[0]) and A[i][j] == 1 and (i,j) not in seen:
+                        stack.append((i,j))
+                        seen.add((i,j))
+                        
+            return cnt if enclosed else 0
+        
+        for i in range(len(A)):
+            for j in range(len(A[0])):
+                if A[i][j] == 1 and (i,j) not in seen:
+                    res += dfs(i,j)
+        return res
+```
+First count total number of 1 in the grid, then only do dfs search starting on the boundary:
+```
+class Solution:
+    def numEnclaves(self, A: List[List[int]]) -> int:
+        seen, res = set(), sum([sum(row) for row in A])
+        
+        def dfs(x, y):
+            cnt = 0
+            seen.add((x,y))
+            stack = [(x,y)]
+            while stack:
+                x0,y0 = stack.pop()
+                cnt += 1
+                for i,j in [(x0+1,y0),(x0-1,y0),(x0,y0+1),(x0,y0-1)]:
+                    if 0<=i<len(A) and 0<=j<len(A[0]) and A[i][j] == 1 and (i,j) not in seen:
+                        stack.append((i,j))
+                        seen.add((i,j))
+                        
+            return cnt 
+        
+        for i in [0, len(A)-1]:
+            for j in range(len(A[0])):
+                if A[i][j] == 1 and (i,j) not in seen:
+                    res -= dfs(i,j)
+        
+        for j in [0, len(A[0])-1]:
+            for i in range(1,len(A)-1):
+                if A[i][j] == 1 and (i,j) not in seen:
+                    res -= dfs(i,j)
+        return res
+```
+## 1023. Camelcase Matching
+```
+class Solution:
+    def __init__(self):
+        self.lowers = {chr(i) for i in range(ord('a'), ord('z')+1)}
+    
+    def camelMatch(self, queries: List[str], pattern: str) -> List[bool]:
+        res, simple_pattern = [], self.getCapitals(pattern)
+        for query in queries:
+            if simple_pattern != self.getCapitals(query):
+                res.append(False)
+            else:
+                res.append(self.match(query, pattern))
+        return res
+    
+    def getCapitals(self, word):
+        res = ''
+        for l in word:
+            if l not in self.lowers:
+                res += l
+        return res
+            
+    
+    def match(self, query, pattern):
+        i, j = 0, 0
+        while i < len(pattern) and j<len(query):
+            if query[j] == pattern[i]:
+                j += 1
+                i += 1
+            else:
+                j += 1
+        return i == len(pattern)
+```
+##776. Split BST
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def splitBST(self, root: TreeNode, V: int) -> List[TreeNode]:
+        
+        def helperSplit(small, large, V, Root):
+            if not Root: return [small, large]
+            if Root.val <= V:
+                right = Root.right
+                Root.right = None
+                small = self.merge(small, Root)
+                return helperSplit(small, large, V, right)
+            if Root.val > V:
+                left = Root.left
+                Root.left = None
+                large = self.merge(large, Root)
+                return helperSplit(small, large, V, left)
+            
+        return helperSplit(None, None, V, root)
+        
+    def merge(self, root, node):
+        '''
+        Add node to one of the leaves of the tree starting with root
+        '''
+        if not root:
+            return node
+        if not node:
+            return root
+        pre = root
+        cur = pre.left if pre.val > node.val else pre.right
+        while cur:
+            pre = cur
+            cur = pre.left if pre.val > node.val else pre.right
+        if node.val > pre.val:
+            pre.right = node
+        else:
+            pre.left = node
+        return root
+```
+## 582. Kill Process
+```
+class Solution:
+    def killProcess(self, pid: List[int], ppid: List[int], kill: int) -> List[int]:
+        # d is the parent-children pairs
+        d = collections.defaultdict(set)
+        for i in range(len(pid)):
+            d[ppid[i]].add(pid[i])
+        que, res = collections.deque([kill]), []
+        while que:
+            parent = que.popleft()
+            res.append(parent)
+            for child in d[parent]:
+                que.append(child)
+        return res
+```
