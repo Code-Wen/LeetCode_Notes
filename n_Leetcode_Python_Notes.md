@@ -17165,3 +17165,46 @@ class Solution:
                 que.append(child)
         return res
 ```
+## 1271. Hexspeak
+```
+class Solution:
+    def toHexspeak(self, num: str) -> str:
+        lst, q = [], int(num)
+        d = {1:'I', 0:'O', 10:'A', 11:'B', 12:'C', 13:'D', 14:'E', 15:'F'}
+        while q > 0:
+            q, rem = q//16, q%16
+            if rem not in d:
+                return 'ERROR'
+            else:
+                lst.append(d[rem])
+        lst.reverse()
+        return ''.join(lst)
+```
+## 1275. Find Winner on a Tic Tac Toe Game
+```
+class Solution:
+    def tictactoe(self, moves: List[List[int]]) -> str:
+        grid = [[100]*3 for _ in range(3)]
+        for i in range(len(moves)):
+            if i%2 == 0:
+                grid[moves[i][0]][moves[i][1]] = 1
+            else:
+                grid[moves[i][0]][moves[i][1]] = 0
+        def getSums(grid):
+            res = [sum(row) for row in grid]
+            for j in range(3):
+                res.append(sum([grid[i][j] for i in range(3)]))
+            res.append(sum([grid[i][i] for i in range(3)]))
+            res.append(sum([grid[i][2-i] for i in range(3)]))
+            return res
+        
+        sums = getSums(grid)
+        if 3 in sums:
+            return 'A'
+        elif 0 in sums:
+            return 'B'
+        elif len(moves) == 9:
+            return 'Draw'
+        else:
+            return 'Pending'
+```
