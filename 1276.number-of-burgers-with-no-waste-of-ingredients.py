@@ -80,6 +80,10 @@
 # @lc code=start
 class Solution:
     def numOfBurgers(self, tomatoSlices: int, cheeseSlices: int) -> List[int]:
+        X, Y = tomatoSlices, cheeseSlices
+        if X%2 != 0 or X//2-Y < 0 or 2*Y-X//2 < 0:
+            return []
         
+        return [X//2-Y, 2*Y-X//2]
 # @lc code=end
 
