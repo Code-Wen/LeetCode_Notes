@@ -46,10 +46,7 @@ class Solution:
         # diff = # of ones minus # of zeros
         d, diff, res = { 0 : -1}, 0, 0
         for i, n in enumerate(nums):
-            if n == 1:
-                diff += 1
-            elif n == 0:
-                diff -= 1
+            diff += 1 if n else -1
             
             if diff in d:
                 res = max(res, i-d[diff])
