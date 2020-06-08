@@ -88,6 +88,17 @@
 # @lc code=start
 class Solution:
     def checkIfPrerequisite(self, n: int, prerequisites: List[List[int]], queries: List[List[int]]) -> List[bool]:
+        edges = collections.defaultdict(set)
+        for start, end in prerequisites:
+            edges[end].add(start)
         
+        @functools.lru_cache(None)
+        def search(start, end):
+            if start in edges[end]: return True
+            for mid in edges[end]:
+                if search(start, mid): return True
+            return False
+        
+        return [search(i,j) for i,j in queries]
 # @lc code=end
 
